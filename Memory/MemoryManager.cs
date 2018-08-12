@@ -1,7 +1,6 @@
-﻿using System.Collections;
-using System;
+﻿using System;
+using System.Collections;
 using UnityEngine;
-using UnityEngine.Events;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -36,7 +35,7 @@ namespace PWR.LowPowerMemoryConsumption {
 
 
 
-		#region <<---------- Properties ---------->>
+		#region <<---------- Properties and Fields ---------->>
 		
 		/// <summary>
 		/// Should unload unused assets ( <see cref="Resources.UnloadUnusedAssets"/>) when application receives low memory warning?
@@ -47,20 +46,6 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// Should collect garbage ( <see cref="GC.Collect"/>) when application receives low memory warning?
 		/// </summary>
 		[HideInInspector] public bool collectGarbageOnLowMemory = true;
-
-		[SerializeField][HideInInspector] private UnityEvent _onLowMemoryEvent;
-
-		/// <summary>
-		/// Event invoked when application receives low memory warning.
-		/// </summary>
-		public UnityEvent onLowMemoryEvent {
-			get {
-				if (this._onLowMemoryEvent == null) {
-					this._onLowMemoryEvent = new UnityEvent();
-				}
-				return this._onLowMemoryEvent;
-			}
-		}
 
 		/// <summary>
 		/// Action invoked when application receives low memory warning.
@@ -89,7 +74,7 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		private const string DefaultName = "Memory Manager";
 
-		#endregion <<---------- Properties ---------->>
+		#endregion <<---------- Properties and Fields ---------->>
 
 
 
@@ -196,7 +181,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		/// <summary>
-		/// Will invoke all callbacks registered to <see cref="onLowMemory"/> and <see cref="onLowMemoryEvent"/>. And also perform unused resources unload and garbage collect if they are enabled.
+		/// Will invoke all callbacks registered to <see cref="onLowMemory"/> and <see cref="OnLowMemoryEvent"/>. And also perform unused resources unload and garbage collect if they are enabled.
 		/// </summary>
 		public void SimulateLowMemory() {
 			if (Debug.isDebugBuild) Debug.Log("[" + typeof(MemoryManager).Name + "] simulating low memory", this);
@@ -204,11 +189,9 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		private void OnApplicationLowMemoryCallback() {
-			if (Debug.isDebugBuild) Debug.LogWarning("[" + typeof(MemoryManager).Name + "] received application low memory callback", this);
+			Debug.LogWarning("[" + typeof(MemoryManager).Name + "] received application low memory callback", this);
 
 			if (this.onLowMemory != null) this.onLowMemory();
-
-			if (this._onLowMemoryEvent != null) this._onLowMemoryEvent.Invoke();
 
 			if (this.unloadUnusedAssetsOnLowMemory) {
 				this.UnloadUnusedAssets(() => {
@@ -233,12 +216,10 @@ namespace PWR.LowPowerMemoryConsumption {
 
 			private SerializedProperty propUnloadUnusedAssetsOnLowMemory;
 			private SerializedProperty propCollectGarbageOnLowMemory;
-			private SerializedProperty propOnLowMemoryEvent;
 
 			void OnEnable() {
 				this.propUnloadUnusedAssetsOnLowMemory = this.serializedObject.FindProperty("unloadUnusedAssetsOnLowMemory");
 				this.propCollectGarbageOnLowMemory = this.serializedObject.FindProperty("collectGarbageOnLowMemory");
-				this.propOnLowMemoryEvent = this.serializedObject.FindProperty("_onLowMemoryEvent");
 			}
 
 			public override void OnInspectorGUI() {
@@ -253,12 +234,6 @@ namespace PWR.LowPowerMemoryConsumption {
 
 				EditorGUI.BeginChangeCheck();
 				this.propCollectGarbageOnLowMemory.boolValue = EditorGUILayout.ToggleLeft("Collect Garbage On Low Memory", this.propCollectGarbageOnLowMemory.boolValue);
-				if (EditorGUI.EndChangeCheck()) {
-					this.serializedObject.ApplyModifiedProperties();
-				}
-
-				EditorGUI.BeginChangeCheck();
-				EditorGUILayout.PropertyField(this.propOnLowMemoryEvent);
 				if (EditorGUI.EndChangeCheck()) {
 					this.serializedObject.ApplyModifiedProperties();
 				}

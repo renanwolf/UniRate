@@ -9,10 +9,15 @@ namespace PWR.LowPowerMemoryConsumption {
 
     public class LowMemoryTrigger : MonoBehaviour {
 
-        #region <<---------- Properties ---------->>
+        #region <<---------- Properties and Fields ---------->>
 
         [SerializeField] private UnityEvent _onLowMemoryEvent;
-        public UnityEvent onLowMemoryEvent {
+
+        /// <summary>
+        /// Event invoked when <see cref="MemoryManager.onLowMemory"/> is invoked.
+        /// </summary>
+        /// <value></value>
+        public UnityEvent OnLowMemoryEvent {
             get {
                 if (this._onLowMemoryEvent == null) {
                     this._onLowMemoryEvent = new UnityEvent();
@@ -23,7 +28,7 @@ namespace PWR.LowPowerMemoryConsumption {
 
         private bool _isApplicationQuitting = false;
 
-        #endregion <<---------- Properties ---------->>
+        #endregion <<---------- Properties and Fields ---------->>
 
 
 
@@ -62,8 +67,9 @@ namespace PWR.LowPowerMemoryConsumption {
 
         #region <<---------- Custom Inspector ---------->>
 		#if UNITY_EDITOR
-		[CustomEditor(typeof(LowMemoryTrigger))]
-		private class CustomInspector : Editor {
+		[CustomEditor(typeof(LowMemoryTrigger), true)]
+        [CanEditMultipleObjects]
+		protected class CustomInspectorBase : Editor {
 
 			public override void OnInspectorGUI() {
 				this.serializedObject.Update();
