@@ -71,7 +71,6 @@ namespace PWR.LowPowerMemoryConsumption {
 		private Coroutine _coroutineUnloadUnusedAssets;
 
 		public const string NotSupportedMessage = "According to Unity documentation, lowMemory event is only supported on iOS and Android.";
-
 		private const string DefaultName = "Memory Manager";
 
 		#endregion <<---------- Properties and Fields ---------->>

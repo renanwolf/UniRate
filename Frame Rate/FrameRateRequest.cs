@@ -29,6 +29,9 @@ namespace PWR.LowPowerMemoryConsumption {
 		private int _value;
 		private FrameRateType _type;
 
+		/// <summary>
+		/// Rate value.
+		/// </summary>
 		public int Value {
 			get { return this._value; }
 			set {
@@ -38,6 +41,9 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
+		/// <summary>
+		/// Rate type.
+		/// </summary>
 		public FrameRateType Type {
 			get { return this._type; }
 			set {
@@ -47,10 +53,16 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
+		/// <summary>
+		/// Is valid if FPS with value ≥ 0 or FixedFPS with value ≥ 1.
+		/// </summary>
 		public bool IsValid {
 			get { return this._value >= MinValueForType(this._type); }
 		}
 
+		/// <summary>
+		/// Action invoked when <see cref="Value"/> or <see cref="Type"/> are changed.
+		/// </summary>
 		public Action<FrameRateRequest> onRequestChanged;
 
 		#endregion <<---------- Properties and Fields ---------->>
@@ -68,11 +80,18 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
+		/// <summary>
+		/// Add the frame request on <see cref="FrameRateManager"/>.
+		/// </summary>
+		/// <returns>Returns this instance to use as fluent interface.</returns>
 		public FrameRateRequest Start() {
 			FrameRateManager.Instance.AddRequest(this);
 			return this;
 		}
 
+		/// <summary>
+		/// Remove the frame request from <see cref="FrameRateManager"/>.
+		/// </summary>
 		public void Stop() {
 			FrameRateManager.Instance.RemoveRequest(this);
 		}
@@ -84,14 +103,26 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Fluent Interface Pattern ---------->>
 
+		/// <summary>
+		/// Create new frame request with type FPS.
+		/// </summary>
+		/// <returns>Returns the new created request.</returns>
 		public static FrameRateRequest FPS() {
 			return new FrameRateRequest(FrameRateType.FPS);
 		}
 
+		/// <summary>
+		/// Create new frame request with type FixedFPS.
+		/// </summary>
+		/// <returns>Returns the new created request.</returns>
 		public static FrameRateRequest FixedFPS() {
 			return new FrameRateRequest(FrameRateType.FixedFPS);
 		}
 
+		/// <summary>
+		/// Change the rate value.
+		/// </summary>
+		/// <returns>Returns this instance to use as fluent interface.</returns>
 		public FrameRateRequest WithRate(int requestedValue) {
 			this.Value = requestedValue;
 			return this;

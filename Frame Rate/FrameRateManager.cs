@@ -39,6 +39,14 @@ namespace PWR.LowPowerMemoryConsumption {
 		#region <<---------- Properties and Fields ---------->>
 
 		[SerializeField][Range(MinNumberOfSamples,60)] private int _smoothFramesCount = 5;
+
+		[SerializeField] private int _fallbackFrameRate = 30;
+
+		[SerializeField] private int _fallbackFixedFrameRate = 50;
+
+		/// <summary>
+		/// Number of frame rate samples to calculate <see cref="CurrentFrameRate"/>.
+		/// </summary>
 		public int SmoothFramesCount {
 			get { return this._smoothFramesCount; }
 			set {
@@ -47,7 +55,9 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
-		[SerializeField] private int _fallbackFrameRate = 30;
+		/// <summary>
+		/// Target frame rate to set if there are no requests active.
+		/// </summary>
 		public int FallbackFrameRate {
 			get { return this._fallbackFrameRate; }
 			set {
@@ -57,7 +67,9 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
-		[SerializeField] private int _fallbackFixedFrameRate = 50;
+		/// <summary>
+		/// Target fixed frame rate to set if there are no requests active.
+		/// </summary>
 		public int FallbackFixedFrameRate {
 			get { return this._fallbackFixedFrameRate; }
 			set {
@@ -67,14 +79,33 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
+		/// <summary>
+		/// Action invoked when <see cref="CurrentFrameRate"/> changes.
+		/// </summary>
 		public Action<int> onFrameRate;
+
+		/// <summary>
+		/// Action invoked when <see cref="CurrentFixedFrameRate"/> changes.
+		/// </summary>
 		public Action<int> onFixedFrameRate;
 
+		/// <summary>
+		/// Action invoked when <see cref="TargetFrameRate"/> changes.
+		/// </summary>
 		public Action<int> onTragetFrameRate;
+
+		/// <summary>
+		/// Action invoked when <see cref="TargetFixedFrameRate"/> changes.
+		/// </summary>
 		public Action<int> onTragetFixedFrameRate;
 
 		private List<int> _samplesFrameRate = new List<int>();
+
 		private int _currentFrameRate = 0;
+
+		/// <summary>
+		/// Current frames per second.
+		/// </summary>
 		public int CurrentFrameRate {
 			get { return this._currentFrameRate; }
 			private set {
@@ -85,6 +116,10 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		private int _currentFixedFrameRate = 0;
+
+		/// <summary>
+		/// Current fixed frames per second
+		/// </summary>
 		public int CurrentFixedFrameRate {
 			get { return this._currentFixedFrameRate; }
 			private set {
@@ -94,7 +129,11 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
-		private int _targetFrameRate = 8;
+		private int _targetFrameRate = 0;
+
+		/// <summary>
+		/// Target frames per second.
+		/// </summary>
 		public int TargetFrameRate {
 			get { return this._targetFrameRate; }
 			private set {
@@ -104,7 +143,11 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
-		private int _targetFixedFrameRate = 8;
+		private int _targetFixedFrameRate = 0;
+
+		/// <summary>
+		/// Target fixed frames per second.
+		/// </summary>
 		public int TargetFixedFrameRate {
 			get { return this._targetFixedFrameRate; }
 			private set {
@@ -114,8 +157,17 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
+		/// <summary>
+		/// TargetFrameRate can only be changed if VSync is off.
+		/// </summary>
+		/// <value>Returns true if <see cref="QualitySettings.vSyncCount"/> is zero or less. Otherwise false.</value>
+		public static bool IsSupported {
+			get { return QualitySettings.vSyncCount <= 0; }
+		}
+
 		private List<FrameRateRequest> _requests;
 
+		public const string NotSupportedMessage = "TargetFrameRate can only be changed if VSync is off.";
 		private const string DefaultName = "Frame Rate Manager";
 		private const int MinNumberOfSamples = 1;
 
@@ -149,6 +201,7 @@ namespace PWR.LowPowerMemoryConsumption {
 			this.transform.SetParent(null, false);
 			DontDestroyOnLoad(this);
 
+			if (!FrameRateManager.IsSupported) Debug.LogWarning("[" + typeof(FrameRateManager).Name + "] " + FrameRateManager.NotSupportedMessage, this);
 			this.RecalculateTargetsRateIfPlaying();
         }
 
@@ -227,10 +280,19 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Requests Management ---------->>
 
+		/// <summary>
+		/// Check if a request is added and active.
+		/// </summary>
+		/// <param name="request">Request to check.</param>
+		/// <returns></returns>
 		public bool ContainsRequest(FrameRateRequest request) {
 			return request != null && this._requests != null && this._requests.Contains(request);
 		}
 
+		/// <summary>
+		/// Add and activate a new frame rate request.
+		/// </summary>
+		/// <param name="request">Request to add.</param>
 		public void AddRequest(FrameRateRequest request) {
 			if (request == null || this.ContainsRequest(request)) return;
 			if (this._requests == null) this._requests = new List<FrameRateRequest>();
@@ -239,6 +301,10 @@ namespace PWR.LowPowerMemoryConsumption {
 			this.RecalculateTargetsRateIfPlaying();
 		}
 
+		/// <summary>
+		/// Remove and deactivate a frame rate request.
+		/// </summary>
+		/// <param name="request">Request to remove.</param>
 		public void RemoveRequest(FrameRateRequest request) {
 			if (request == null || !this.ContainsRequest(request)) return;
 			this._requests.Remove(request);
@@ -263,7 +329,6 @@ namespace PWR.LowPowerMemoryConsumption {
 		#region <<---------- General ---------->>
 
 		private void SetApplicationTargetFrameRate(FrameRateType type, int value) {
-			Debug.Log("Setting app target rate " + type.ToString() + " to " + value);
 			switch (type) {
 
 				case FrameRateType.FPS:
@@ -339,6 +404,10 @@ namespace PWR.LowPowerMemoryConsumption {
 			public override void OnInspectorGUI() {
 				this.serializedObject.Update();
 				this.DrawDefaultInspector();
+
+				if (!FrameRateManager.IsSupported) {
+					EditorGUILayout.HelpBox(FrameRateManager.NotSupportedMessage, MessageType.Warning);
+				}
 
 				int minRateValue = FrameRateRequest.MinValueForType(FrameRateType.FPS);
 				int minFixedRateValue = FrameRateRequest.MinValueForType(FrameRateType.FixedFPS);

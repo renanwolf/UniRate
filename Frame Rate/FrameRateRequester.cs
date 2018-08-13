@@ -16,6 +16,9 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		[SerializeField] private int _rate = 30;
 
+		/// <summary>
+		/// Rate type.
+		/// </summary>
 		public FrameRateType Type {
 			get { return this._type; }
 			set {
@@ -24,6 +27,9 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
+		/// <summary>
+		/// Rate value.
+		/// </summary>
 		public int Rate {
 			get { return this._rate; }
 			set {
