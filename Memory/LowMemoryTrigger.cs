@@ -16,7 +16,6 @@ namespace PWR.LowPowerMemoryConsumption {
         /// <summary>
         /// Event invoked when <see cref="MemoryManager.onLowMemory"/> is invoked.
         /// </summary>
-        /// <value></value>
         public UnityEvent OnLowMemoryEvent {
             get {
                 if (this._onLowMemoryEvent == null) {

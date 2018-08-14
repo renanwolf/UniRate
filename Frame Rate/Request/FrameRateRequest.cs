@@ -1,6 +1,4 @@
-﻿//using System.Collections;
-//using System.Collections.Generic;
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace PWR.LowPowerMemoryConsumption {
@@ -74,7 +72,7 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		public static int MinValueForType(FrameRateType type) {
 			switch (type) {
-				case FrameRateType.FPS: return 0;
+				case FrameRateType.FPS: return 1;
 				case FrameRateType.FixedFPS: return 1;
 				default: return int.MaxValue;
 			}

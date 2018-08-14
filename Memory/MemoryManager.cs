@@ -8,6 +8,7 @@ using UnityEditor;
 
 namespace PWR.LowPowerMemoryConsumption {
 
+	[DisallowMultipleComponent]
     public class MemoryManager : MonoBehaviour {
 
         #region <<---------- Singleton ---------->>

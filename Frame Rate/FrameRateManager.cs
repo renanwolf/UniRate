@@ -9,6 +9,7 @@ using UnityEditor;
 
 namespace PWR.LowPowerMemoryConsumption {
 
+	[DisallowMultipleComponent]
 	public class FrameRateManager : MonoBehaviour {
 
 		#region <<---------- Singleton ---------->>
@@ -92,12 +93,12 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// <summary>
 		/// Action invoked when <see cref="TargetFrameRate"/> changes.
 		/// </summary>
-		public Action<int> onTragetFrameRate;
+		public Action<int> onTargetFrameRate;
 
 		/// <summary>
 		/// Action invoked when <see cref="TargetFixedFrameRate"/> changes.
 		/// </summary>
-		public Action<int> onTragetFixedFrameRate;
+		public Action<int> onTargetFixedFrameRate;
 
 		private List<int> _samplesFrameRate = new List<int>();
 
@@ -162,7 +163,16 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// </summary>
 		/// <value>Returns true if <see cref="QualitySettings.vSyncCount"/> is zero or less. Otherwise false.</value>
 		public static bool IsSupported {
-			get { return QualitySettings.vSyncCount <= 0; }
+			get {
+				#if UNITY_EDITOR
+				return QualitySettings.vSyncCount <= 0;
+				#elif UNITY_IOS
+				//on iOS VSync is always on, but Application.targetFrameRate seems to work.
+				return true;
+				#else
+				return QualitySettings.vSyncCount <= 0;
+				#endif
+			}
 		}
 
 		private List<FrameRateRequest> _requests;
@@ -265,12 +275,12 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		private void OnTargetFrameRateChanged() {
 			this.SetApplicationTargetFrameRate(FrameRateType.FPS, this._targetFrameRate);
-			if (this.onTragetFrameRate != null) this.onTragetFrameRate(this._targetFrameRate);
+			if (this.onTargetFrameRate != null) this.onTargetFrameRate(this._targetFrameRate);
 		}
 
 		private void OnTargetFixedFrameRateChanged() {
 			this.SetApplicationTargetFrameRate(FrameRateType.FixedFPS, this._targetFixedFrameRate);
-			if (this.onTragetFixedFrameRate != null) this.onTragetFixedFrameRate(this._targetFixedFrameRate);
+			if (this.onTargetFixedFrameRate != null) this.onTargetFixedFrameRate(this._targetFixedFrameRate);
 		}
 
 		#endregion <<---------- Internal Callbacks ---------->>
@@ -359,12 +369,7 @@ namespace PWR.LowPowerMemoryConsumption {
 
 					switch (this._requests[i].Type) {
 						case FrameRateType.FPS:
-							if (this._requests[i].Value == 0) {
-								newTarget = 0;
-							}
-							else if (newTarget != 0) {
-								newTarget = Mathf.Max(newTarget, this._requests[i].Value);
-							}
+							newTarget = Mathf.Max(newTarget, this._requests[i].Value);
 						break;
 
 						case FrameRateType.FixedFPS:
