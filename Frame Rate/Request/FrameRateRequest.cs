@@ -1,19 +1,20 @@
 ﻿using System;
 using UnityEngine;
+using PWR.LowPowerMemoryConsumption.Internal;
 
 namespace PWR.LowPowerMemoryConsumption {
 
-	public class FrameRateRequest {
+	public class FrameRateRequest : RateRequestBase<FrameRateRequest> {
 
 		#region <<---------- Initializers ---------->>
 
-		public FrameRateRequest(FrameRateType type, int requestedValue) {
-			this._value = requestedValue;
-			this._type = type;
-			this.onRequestChanged = null;
+		public FrameRateRequest(FrameRateType rateType, int rateValue) : base(rateValue) {
+			this._type = rateType;
 		}
 
-		public FrameRateRequest(FrameRateType type) : this(type, -1) { }
+		public FrameRateRequest(FrameRateType rateType) : base() {
+			this._type = rateType;
+		}
 
 		public FrameRateRequest() : this(FrameRateType.FPS) { }
 
@@ -24,20 +25,7 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		private int _value;
 		private FrameRateType _type;
-
-		/// <summary>
-		/// Rate value.
-		/// </summary>
-		public int Value {
-			get { return this._value; }
-			set {
-				if (this._value == value) return;
-				this._value = value;
-				if (this.onRequestChanged != null) this.onRequestChanged(this);
-			}
-		}
 
 		/// <summary>
 		/// Rate type.
@@ -47,21 +35,16 @@ namespace PWR.LowPowerMemoryConsumption {
 			set {
 				if (this._type == value) return;
 				this._type = value;
-				if (this.onRequestChanged != null) this.onRequestChanged(this);
+				this.OnChanged();
 			}
 		}
 
 		/// <summary>
-		/// Is valid if FPS with value ≥ 0 or FixedFPS with value ≥ 1.
+		/// Is valid if FPS with value ≥ 1 or FixedFPS with value ≥ 1.
 		/// </summary>
-		public bool IsValid {
-			get { return this._value >= MinValueForType(this._type); }
+		public override bool IsValid {
+			get { return this.Value >= MinValueForType(this._type); }
 		}
-
-		/// <summary>
-		/// Action invoked when <see cref="Value"/> or <see cref="Type"/> are changed.
-		/// </summary>
-		public Action<FrameRateRequest> onRequestChanged;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -70,28 +53,27 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- General ---------->>
 
+		/// <summary>
+		/// Start the frame rate request on <see cref="FrameRateManager"/>.
+		/// </summary>
+		/// <returns>Returns this instance to use as fluent interface.</returns>
+		public FrameRateRequest Start() {
+			return FrameRateManager.Instance.AddRequest(this);
+		}
+
+		/// <summary>
+		/// Stop the frame rate request on <see cref="FrameRateManager"/>.
+		/// </summary>
+		public void Stop() {
+			FrameRateManager.Instance.RemoveRequest(this);
+		}
+
 		public static int MinValueForType(FrameRateType type) {
 			switch (type) {
 				case FrameRateType.FPS: return 1;
 				case FrameRateType.FixedFPS: return 1;
 				default: return int.MaxValue;
 			}
-		}
-
-		/// <summary>
-		/// Add the frame request on <see cref="FrameRateManager"/>.
-		/// </summary>
-		/// <returns>Returns this instance to use as fluent interface.</returns>
-		public FrameRateRequest Start() {
-			FrameRateManager.Instance.AddRequest(this);
-			return this;
-		}
-
-		/// <summary>
-		/// Remove the frame request from <see cref="FrameRateManager"/>.
-		/// </summary>
-		public void Stop() {
-			FrameRateManager.Instance.RemoveRequest(this);
 		}
 
 		#endregion <<---------- General ---------->>
@@ -115,15 +97,6 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// <returns>Returns the new created request.</returns>
 		public static FrameRateRequest FixedFPS() {
 			return new FrameRateRequest(FrameRateType.FixedFPS);
-		}
-
-		/// <summary>
-		/// Change the rate value.
-		/// </summary>
-		/// <returns>Returns this instance to use as fluent interface.</returns>
-		public FrameRateRequest WithRate(int requestedValue) {
-			this.Value = requestedValue;
-			return this;
 		}		
 
 		#endregion <<---------- Fluent Interface Pattern ---------->>

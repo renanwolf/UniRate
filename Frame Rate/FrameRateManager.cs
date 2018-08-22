@@ -51,7 +51,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		public int SmoothFramesCount {
 			get { return this._smoothFramesCount; }
 			set {
-				if (value <= 0) throw new ArgumentOutOfRangeException("smoothFramesCount", value, "must be greather than zero");
+				if (value < MinNumberOfSamples) throw new ArgumentOutOfRangeException("smoothFramesCount", value, "must be greather or equals to " + MinNumberOfSamples);
 				this._smoothFramesCount = value;
 			}
 		}
@@ -81,24 +81,24 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		/// <summary>
-		/// Action invoked when <see cref="CurrentFrameRate"/> changes.
+		/// Event raised when <see cref="CurrentFrameRate"/> changes.
 		/// </summary>
-		public Action<int> onFrameRate;
+		public event Action<int> CurrentFrameRateChanged;
 
 		/// <summary>
-		/// Action invoked when <see cref="CurrentFixedFrameRate"/> changes.
+		/// Event raised when <see cref="CurrentFixedFrameRate"/> changes.
 		/// </summary>
-		public Action<int> onFixedFrameRate;
+		public event Action<int> CurrentFixedFrameRateChanged;
 
 		/// <summary>
-		/// Action invoked when <see cref="TargetFrameRate"/> changes.
+		/// Event raised when <see cref="TargetFrameRate"/> changes.
 		/// </summary>
-		public Action<int> onTargetFrameRate;
+		public event Action<int> TargetFrameRateChanged;
 
 		/// <summary>
-		/// Action invoked when <see cref="TargetFixedFrameRate"/> changes.
+		/// Event raised when <see cref="TargetFixedFrameRate"/> changes.
 		/// </summary>
-		public Action<int> onTargetFixedFrameRate;
+		public event Action<int> TargetFixedFrameRateChanged;
 
 		private List<int> _samplesFrameRate = new List<int>();
 
@@ -119,7 +119,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		private int _currentFixedFrameRate = 0;
 
 		/// <summary>
-		/// Current fixed frames per second
+		/// Current fixed frames per second.
 		/// </summary>
 		public int CurrentFixedFrameRate {
 			get { return this._currentFixedFrameRate; }
@@ -266,21 +266,31 @@ namespace PWR.LowPowerMemoryConsumption {
 		#region <<---------- Internal Callbacks ---------->>
 
 		private void OnCurrentFrameRateChanged() {
-			if (this.onFrameRate != null) this.onFrameRate(this._currentFrameRate);
+			var evnt = this.CurrentFrameRateChanged;
+			if (evnt == null) return;
+			evnt(this._currentFrameRate);
 		}
 
 		private void OnCurrentFixedFrameRateChanged() {
-			if (this.onFixedFrameRate != null) this.onFixedFrameRate(this._currentFixedFrameRate);
+			var evnt = this.CurrentFixedFrameRateChanged;
+			if (evnt == null) return;
+			evnt(this._currentFixedFrameRate);
 		}
 
 		private void OnTargetFrameRateChanged() {
 			this.SetApplicationTargetFrameRate(FrameRateType.FPS, this._targetFrameRate);
-			if (this.onTargetFrameRate != null) this.onTargetFrameRate(this._targetFrameRate);
+
+			var evnt = this.TargetFrameRateChanged;
+			if (evnt == null) return;
+			evnt(this._targetFrameRate);
 		}
 
 		private void OnTargetFixedFrameRateChanged() {
 			this.SetApplicationTargetFrameRate(FrameRateType.FixedFPS, this._targetFixedFrameRate);
-			if (this.onTargetFixedFrameRate != null) this.onTargetFixedFrameRate(this._targetFixedFrameRate);
+
+			var evnt = this.TargetFixedFrameRateChanged;
+			if (evnt == null) return;
+			evnt(this._targetFixedFrameRate);
 		}
 
 		#endregion <<---------- Internal Callbacks ---------->>
@@ -303,12 +313,15 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// Add and activate a new frame rate request.
 		/// </summary>
 		/// <param name="request">Request to add.</param>
-		public void AddRequest(FrameRateRequest request) {
-			if (request == null || this.ContainsRequest(request)) return;
+		/// <returns>Returns the request.</returns>
+		public FrameRateRequest AddRequest(FrameRateRequest request) {
+			if (request == null) return null;
+			if (this.ContainsRequest(request)) return request;
 			if (this._requests == null) this._requests = new List<FrameRateRequest>();
 			this._requests.Add(request);
-			request.onRequestChanged += this.OnRequestChangedCallback;
+			request.Changed += this.NotifyRequestChanged;
 			this.RecalculateTargetsRateIfPlaying();
+			return request;
 		}
 
 		/// <summary>
@@ -318,14 +331,14 @@ namespace PWR.LowPowerMemoryConsumption {
 		public void RemoveRequest(FrameRateRequest request) {
 			if (request == null || !this.ContainsRequest(request)) return;
 			this._requests.Remove(request);
-			request.onRequestChanged -= this.OnRequestChangedCallback;
+			request.Changed -= this.NotifyRequestChanged;
 			this.RecalculateTargetsRateIfPlaying();
 		}
 
-		private void OnRequestChangedCallback(FrameRateRequest request) {
+		private void NotifyRequestChanged(FrameRateRequest request) {
 			if (request == null) return;
 			if (!this.ContainsRequest(request)) {
-				request.onRequestChanged -= this.OnRequestChangedCallback;
+				request.Changed -= this.NotifyRequestChanged;
 				return;
 			}
 			this.RecalculateTargetsRateIfPlaying();
@@ -391,6 +404,37 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		#endregion <<---------- General ---------->>
+
+
+
+
+		#region <<---------- Legacy Support ---------->>
+
+		[Obsolete("use CurrentFrameRateChanged event instead", false)] // ObsoletedWarning 2018/08/22 - ObsoletedError 20##/##/##
+		public event Action<int> onFrameRate {
+			add { this.CurrentFrameRateChanged += value; }
+			remove { this.CurrentFrameRateChanged -= value; }
+		}
+
+		[Obsolete("use CurrentFixedFrameRateChanged event instead", false)] // ObsoletedWarning 2018/08/22 - ObsoletedError 20##/##/##
+		public event Action<int> onFixedFrameRate {
+			add { this.CurrentFixedFrameRateChanged += value; }
+			remove { this.CurrentFixedFrameRateChanged -= value; }
+		}
+
+		[Obsolete("use TargetFrameRateChanged event instead", false)] // ObsoletedWarning 2018/08/22 - ObsoletedError 20##/##/##
+		public event Action<int> onTargetFrameRate {
+			add { this.TargetFrameRateChanged += value; }
+			remove { this.TargetFrameRateChanged -= value; }
+		}
+
+		[Obsolete("use TargetFixedFrameRateChanged event instead", false)] // ObsoletedWarning 2018/08/22 - ObsoletedError 20##/##/##
+		public event Action<int> onTargetFixedFrameRate {
+			add { this.TargetFixedFrameRateChanged += value; }
+			remove { this.TargetFixedFrameRateChanged -= value; }
+		}
+
+		#endregion <<---------- Legacy Support ---------->>
 
 
 

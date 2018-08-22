@@ -49,9 +49,9 @@ namespace PWR.LowPowerMemoryConsumption {
 		[HideInInspector] public bool collectGarbageOnLowMemory = true;
 
 		/// <summary>
-		/// Action invoked when application receives low memory warning.
+		/// Event raised when application receives low memory warning.
 		/// </summary>
-		public Action onLowMemory;
+		public event Action LowMemory;
 
 		/// <summary>
 		/// According to Unity documentation, lowMemory event is only supported on iOS and Android.
@@ -67,7 +67,7 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
-		private Action _onFinishedUnloadUnusedAssets;
+		private Action _finishedUnloadUnusedAssetsOnce;
 
 		private Coroutine _coroutineUnloadUnusedAssets;
 
@@ -109,12 +109,12 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		private void OnEnable() {
 			if (_instance != this) return;
-			Application.lowMemory += this.OnApplicationLowMemoryCallback;
+			Application.lowMemory += this.OnLowMemory;
 		}
 
 		private void OnDisable() {
 			if (_instance != this) return;
-			Application.lowMemory -= this.OnApplicationLowMemoryCallback;
+			Application.lowMemory -= this.OnLowMemory;
 		}
 
 		private void OnDestroy() {
@@ -141,9 +141,9 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// <summary>
 		/// Unload unused assets invoking <see cref="Resources.UnloadUnusedAssets"/> in a Coroutine.
 		/// </summary>
-		/// <param name="onFinishedHandler">Callback handler when unload finishes.</param>
-		public void UnloadUnusedAssets(Action onFinishedHandler) {
-			if (onFinishedHandler != null) this._onFinishedUnloadUnusedAssets += onFinishedHandler;
+		/// <param name="finished">Callback raised when unload finishes.</param>
+		public void UnloadUnusedAssets(Action finished) {
+			if (finished != null) this._finishedUnloadUnusedAssetsOnce += finished;
 			if (this._coroutineUnloadUnusedAssets != null) return;
 			this._coroutineUnloadUnusedAssets = this.StartCoroutine(this.CoroutineUnloadUnusedAssets());
 		}
@@ -155,15 +155,17 @@ namespace PWR.LowPowerMemoryConsumption {
 			this.UnloadUnusedAssets(null);
 		}
 
+		protected virtual void OnUnusedAssetsUnloaded() {
+			var evnt = this._finishedUnloadUnusedAssetsOnce;
+			this._finishedUnloadUnusedAssetsOnce = null;
+			if (evnt == null) return;
+			evnt();
+		}
+
 		private IEnumerator CoroutineUnloadUnusedAssets() {
-
 			yield return Resources.UnloadUnusedAssets();
-
 			this._coroutineUnloadUnusedAssets = null;
-			if (this._onFinishedUnloadUnusedAssets != null) {
-				this._onFinishedUnloadUnusedAssets();
-				this._onFinishedUnloadUnusedAssets = null;
-			}
+			this.OnUnusedAssetsUnloaded();
 		}
 
 		#endregion <<---------- Unused Assets Unload ---------->>
@@ -181,17 +183,25 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		/// <summary>
-		/// Will invoke all callbacks registered to <see cref="onLowMemory"/> and <see cref="OnLowMemoryEvent"/>. And also perform unused resources unload and garbage collect if they are enabled.
+		/// Will invoke all callbacks listening to <see cref="LowMemory"/>. And also perform unused resources unload and garbage collect if they are enabled.
 		/// </summary>
 		public void SimulateLowMemory() {
+			#if UNITY_EDITOR
+			if (!Application.isPlaying) {
+				Debug.LogWarning("[" + typeof(MemoryManager).Name + "] to perform a low memory simulation, applications must be playing ", this);
+				return;
+			}
+			#endif
+
 			if (Debug.isDebugBuild) Debug.Log("[" + typeof(MemoryManager).Name + "] simulating low memory", this);
-			this.OnApplicationLowMemoryCallback();
+			this.OnLowMemory();
 		}
 
-		private void OnApplicationLowMemoryCallback() {
+		protected virtual void OnLowMemory() {
 			Debug.LogWarning("[" + typeof(MemoryManager).Name + "] received application low memory callback", this);
 
-			if (this.onLowMemory != null) this.onLowMemory();
+			var eventLowMemory = this.LowMemory;
+			if (eventLowMemory != null) eventLowMemory();
 
 			if (this.unloadUnusedAssetsOnLowMemory) {
 				this.UnloadUnusedAssets(() => {
@@ -205,6 +215,19 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		#endregion <<---------- General ---------->>
+
+
+
+
+		#region <<---------- Legacy Support ---------->>
+
+		[Obsolete("use LowMemory event instead", false)] // ObsoletedWarning 2018/08/22 - ObsoletedError 20##/##/##
+		public event Action onLowMemory {
+			add { this.LowMemory += value; }
+			remove { this.LowMemory -= value; }
+		}
+
+		#endregion <<---------- Legacy Support ---------->>
 
 
 
