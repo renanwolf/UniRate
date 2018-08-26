@@ -39,56 +39,58 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		[SerializeField][Range(MinNumberOfSamples,60)] private int _smoothFramesCount = 5;
+		[SerializeField][Range(MinNumberOfSamples,10)] private int _smoothFramesCount = 5;
 
-		[SerializeField] private int _fallbackFrameRate = 30;
+		[SerializeField][Range(FrameRateRequest.MinValue,120)] private int _fallbackFrameRate = 15;
 
-		[SerializeField] private int _fallbackFixedFrameRate = 50;
+		[SerializeField][Range(FrameRateRequest.MinValue,120)] private int _fallbackFixedFrameRate = 30;
 
 		/// <summary>
-		/// Number of frame rate samples to calculate <see cref="CurrentFrameRate"/>.
+		/// Number of frame rate samples to calculate <see cref="FrameRate"/>.
 		/// </summary>
 		public int SmoothFramesCount {
 			get { return this._smoothFramesCount; }
 			set {
-				if (value < MinNumberOfSamples) throw new ArgumentOutOfRangeException("smoothFramesCount", value, "must be greather or equals to " + MinNumberOfSamples);
+				if (value < MinNumberOfSamples) throw new ArgumentOutOfRangeException("SmoothFramesCount", value, "must be greather or equals to " + MinNumberOfSamples);
 				this._smoothFramesCount = value;
 			}
 		}
 
 		/// <summary>
-		/// Target frame rate to set if there are no requests active.
+		/// Target frame rate to set if there are no active requests.
 		/// </summary>
 		public int FallbackFrameRate {
 			get { return this._fallbackFrameRate; }
 			set {
 				if (this._fallbackFrameRate == value) return;
+				if (value < FrameRateRequest.MinValue) throw new ArgumentOutOfRangeException("FallbackFrameRate", value, "must be greather or equals to " + FrameRateRequest.MinValue);
 				this._fallbackFrameRate = value;
 				this.RecalculateTargetsRateIfPlaying();
 			}
 		}
 
 		/// <summary>
-		/// Target fixed frame rate to set if there are no requests active.
+		/// Target fixed frame rate to set if there are no active requests.
 		/// </summary>
 		public int FallbackFixedFrameRate {
 			get { return this._fallbackFixedFrameRate; }
 			set {
 				if (this._fallbackFixedFrameRate == value) return;
+				if (value < FrameRateRequest.MinValue) throw new ArgumentOutOfRangeException("FallbackFrameRate", value, "must be greather or equals to " + FrameRateRequest.MinValue);
 				this._fallbackFixedFrameRate = value;
 				this.RecalculateTargetsRateIfPlaying();
 			}
 		}
 
 		/// <summary>
-		/// Event raised when <see cref="CurrentFrameRate"/> changes.
+		/// Event raised when <see cref="FrameRate"/> changes.
 		/// </summary>
-		public event Action<int> CurrentFrameRateChanged;
+		public event Action<int> FrameRateChanged;
 
 		/// <summary>
-		/// Event raised when <see cref="CurrentFixedFrameRate"/> changes.
+		/// Event raised when <see cref="FixedFrameRate"/> changes.
 		/// </summary>
-		public event Action<int> CurrentFixedFrameRateChanged;
+		public event Action<int> FixedFrameRateChanged;
 
 		/// <summary>
 		/// Event raised when <see cref="TargetFrameRate"/> changes.
@@ -107,7 +109,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// <summary>
 		/// Current frames per second.
 		/// </summary>
-		public int CurrentFrameRate {
+		public int FrameRate {
 			get { return this._currentFrameRate; }
 			private set {
 				if (this._currentFrameRate == value) return;
@@ -121,7 +123,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// <summary>
 		/// Current fixed frames per second.
 		/// </summary>
-		public int CurrentFixedFrameRate {
+		public int FixedFrameRate {
 			get { return this._currentFixedFrameRate; }
 			private set {
 				if (this._currentFixedFrameRate == value) return;
@@ -223,7 +225,7 @@ namespace PWR.LowPowerMemoryConsumption {
 			while(this._samplesFrameRate.Count > maxSamples) this._samplesFrameRate.RemoveAt(0);
 			float sum = 0;
 			for (int i = 0; i < this._samplesFrameRate.Count; i++) sum += this._samplesFrameRate[i];
-			this.CurrentFrameRate = Mathf.RoundToInt( sum / (float)this._samplesFrameRate.Count );
+			this.FrameRate = Mathf.RoundToInt( sum / (float)this._samplesFrameRate.Count );
 
 			//check if application target frame rate has changed from elsewhere
 			if (Application.targetFrameRate != this._targetFrameRate) {
@@ -234,7 +236,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		private void FixedUpdate() {
 			
 			//calculate fixed frame rate
-			this.CurrentFixedFrameRate = Mathf.RoundToInt(1.0f / Time.fixedUnscaledDeltaTime);
+			this.FixedFrameRate = Mathf.RoundToInt(1.0f / Time.fixedUnscaledDeltaTime);
 
 			//check if application fixed frame rate has changed from elsewhere
 			if (this._currentFixedFrameRate != this._targetFixedFrameRate) {
@@ -266,13 +268,13 @@ namespace PWR.LowPowerMemoryConsumption {
 		#region <<---------- Internal Callbacks ---------->>
 
 		private void OnCurrentFrameRateChanged() {
-			var evnt = this.CurrentFrameRateChanged;
+			var evnt = this.FrameRateChanged;
 			if (evnt == null) return;
 			evnt(this._currentFrameRate);
 		}
 
 		private void OnCurrentFixedFrameRateChanged() {
-			var evnt = this.CurrentFixedFrameRateChanged;
+			var evnt = this.FixedFrameRateChanged;
 			if (evnt == null) return;
 			evnt(this._currentFixedFrameRate);
 		}
@@ -369,8 +371,8 @@ namespace PWR.LowPowerMemoryConsumption {
 			if (!Application.isPlaying) return;
 			#endif
 
-			int newTarget = FrameRateRequest.MinValueForType(FrameRateType.FPS) - 1;
-			int newTargetFixed = FrameRateRequest.MinValueForType(FrameRateType.FixedFPS) - 1;
+			int newTarget = FrameRateRequest.MinValue - 1;
+			int newTargetFixed = FrameRateRequest.MinValue - 1;
 
 			if (this._requests != null && this._requests.Count > 0) {
 				for (int i = this._requests.Count - 1; i >= 0; i--) {
@@ -392,10 +394,10 @@ namespace PWR.LowPowerMemoryConsumption {
 				}
 			}
 
-			if (newTarget < FrameRateRequest.MinValueForType(FrameRateType.FPS)) {
+			if (newTarget < FrameRateRequest.MinValue) {
 				newTarget = this._fallbackFrameRate;
 			}
-			if (newTargetFixed < FrameRateRequest.MinValueForType(FrameRateType.FixedFPS)) {
+			if (newTargetFixed < FrameRateRequest.MinValue) {
 				newTargetFixed = this._fallbackFixedFrameRate;
 			}
 
@@ -412,14 +414,14 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		[Obsolete("use CurrentFrameRateChanged event instead", false)] // ObsoletedWarning 2018/08/22 - ObsoletedError 20##/##/##
 		public event Action<int> onFrameRate {
-			add { this.CurrentFrameRateChanged += value; }
-			remove { this.CurrentFrameRateChanged -= value; }
+			add { this.FrameRateChanged += value; }
+			remove { this.FrameRateChanged -= value; }
 		}
 
 		[Obsolete("use CurrentFixedFrameRateChanged event instead", false)] // ObsoletedWarning 2018/08/22 - ObsoletedError 20##/##/##
 		public event Action<int> onFixedFrameRate {
-			add { this.CurrentFixedFrameRateChanged += value; }
-			remove { this.CurrentFixedFrameRateChanged -= value; }
+			add { this.FixedFrameRateChanged += value; }
+			remove { this.FixedFrameRateChanged -= value; }
 		}
 
 		[Obsolete("use TargetFrameRateChanged event instead", false)] // ObsoletedWarning 2018/08/22 - ObsoletedError 20##/##/##
@@ -444,31 +446,12 @@ namespace PWR.LowPowerMemoryConsumption {
 		[CustomEditor(typeof(FrameRateManager))]
 		private class CustomInspector : Editor {
 
-			FrameRateManager script;
-
-			void OnEnable() {
-				script = this.target as FrameRateManager;
-			}
-
 			public override void OnInspectorGUI() {
 				this.serializedObject.Update();
 				this.DrawDefaultInspector();
 
 				if (!FrameRateManager.IsSupported) {
 					EditorGUILayout.HelpBox(FrameRateManager.NotSupportedMessage, MessageType.Warning);
-				}
-
-				int minRateValue = FrameRateRequest.MinValueForType(FrameRateType.FPS);
-				int minFixedRateValue = FrameRateRequest.MinValueForType(FrameRateType.FixedFPS);
-
-				if (script._fallbackFrameRate < minRateValue) {
-					EditorGUILayout.HelpBox("Minimum value for " + FrameRateType.FPS.ToString() + " is " + minRateValue, MessageType.Warning);
-					EditorGUILayout.Space();
-				}
-
-				if (script._fallbackFixedFrameRate < minFixedRateValue) {
-					EditorGUILayout.HelpBox("Minimum value for " + FrameRateType.FixedFPS.ToString() + " is " + minFixedRateValue, MessageType.Warning);
-					EditorGUILayout.Space();
 				}
 			}
 		}

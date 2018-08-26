@@ -41,6 +41,11 @@ namespace PWR.LowPowerMemoryConsumption.Internal {
 			get { return this._value > 0; }
 		}
 
+		/// <summary>
+		/// Minimum rate request value.
+		/// </summary>
+		public const int MinValue = 1;
+
 		#endregion <<---------- Properties and Fields ---------->>
 
 

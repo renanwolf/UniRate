@@ -40,10 +40,10 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		/// <summary>
-		/// Is valid if FPS with value ≥ 1 or FixedFPS with value ≥ 1.
+		/// Is valid if value is greather or equals to <see cref="RateRequestBase.MinValue"/>.
 		/// </summary>
 		public override bool IsValid {
-			get { return this.Value >= MinValueForType(this._type); }
+			get { return this.Value >= MinValue; }
 		}
 
 		#endregion <<---------- Properties and Fields ---------->>
@@ -66,14 +66,6 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// </summary>
 		public void Stop() {
 			FrameRateManager.Instance.RemoveRequest(this);
-		}
-
-		public static int MinValueForType(FrameRateType type) {
-			switch (type) {
-				case FrameRateType.FPS: return 1;
-				case FrameRateType.FixedFPS: return 1;
-				default: return int.MaxValue;
-			}
 		}
 
 		#endregion <<---------- General ---------->>

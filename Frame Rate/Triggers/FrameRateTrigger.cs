@@ -98,22 +98,22 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		protected void StartListening() {
 			FrameRateManager.Instance.TargetFrameRateChanged += this.NotifyTargetFrameRateChanged;
-			FrameRateManager.Instance.CurrentFrameRateChanged += this.NotifyCurrentFrameRateChanged;
+			FrameRateManager.Instance.FrameRateChanged += this.NotifyCurrentFrameRateChanged;
 
 			FrameRateManager.Instance.TargetFixedFrameRateChanged += this.NotifyTargetFixedFrameRateChanged;
-			FrameRateManager.Instance.CurrentFixedFrameRateChanged += this.NotifyCurrentFixedFrameRateChanged;
+			FrameRateManager.Instance.FixedFrameRateChanged += this.NotifyCurrentFixedFrameRateChanged;
 		}
 
 		protected void StopListening() {
 			FrameRateManager.Instance.TargetFrameRateChanged -= this.NotifyTargetFrameRateChanged;
-			FrameRateManager.Instance.CurrentFrameRateChanged -= this.NotifyCurrentFrameRateChanged;
+			FrameRateManager.Instance.FrameRateChanged -= this.NotifyCurrentFrameRateChanged;
 
 			FrameRateManager.Instance.TargetFixedFrameRateChanged -= this.NotifyTargetFixedFrameRateChanged;
-			FrameRateManager.Instance.CurrentFixedFrameRateChanged -= this.NotifyCurrentFixedFrameRateChanged;
+			FrameRateManager.Instance.FixedFrameRateChanged -= this.NotifyCurrentFixedFrameRateChanged;
 		}
 
 		protected void NotifyCurrentFrameRateChanged() {
-			this.NotifyCurrentFrameRateChanged(FrameRateManager.Instance.CurrentFrameRate);
+			this.NotifyCurrentFrameRateChanged(FrameRateManager.Instance.FrameRate);
 		}
 		protected virtual void NotifyCurrentFrameRateChanged(int rate) {
 			if (this._type != FrameRateType.FPS) return;
@@ -129,7 +129,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		protected void NotifyCurrentFixedFrameRateChanged() {
-			this.NotifyCurrentFixedFrameRateChanged(FrameRateManager.Instance.CurrentFixedFrameRate);
+			this.NotifyCurrentFixedFrameRateChanged(FrameRateManager.Instance.FixedFrameRate);
 		}
 		protected virtual void NotifyCurrentFixedFrameRateChanged(int rate) {
 			if (this._type != FrameRateType.FixedFPS) return;

@@ -2,24 +2,13 @@
 
 namespace PWR.LowPowerMemoryConsumption {
 
-	public class FrameRateRequester : MonoBehaviour {
+	public class RenderRateRequester : MonoBehaviour {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		[SerializeField] private FrameRateType _type = FrameRateType.FPS;
+		[SerializeField] private RenderRateManager _manager;
 
-		[SerializeField][Range(FrameRateRequest.MinValue,120)] private int _rate = 30;
-
-		/// <summary>
-		/// Rate type.
-		/// </summary>
-		public FrameRateType Type {
-			get { return this._type; }
-			set {
-				this._type = value;
-				if (Application.isPlaying) this.Request.Type = value;
-			}
-		}
+		[SerializeField][Range(RenderRateRequest.MinValue,120)] private int _rate = 30;
 
 		/// <summary>
 		/// Rate value.
@@ -32,11 +21,26 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
-		private FrameRateRequest _request;
-		protected FrameRateRequest Request {
+		public RenderRateManager Manager {
+			get { return this._manager; }
+			set {
+				if (this._manager == value) return;
+				this._manager = value;
+				#if UNITY_EDITOR
+				if (!Application.isPlaying) return;
+				#endif
+				if (this.isActiveAndEnabled) {
+					this.Request.Stop();
+					this.Request.Start(this._manager);
+				}
+			}
+		}
+
+		private RenderRateRequest _request;
+		protected RenderRateRequest Request {
 			get {
 				if (this._request == null) {
-					this._request = new FrameRateRequest(this._type, this._rate);
+					this._request = new RenderRateRequest(this._rate);
 				}
 				return this._request;
 			}
@@ -52,7 +56,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		#region <<---------- MonoBehaviour ---------->>
 
 		protected virtual void OnEnable() {
-			this.Request.Start();
+			this.Request.Start(this._manager);
 		}
 
 		protected virtual void OnDisable() {
@@ -67,12 +71,18 @@ namespace PWR.LowPowerMemoryConsumption {
 		#if UNITY_EDITOR
 		protected virtual void OnValidate() {
 			if (!Application.isPlaying) return;
-			this.Request.Type = this._type;
+			if (this.isActiveAndEnabled) {
+				this.Request.Stop();
+				this.Request.Start(this._manager);
+			}
 			this.Request.Value = this._rate;
 		}
 		protected virtual void OnReset() {
 			if (!Application.isPlaying) return;
-			this.Request.Type = this._type;
+			if (this.isActiveAndEnabled) {
+				this.Request.Stop();
+				this.Request.Start(this._manager);
+			}
 			this.Request.Value = this._rate;
 		}
 		#endif
