@@ -21,6 +21,9 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
+		/// <summary>
+		/// Render rate manager to request.
+		/// </summary>
 		public RenderRateManager Manager {
 			get { return this._manager; }
 			set {

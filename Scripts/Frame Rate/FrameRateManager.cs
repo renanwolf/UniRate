@@ -39,11 +39,12 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		[SerializeField][Range(MinNumberOfSamples,10)] private int _smoothFramesCount = 5;
+		[SerializeField][Range(FrameRateRequest.MinValue,120)] private int _fallbackFrameRate = 18;
 
-		[SerializeField][Range(FrameRateRequest.MinValue,120)] private int _fallbackFrameRate = 15;
+		[SerializeField][Range(FrameRateRequest.MinValue,120)] private int _fallbackFixedFrameRate = 18;
 
-		[SerializeField][Range(FrameRateRequest.MinValue,120)] private int _fallbackFixedFrameRate = 30;
+		[Space]
+		[SerializeField][Range(MinNumberOfSamples,10)] private int _smoothFramesCount = 3;
 
 		/// <summary>
 		/// Number of frame rate samples to calculate <see cref="FrameRate"/>.

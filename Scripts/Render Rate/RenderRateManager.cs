@@ -10,8 +10,11 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		[SerializeField][Range(RenderRateRequest.MinValue,120)] private int _fallbackRenderRate = 15;
+		[SerializeField][Range(RenderRateRequest.MinValue,120)] private int _fallbackRenderRate = 18;
 
+		/// <summary>
+		/// Target render rate to set if there are no active requests.
+		/// </summary>
 		public int FallbackRenderRate {
 			get { return this._fallbackRenderRate; }
 			set {
@@ -22,6 +25,9 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
+		/// <summary>
+		/// Target render rate per second.
+		/// </summary>
 		public int TargetRenderRate {
 			get {
 				if (this._renderOnEverySeconds <= 0f) return int.MaxValue;
@@ -31,11 +37,15 @@ namespace PWR.LowPowerMemoryConsumption {
 				var newRenderSeconds = value <= 0 ? float.PositiveInfinity : (1f / (float)value);
 				if (this._renderOnEverySeconds == newRenderSeconds) return;
 				this._renderOnEverySeconds = newRenderSeconds;
-				this.OnTargetRenderRateChanged();
+				this.OnTargetRenderRateChanged(value);
 			}
 		}
 
-		private int _currentRenderRate = 0;
+		private int _currentRenderRate;
+
+		/// <summary>
+		/// Current render rate per second.
+		/// </summary>
 		public int RenderRate {
 			get { return this._currentRenderRate; }
 			private set {
@@ -47,6 +57,9 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		private Camera _attachedCamera;
 
+		/// <summary>
+		/// Camera component attached to this GameObject.
+		/// </summary>
 		public Camera AttachedCamera {
 			get {
 				if (this._attachedCamera == null) {
@@ -56,27 +69,54 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 
-		private bool _isRendering = false;
+		private bool _isOnRenderProcess = false;
+
+		/// <summary>
+		/// Is on render process?
+		/// </summary>
 		public bool IsRendering {
-			get { return this._isRendering; }
+			get { return this._isOnRenderProcess; }
 			private set {
-				if (this._isRendering == value) return;
-				this._isRendering = value;
+				if (this._isOnRenderProcess == value) return;
+				this._isOnRenderProcess = value;
 				this.OnIsRenderingChanged();
 			}
 		}
+
+		/// <summary>
+		/// Event raised when <see cref="RenderRate"/> changes.
+		/// </summary>
+		public event Action<RenderRateManager, int> RenderRateChanged;
+
+		/// <summary>
+		/// Event raised when <see cref="TargetRenderRate"/> changes.
+		/// </summary>
+		public event Action<RenderRateManager, int> TargetRenderRateChanged;
+
+		/// <summary>
+		/// Event raised when <see cref="IsRendering"/> changes.
+		/// </summary>
+		public event Action<RenderRateManager, bool> IsRenderingChanged;
 
 		private float _renderOnEverySeconds;
 
 		private float _renderDeltaTime = float.PositiveInfinity;
 
-		private float _lastRenderRealtime;
+		private float _renderProcessStart;
 
-		private float _elapsedRealtimeSinceLastRender {
-			get { return Time.realtimeSinceStartup - this._lastRenderRealtime; }
+		private float _renderFinish;
+
+		private float ElapsedSinceRenderProcessStart {
+			get { return Time.realtimeSinceStartup - this._renderProcessStart; }
+		}
+
+		private float ElapsedSinceRendeFinish {
+			get { return Time.realtimeSinceStartup - this._renderFinish; }
 		}
 
 		private List<RenderRateRequest> _requests;
+
+		private bool _firstUpdateAfterEnable;
 
 		#endregion <<---------- Properties and Fields ---------->>
 
@@ -90,24 +130,29 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		protected virtual void OnEnable() {
-			this._isRendering = false; //to force rendering change
+			this._firstUpdateAfterEnable = true;
 			this.Render();
 		}
 
 		protected virtual void Update() {
-
-			if (this._elapsedRealtimeSinceLastRender >= this._renderOnEverySeconds) {
-				if (!this._isRendering) this.StartRendering();
+			
+			if (this._firstUpdateAfterEnable) {
+				this._firstUpdateAfterEnable = false;
 			}
-			else if (this._isRendering) {
-				this.StopRendering();
+			else {
+				if (this._isOnRenderProcess && this.ElapsedSinceRendeFinish >= 0f) {
+					this.OnStopRenderProcess();
+				}
+				if (!this._isOnRenderProcess && this.ElapsedSinceRenderProcessStart >= this._renderOnEverySeconds) {
+					this.OnStartRenderProcess();
+				}
 			}
 
 			this.RenderRate = Mathf.RoundToInt(1f / this._renderDeltaTime);
 		}
 
 		protected virtual void OnDisable() {
-			this.AssertIsRenderingFlag();
+			this.AssertIsOnRenderProcessFlag();
 		}
 
 		#if UNITY_EDITOR
@@ -126,10 +171,12 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Camera Messages ---------->>
 
+		protected virtual void OnPreRender() {
+			this.OnBeginRender();
+		}
+
 		protected virtual void OnPostRender() {
-			float realTime = Time.realtimeSinceStartup;
-			this._renderDeltaTime = Mathf.Max(0.00001f, realTime - this._lastRenderRealtime);
-			this._lastRenderRealtime = realTime;
+			this.OnFinishRender();
 		}
 
 		#endregion <<---------- Camera Messages ---------->>
@@ -139,16 +186,22 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Internal Callbacks ---------->>
 
-		protected virtual void OnTargetRenderRateChanged() {
-
+		protected virtual void OnTargetRenderRateChanged(int value) {
+			var evnt = this.TargetRenderRateChanged;
+			if (evnt == null) return;
+			evnt(this, value);
 		}
 
 		protected virtual void OnIsRenderingChanged() {
-			
+			var evnt = this.IsRenderingChanged;
+			if (evnt == null) return;
+			evnt(this, this._isOnRenderProcess);
 		}
 
 		protected virtual void OnCurrentRenderRateChanged() {
-			//Debug.Log("Rate: " + this._currentRenderRate);
+			var evnt = this.RenderRateChanged;
+			if (evnt == null) return;
+			evnt(this, this._currentRenderRate);
 		}
 
 		#endregion <<---------- Internal Callbacks ---------->>
@@ -208,25 +261,42 @@ namespace PWR.LowPowerMemoryConsumption {
 
 
 		#region <<---------- General ---------->>
-
-		protected void AssertIsRenderingFlag() {
-			this.IsRendering = this.isActiveAndEnabled && this.AttachedCamera.enabled;
+		
+		protected void AssertIsOnRenderProcessFlag() {
+			this.IsRendering = this.gameObject.activeInHierarchy && this.AttachedCamera.enabled;
 		}
 
-		private void StartRendering() {
+		private void OnStartRenderProcess() {
+			float realTime = Time.realtimeSinceStartup;
+			this._renderDeltaTime = Mathf.Max(0.00001f, realTime - this._renderProcessStart);
+			this._renderProcessStart = realTime;
+
+			this._renderFinish = float.PositiveInfinity;
+
 			this.AttachedCamera.enabled = true;
-			this.AssertIsRenderingFlag();
+			this.AssertIsOnRenderProcessFlag();
 		}
 
-		private void StopRendering() {
+		private void OnBeginRender() {
+
+		}
+
+		private void OnFinishRender() {
+			this._renderFinish = Time.realtimeSinceStartup;
+		}
+
+		private void OnStopRenderProcess() {
 			this.AttachedCamera.enabled = false;
-			this.AssertIsRenderingFlag();
+			this.AssertIsOnRenderProcessFlag();
 		}
 
+		/// <summary>
+		/// Render now.
+		/// </summary>
 		public void Render() {
 			if (!this.isActiveAndEnabled) return;
-			this._lastRenderRealtime = Time.realtimeSinceStartup - this._renderOnEverySeconds;
-			this.StartRendering();
+			//this._lastRenderRealtime = Time.realtimeSinceStartup - this._renderOnEverySeconds;
+			this.OnStartRenderProcess();
 		}
 
 		private void RecalculateTargetsRateIfPlaying() {

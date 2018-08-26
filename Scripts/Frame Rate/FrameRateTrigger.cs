@@ -8,9 +8,9 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		[SerializeField] private FrameRateType _type = FrameRateType.FPS;
 
-		[SerializeField] private UnityEventFrameRate _currentRateChangedEvent;
+		[SerializeField] private UnityEventRate _currentRateChangedEvent;
 
-		[SerializeField] private UnityEventFrameRate _targetRateChangedEvent;
+		[SerializeField] private UnityEventRate _targetRateChangedEvent;
 
 		/// <summary>
 		/// Rate type.
@@ -25,24 +25,24 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		/// <summary>
-        /// Event raised when current rate of <see cref="Type"/> is changed.
+        /// Event raised when current rate of <see cref="Type"/> changes.
         /// </summary>
-		public UnityEventFrameRate CurrentRateChangedEvent {
+		public UnityEventRate CurrentRateChangedEvent {
 			get {
 				if (this._currentRateChangedEvent == null) {
-					this._currentRateChangedEvent = new UnityEventFrameRate();
+					this._currentRateChangedEvent = new UnityEventRate();
 				}
 				return this._currentRateChangedEvent;
 			}
 		}
 
 		/// <summary>
-        /// Event raised when target rate of <see cref="Type"/> is changed.
+        /// Event raised when target rate of <see cref="Type"/> changes.
         /// </summary>
-		public UnityEventFrameRate TargetRateChangedEvent {
+		public UnityEventRate TargetRateChangedEvent {
 			get {
 				if (this._targetRateChangedEvent == null) {
-					this._targetRateChangedEvent = new UnityEventFrameRate();
+					this._targetRateChangedEvent = new UnityEventRate();
 				}
 				return this._targetRateChangedEvent;
 			}

@@ -4,5 +4,5 @@ using UnityEngine.Events;
 namespace PWR.LowPowerMemoryConsumption {
 
 	[Serializable]
-	public class UnityEventFrameRate : UnityEvent<int> { }
+	public class UnityEventRate : UnityEvent<int> { }
 }
