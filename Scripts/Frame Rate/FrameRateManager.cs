@@ -12,12 +12,21 @@ namespace PWR.LowPowerMemoryConsumption {
 	[DisallowMultipleComponent]
 	public class FrameRateManager : MonoBehaviour {
 
+		#region <<---------- Initializers ---------->>
+
+		protected FrameRateManager() { }
+
+		#endregion <<---------- Initializers ---------->>
+
+
+
+
 		#region <<---------- Singleton ---------->>
 
         private static FrameRateManager _instance = null;
 
 		/// <summary>
-		/// Singleton instance.
+		/// Frame rate manager singleton instance.
 		/// </summary>
         public static FrameRateManager Instance {
             get {
@@ -39,12 +48,12 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		[SerializeField][Range(FrameRateRequest.MinValue,120)] private int _fallbackFrameRate = 18;
+		[SerializeField][Range(FrameRateRequest.MinRate, 120)] private int _fallbackFrameRate = 18;
 
-		[SerializeField][Range(FrameRateRequest.MinValue,120)] private int _fallbackFixedFrameRate = 18;
+		[SerializeField][Range(FrameRateRequest.MinRate, 120)] private int _fallbackFixedFrameRate = 18;
 
 		[Space]
-		[SerializeField][Range(MinNumberOfSamples,10)] private int _smoothFramesCount = 3;
+		[SerializeField][Range(MinNumberOfSamples, 120)] private int _smoothFramesCount = 4;
 
 		/// <summary>
 		/// Number of frame rate samples to calculate <see cref="FrameRate"/>.
@@ -64,7 +73,7 @@ namespace PWR.LowPowerMemoryConsumption {
 			get { return this._fallbackFrameRate; }
 			set {
 				if (this._fallbackFrameRate == value) return;
-				if (value < FrameRateRequest.MinValue) throw new ArgumentOutOfRangeException("FallbackFrameRate", value, "must be greather or equals to " + FrameRateRequest.MinValue);
+				if (value < FrameRateRequest.MinRate) throw new ArgumentOutOfRangeException("FallbackFrameRate", value, "must be greather or equals to " + FrameRateRequest.MinRate);
 				this._fallbackFrameRate = value;
 				this.RecalculateTargetsRateIfPlaying();
 			}
@@ -77,7 +86,7 @@ namespace PWR.LowPowerMemoryConsumption {
 			get { return this._fallbackFixedFrameRate; }
 			set {
 				if (this._fallbackFixedFrameRate == value) return;
-				if (value < FrameRateRequest.MinValue) throw new ArgumentOutOfRangeException("FallbackFrameRate", value, "must be greather or equals to " + FrameRateRequest.MinValue);
+				if (value < FrameRateRequest.MinRate) throw new ArgumentOutOfRangeException("FallbackFrameRate", value, "must be greather or equals to " + FrameRateRequest.MinRate);
 				this._fallbackFixedFrameRate = value;
 				this.RecalculateTargetsRateIfPlaying();
 			}
@@ -86,26 +95,60 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// <summary>
 		/// Event raised when <see cref="FrameRate"/> changes.
 		/// </summary>
-		public event Action<int> FrameRateChanged;
+		public event Action<int> FrameRateChanged {
+			add {
+				this._frameRateChanged -= value;
+				this._frameRateChanged += value;
+			}
+			remove {
+				this._frameRateChanged -= value;
+			}
+		}
+		private Action<int> _frameRateChanged;
 
 		/// <summary>
 		/// Event raised when <see cref="FixedFrameRate"/> changes.
 		/// </summary>
-		public event Action<int> FixedFrameRateChanged;
+		public event Action<int> FixedFrameRateChanged {
+			add {
+				this._fixedFrameRateChanged -= value;
+				this._fixedFrameRateChanged += value;
+			}
+			remove {
+				this._fixedFrameRateChanged -= value;
+			}
+		}
+		private Action<int> _fixedFrameRateChanged;
 
 		/// <summary>
 		/// Event raised when <see cref="TargetFrameRate"/> changes.
 		/// </summary>
-		public event Action<int> TargetFrameRateChanged;
+		public event Action<int> TargetFrameRateChanged {
+			add {
+				this._targetFrameRateChanged -= value;
+				this._targetFrameRateChanged += value;
+			}
+			remove {
+				this._targetFrameRateChanged -= value;
+			}
+		}
+		private Action<int> _targetFrameRateChanged;
 
 		/// <summary>
 		/// Event raised when <see cref="TargetFixedFrameRate"/> changes.
 		/// </summary>
-		public event Action<int> TargetFixedFrameRateChanged;
+		public event Action<int> TargetFixedFrameRateChanged {
+			add {
+				this._targetFixedFrameRateChanged -= value;
+				this._targetFixedFrameRateChanged += value;
+			}
+			remove {
+				this._targetFixedFrameRateChanged -= value;
+			}
+		}
+		private Action<int> _targetFixedFrameRateChanged;
 
 		private List<int> _samplesFrameRate = new List<int>();
-
-		private int _currentFrameRate = 0;
 
 		/// <summary>
 		/// Current frames per second.
@@ -118,8 +161,7 @@ namespace PWR.LowPowerMemoryConsumption {
 				this.OnCurrentFrameRateChanged();
 			}
 		}
-
-		private int _currentFixedFrameRate = 0;
+		private int _currentFrameRate = 0;
 
 		/// <summary>
 		/// Current fixed frames per second.
@@ -132,8 +174,7 @@ namespace PWR.LowPowerMemoryConsumption {
 				this.OnCurrentFixedFrameRateChanged();
 			}
 		}
-
-		private int _targetFrameRate = 0;
+		private int _currentFixedFrameRate = 0;
 
 		/// <summary>
 		/// Target frames per second.
@@ -146,8 +187,7 @@ namespace PWR.LowPowerMemoryConsumption {
 				this.OnTargetFrameRateChanged();
 			}
 		}
-
-		private int _targetFixedFrameRate = 0;
+		private int _targetFrameRate = 0;
 
 		/// <summary>
 		/// Target fixed frames per second.
@@ -160,6 +200,7 @@ namespace PWR.LowPowerMemoryConsumption {
 				this.OnTargetFixedFrameRateChanged();
 			}
 		}
+		private int _targetFixedFrameRate = 0;
 
 		/// <summary>
 		/// TargetFrameRate can only be changed if VSync is off.
@@ -212,7 +253,7 @@ namespace PWR.LowPowerMemoryConsumption {
 			
 			this.name = DefaultName;
 			this.transform.SetParent(null, false);
-			DontDestroyOnLoad(this);
+			if (Application.isPlaying) DontDestroyOnLoad(this);
 
 			if (!FrameRateManager.IsSupported) Debug.LogWarning("[" + typeof(FrameRateManager).Name + "] " + FrameRateManager.NotSupportedMessage, this);
 			this.RecalculateTargetsRateIfPlaying();
@@ -269,13 +310,13 @@ namespace PWR.LowPowerMemoryConsumption {
 		#region <<---------- Internal Callbacks ---------->>
 
 		private void OnCurrentFrameRateChanged() {
-			var evnt = this.FrameRateChanged;
+			var evnt = this._frameRateChanged;
 			if (evnt == null) return;
 			evnt(this._currentFrameRate);
 		}
 
 		private void OnCurrentFixedFrameRateChanged() {
-			var evnt = this.FixedFrameRateChanged;
+			var evnt = this._fixedFrameRateChanged;
 			if (evnt == null) return;
 			evnt(this._currentFixedFrameRate);
 		}
@@ -283,7 +324,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		private void OnTargetFrameRateChanged() {
 			this.SetApplicationTargetFrameRate(FrameRateType.FPS, this._targetFrameRate);
 
-			var evnt = this.TargetFrameRateChanged;
+			var evnt = this._targetFrameRateChanged;
 			if (evnt == null) return;
 			evnt(this._targetFrameRate);
 		}
@@ -291,7 +332,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		private void OnTargetFixedFrameRateChanged() {
 			this.SetApplicationTargetFrameRate(FrameRateType.FixedFPS, this._targetFixedFrameRate);
 
-			var evnt = this.TargetFixedFrameRateChanged;
+			var evnt = this._targetFixedFrameRateChanged;
 			if (evnt == null) return;
 			evnt(this._targetFixedFrameRate);
 		}
@@ -322,7 +363,7 @@ namespace PWR.LowPowerMemoryConsumption {
 			if (this.ContainsRequest(request)) return request;
 			if (this._requests == null) this._requests = new List<FrameRateRequest>();
 			this._requests.Add(request);
-			request.Changed += this.NotifyRequestChanged;
+			request.Changed += this.OnRequestChanged;
 			this.RecalculateTargetsRateIfPlaying();
 			return request;
 		}
@@ -334,14 +375,14 @@ namespace PWR.LowPowerMemoryConsumption {
 		public void RemoveRequest(FrameRateRequest request) {
 			if (request == null || !this.ContainsRequest(request)) return;
 			this._requests.Remove(request);
-			request.Changed -= this.NotifyRequestChanged;
+			request.Changed -= this.OnRequestChanged;
 			this.RecalculateTargetsRateIfPlaying();
 		}
 
-		private void NotifyRequestChanged(FrameRateRequest request) {
+		private void OnRequestChanged(FrameRateRequest request) {
 			if (request == null) return;
 			if (!this.ContainsRequest(request)) {
-				request.Changed -= this.NotifyRequestChanged;
+				request.Changed -= this.OnRequestChanged;
 				return;
 			}
 			this.RecalculateTargetsRateIfPlaying();
@@ -372,8 +413,8 @@ namespace PWR.LowPowerMemoryConsumption {
 			if (!Application.isPlaying) return;
 			#endif
 
-			int newTarget = FrameRateRequest.MinValue - 1;
-			int newTargetFixed = FrameRateRequest.MinValue - 1;
+			int newTarget = FrameRateRequest.MinRate - 1;
+			int newTargetFixed = FrameRateRequest.MinRate - 1;
 
 			if (this._requests != null && this._requests.Count > 0) {
 				for (int i = this._requests.Count - 1; i >= 0; i--) {
@@ -385,20 +426,20 @@ namespace PWR.LowPowerMemoryConsumption {
 
 					switch (this._requests[i].Type) {
 						case FrameRateType.FPS:
-							newTarget = Mathf.Max(newTarget, this._requests[i].Value);
+							newTarget = Mathf.Max(newTarget, this._requests[i].Rate);
 						break;
 
 						case FrameRateType.FixedFPS:
-							newTargetFixed = Mathf.Max(newTargetFixed, this._requests[i].Value);
+							newTargetFixed = Mathf.Max(newTargetFixed, this._requests[i].Rate);
 						break;
 					}
 				}
 			}
 
-			if (newTarget < FrameRateRequest.MinValue) {
+			if (newTarget < FrameRateRequest.MinRate) {
 				newTarget = this._fallbackFrameRate;
 			}
-			if (newTargetFixed < FrameRateRequest.MinValue) {
+			if (newTargetFixed < FrameRateRequest.MinRate) {
 				newTargetFixed = this._fallbackFixedFrameRate;
 			}
 
