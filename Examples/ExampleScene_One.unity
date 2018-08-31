@@ -144,8 +144,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: -5, y: 0}
-  m_SizeDelta: {x: -20, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: -10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &137022171
 GameObject:
@@ -279,8 +279,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 40}
-  m_SizeDelta: {x: 0, y: 90}
+  m_AnchoredPosition: {x: 0, y: 20}
+  m_SizeDelta: {x: 0, y: 41.8}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &391791075
 MonoBehaviour:
@@ -347,7 +347,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -20, y: 0}
+  m_SizeDelta: {x: -10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &698369947
 GameObject:
@@ -382,7 +382,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 0}
+  m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &698369949
 MonoBehaviour:
@@ -574,11 +574,11 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
-    m_FontStyle: 1
+    m_FontSize: 4
+    m_FontStyle: 0
     m_BestFit: 1
-    m_MinSize: 1
-    m_MaxSize: 14
+    m_MinSize: 3
+    m_MaxSize: 4
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -618,12 +618,12 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventRate, Assembly-CSharp, Version=0.0.0.0,
+    m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventInt, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
   _targetRateChangedEvent:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventRate, Assembly-CSharp, Version=0.0.0.0,
+    m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventInt, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!1 &895519023
 GameObject:
@@ -650,10 +650,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 895519023}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a77b028b9201641f4ae2745750186a14, type: 3}
+  m_Script: {fileID: 11500000, guid: b7a2f92d5b1114a2ba21d54ae7b463f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _fallbackRenderRate: 10
+  _fallbackRenderInterval: 4
+  _framesBypassAtStartToPreventFlickering: 30
 --- !u!20 &895519026
 Camera:
   m_ObjectHideFlags: 0
@@ -835,7 +836,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 12
+    m_FontSize: 6
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 1
@@ -868,8 +869,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 18}
-  m_SizeDelta: {x: 0, y: 30}
+  m_AnchoredPosition: {x: 0, y: 8}
+  m_SizeDelta: {x: 0, y: 8}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &934507672
 GameObject:
@@ -956,7 +957,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -20, y: 0}
+  m_SizeDelta: {x: -10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &992348420
 GameObject:
@@ -993,7 +994,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 40}
+  m_SizeDelta: {x: 0, y: 20}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &992348422
 MonoBehaviour:
@@ -1085,7 +1086,7 @@ MonoBehaviour:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 10
-          m_FloatArgument: 18
+          m_FloatArgument: 3
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
@@ -1257,7 +1258,7 @@ GameObject:
   - component: {fileID: 1029735075}
   - component: {fileID: 1029735074}
   m_Layer: 5
-  m_Name: Text RenderRate
+  m_Name: Text RenderInterval
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1274,7 +1275,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d12daf54c3624166b2bb406236a9c24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefix: 'RenderRate: '
+  prefix: 'RenderInterval: '
   suffix: 
   FormatFloat: 0.00
   FormatInt: 0
@@ -1315,7 +1316,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 12
+    m_FontSize: 6
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 1
@@ -1326,7 +1327,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'RenderRate: 18'
+  m_Text: 'RenderInterval: 3'
 --- !u!222 &1029735076
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1348,8 +1349,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 60}
-  m_SizeDelta: {x: 0, y: 30}
+  m_AnchoredPosition: {x: 0, y: 29.8}
+  m_SizeDelta: {x: 0, y: 8}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &1103222975
 GameObject:
@@ -1382,8 +1383,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: -5, y: 0}
-  m_SizeDelta: {x: -20, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: -10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1134628051
 GameObject:
@@ -1441,11 +1442,11 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 18
+    m_FontSize: 10
     m_FontStyle: 1
     m_BestFit: 1
-    m_MinSize: 12
-    m_MaxSize: 18
+    m_MinSize: 1
+    m_MaxSize: 10
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -4917,7 +4918,7 @@ GameObject:
   - component: {fileID: 1232353342}
   - component: {fileID: 1232353345}
   m_Layer: 5
-  m_Name: Text RenderRate
+  m_Name: Text RenderInterval
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4952,10 +4953,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d12daf54c3624166b2bb406236a9c24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefix: 'RenderRate: '
+  prefix: 'RenderInterval: '
   suffix: 
   FormatFloat: 0.00
-  FormatInt: 000
+  FormatInt: 0
   TextEvent:
     m_PersistentCalls:
       m_Calls:
@@ -4993,18 +4994,18 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
-    m_FontStyle: 1
+    m_FontSize: 4
+    m_FontStyle: 0
     m_BestFit: 1
-    m_MinSize: 1
-    m_MaxSize: 14
+    m_MinSize: 3
+    m_MaxSize: 4
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: RenderRate
+  m_Text: RenderInterval
 --- !u!222 &1232353344
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5019,11 +5020,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1232353340}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 21c1096444a4d4268bf7d28f2b16a6be, type: 3}
+  m_Script: {fileID: 11500000, guid: f76eae0c6f66c48889c7fa2c52795cd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _manager: {fileID: 895519024}
-  _currentRateChangedEvent:
+  _renderIntervalChangedEvent:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1232353342}
@@ -5037,12 +5038,12 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventRate, Assembly-CSharp, Version=0.0.0.0,
+    m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventInt, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  _targetRateChangedEvent:
+  _isRenderingChangedEvent:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventRate, Assembly-CSharp, Version=0.0.0.0,
+    m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventBool, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!1 &1487684555
 GameObject:
@@ -5370,7 +5371,7 @@ MonoBehaviour:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 120
-          m_FloatArgument: 120
+          m_FloatArgument: 1
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
@@ -5426,7 +5427,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 40}
+  m_SizeDelta: {x: 0, y: 20}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &1786168195
 GameObject:
@@ -5532,8 +5533,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 10}
-  m_SizeDelta: {x: -16, y: 20}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: -16, y: 10}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1807519820
 MonoBehaviour:
@@ -5686,7 +5687,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 40}
+  m_SizeDelta: {x: 0, y: 10}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1859345903
 MonoBehaviour:
@@ -5702,8 +5703,8 @@ MonoBehaviour:
   m_Padding:
     m_Left: 0
     m_Right: 0
-    m_Top: 8
-    m_Bottom: 8
+    m_Top: 0
+    m_Bottom: 0
   m_ChildAlignment: 4
   m_Spacing: 0
   m_ChildForceExpandWidth: 0
@@ -5729,7 +5730,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -5755,7 +5756,7 @@ GameObject:
   - component: {fileID: 1863868860}
   - component: {fileID: 1863868859}
   m_Layer: 5
-  m_Name: Slider RenderRate
+  m_Name: Slider RenderInterval
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5779,8 +5780,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 50}
-  m_SizeDelta: {x: -16, y: 20}
+  m_AnchoredPosition: {x: 0, y: 20}
+  m_SizeDelta: {x: -16, y: 10}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1863868859
 MonoBehaviour:
@@ -5821,10 +5822,10 @@ MonoBehaviour:
   m_FillRect: {fileID: 734997680}
   m_HandleRect: {fileID: 2018011388}
   m_Direction: 0
-  m_MinValue: 10
-  m_MaxValue: 100
+  m_MinValue: 1
+  m_MaxValue: 20
   m_WholeNumbers: 1
-  m_Value: 18
+  m_Value: 3
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
@@ -5856,7 +5857,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1863868861}
-        m_MethodName: set_Rate
+        m_MethodName: set_Interval
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5887,11 +5888,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1863868857}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 951d14c4e1e664b1eb9c388173302537, type: 3}
+  m_Script: {fileID: 11500000, guid: cef5e52f037b54908bcc587756181cba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _manager: {fileID: 895519024}
-  _rate: 18
+  _interval: 3
 --- !u!1 &1956114037
 GameObject:
   m_ObjectHideFlags: 0
@@ -5981,11 +5982,11 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
-    m_FontStyle: 1
+    m_FontSize: 4
+    m_FontStyle: 0
     m_BestFit: 1
-    m_MinSize: 1
-    m_MaxSize: 14
+    m_MinSize: 3
+    m_MaxSize: 4
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -6025,12 +6026,12 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventRate, Assembly-CSharp, Version=0.0.0.0,
+    m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventInt, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
   _targetRateChangedEvent:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventRate, Assembly-CSharp, Version=0.0.0.0,
+    m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventInt, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!1 &2018011387
 GameObject:
@@ -6065,7 +6066,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 0}
+  m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2018011389
 MonoBehaviour:
@@ -6156,11 +6157,11 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 18
+    m_FontSize: 10
     m_FontStyle: 1
     m_BestFit: 1
-    m_MinSize: 12
-    m_MaxSize: 18
+    m_MinSize: 1
+    m_MaxSize: 10
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
