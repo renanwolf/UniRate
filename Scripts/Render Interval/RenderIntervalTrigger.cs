@@ -8,31 +8,31 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		[SerializeField] private RenderIntervalManager _manager;
 
-		[SerializeField] private UnityEventInt _renderIntervalChangedEvent;
+		[SerializeField] private UnityEventInt _renderIntervalChanged;
 
-		[SerializeField] private UnityEventBool _isRenderingChangedEvent;
+		[SerializeField] private UnityEventBool _isRenderingChanged;
 
 		/// <summary>
         /// Event raised when render interval changes.
         /// </summary>
-		public UnityEventInt RenderIntervalChangedEvent {
+		public UnityEventInt RenderIntervalChanged {
 			get {
-				if (this._renderIntervalChangedEvent == null) {
-					this._renderIntervalChangedEvent = new UnityEventInt();
+				if (this._renderIntervalChanged == null) {
+					this._renderIntervalChanged = new UnityEventInt();
 				}
-				return this._renderIntervalChangedEvent;
+				return this._renderIntervalChanged;
 			}
 		}
 
 		/// <summary>
         /// Event raised when is rendering changes.
         /// </summary>
-		public UnityEventBool IsRenderingChangedEvent {
+		public UnityEventBool IsRenderingChanged {
 			get {
-				if (this._isRenderingChangedEvent == null) {
-					this._isRenderingChangedEvent = new UnityEventBool();
+				if (this._isRenderingChanged == null) {
+					this._isRenderingChanged = new UnityEventBool();
 				}
-				return this._isRenderingChangedEvent;
+				return this._isRenderingChanged;
 			}
 		}
 
@@ -113,7 +113,7 @@ namespace PWR.LowPowerMemoryConsumption {
 				}
 				return;
 			}
-			if (this._isRenderingChangedEvent != null) this._isRenderingChangedEvent.Invoke(isRendering);
+			if (this._isRenderingChanged != null) this._isRenderingChanged.Invoke(isRendering);
 		}
 
 		protected void OnRenderIntervalChanged() {
@@ -130,7 +130,7 @@ namespace PWR.LowPowerMemoryConsumption {
 				}
 				return;
 			}
-			if (this._renderIntervalChangedEvent != null) this._renderIntervalChangedEvent.Invoke(interval);
+			if (this._renderIntervalChanged != null) this._renderIntervalChanged.Invoke(interval);
 		}
 
 		#endregion <<---------- General ---------->>

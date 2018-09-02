@@ -193,7 +193,7 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 			#endif
 
-			if (Debug.isDebugBuild) Debug.Log("[" + typeof(MemoryManager).Name + "] simulating low memory", this);
+			Debug.Log("[" + typeof(MemoryManager).Name + "] simulating low memory", this);
 			this.OnLowMemory();
 		}
 
@@ -220,12 +220,6 @@ namespace PWR.LowPowerMemoryConsumption {
 
 
 		#region <<---------- Legacy Support ---------->>
-
-		[Obsolete("use LowMemory event instead", false)] // ObsoletedWarning 2018/08/22 - ObsoletedError 20##/##/##
-		public event Action onLowMemory {
-			add { this.LowMemory += value; }
-			remove { this.LowMemory -= value; }
-		}
 
 		#endregion <<---------- Legacy Support ---------->>
 

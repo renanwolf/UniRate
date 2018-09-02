@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.3731316, g: 0.38074896, b: 0.3587254, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311947, g: 0.38074005, b: 0.35872722, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -604,7 +604,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _type: 1
-  _currentRateChangedEvent:
+  _currentRateChanged:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 821110076}
@@ -620,7 +620,7 @@ MonoBehaviour:
         m_CallState: 2
     m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventInt, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  _targetRateChangedEvent:
+  _targetRateChanged:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventInt, Assembly-CSharp, Version=0.0.0.0,
@@ -5024,7 +5024,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _manager: {fileID: 895519024}
-  _renderIntervalChangedEvent:
+  _renderIntervalChanged:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1232353342}
@@ -5040,7 +5040,7 @@ MonoBehaviour:
         m_CallState: 2
     m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventInt, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  _isRenderingChangedEvent:
+  _isRenderingChanged:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventBool, Assembly-CSharp, Version=0.0.0.0,
@@ -6012,7 +6012,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _type: 0
-  _currentRateChangedEvent:
+  _currentRateChanged:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1956114039}
@@ -6028,7 +6028,7 @@ MonoBehaviour:
         m_CallState: 2
     m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventInt, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  _targetRateChangedEvent:
+  _targetRateChanged:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: PWR.LowPowerMemoryConsumption.UnityEventInt, Assembly-CSharp, Version=0.0.0.0,

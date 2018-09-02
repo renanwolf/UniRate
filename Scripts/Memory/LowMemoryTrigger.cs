@@ -12,17 +12,17 @@ namespace PWR.LowPowerMemoryConsumption {
 
         #region <<---------- Properties and Fields ---------->>
 
-        [SerializeField] private UnityEvent _lowMemoryEvent;
+        [SerializeField] private UnityEvent _lowMemory;
 
         /// <summary>
         /// Event raised when <see cref="MemoryManager.LowMemory"/> is raised.
         /// </summary>
-        public UnityEvent LowMemoryEvent {
+        public UnityEvent LowMemory {
             get {
-                if (this._lowMemoryEvent == null) {
-                    this._lowMemoryEvent = new UnityEvent();
+                if (this._lowMemory == null) {
+                    this._lowMemory = new UnityEvent();
                 }
-                return this._lowMemoryEvent;
+                return this._lowMemory;
             }
         }
 
@@ -36,12 +36,12 @@ namespace PWR.LowPowerMemoryConsumption {
         #region <<---------- MonoBehaviour ---------->>
 
         protected virtual void OnEnable() {
-            MemoryManager.Instance.LowMemory += this.NotifyLowMemory;
+            MemoryManager.Instance.LowMemory += this.OnLowMemory;
         }
 
         protected virtual void OnDisable() {
             if (this._isApplicationQuitting) return;
-            MemoryManager.Instance.LowMemory -= this.NotifyLowMemory;
+            MemoryManager.Instance.LowMemory -= this.OnLowMemory;
         }
 
         protected virtual void OnApplicationQuit() {
@@ -55,9 +55,9 @@ namespace PWR.LowPowerMemoryConsumption {
 
         #region <<---------- General ---------->>
 
-        protected virtual void NotifyLowMemory() {
-            if (this._lowMemoryEvent == null) return;
-            this._lowMemoryEvent.Invoke();
+        protected virtual void OnLowMemory() {
+            if (this._lowMemory == null) return;
+            this._lowMemory.Invoke();
         }
 
         #endregion <<---------- General ---------->>
@@ -66,11 +66,6 @@ namespace PWR.LowPowerMemoryConsumption {
 
 
         #region <<---------- Legacy Support ---------->>
-
-        [System.Obsolete("use LowMemoryEvent instead", false)] // ObsoletedWarning 2018/08/22 - ObsoletedError 20##/##/##
-		public UnityEvent OnLowMemoryEvent {
-			get { return this.LowMemoryEvent; }
-		}
 
         #endregion <<---------- Legacy Support ---------->>
 

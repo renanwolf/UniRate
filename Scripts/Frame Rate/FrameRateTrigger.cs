@@ -8,9 +8,9 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		[SerializeField] private FrameRateType _type = FrameRateType.FPS;
 
-		[SerializeField] private UnityEventInt _currentRateChangedEvent;
+		[SerializeField] private UnityEventInt _currentRateChanged;
 
-		[SerializeField] private UnityEventInt _targetRateChangedEvent;
+		[SerializeField] private UnityEventInt _targetRateChanged;
 
 		/// <summary>
 		/// Rate type.
@@ -27,24 +27,24 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// <summary>
         /// Event raised when current rate of <see cref="Type"/> changes.
         /// </summary>
-		public UnityEventInt CurrentRateChangedEvent {
+		public UnityEventInt CurrentRateChanged {
 			get {
-				if (this._currentRateChangedEvent == null) {
-					this._currentRateChangedEvent = new UnityEventInt();
+				if (this._currentRateChanged == null) {
+					this._currentRateChanged = new UnityEventInt();
 				}
-				return this._currentRateChangedEvent;
+				return this._currentRateChanged;
 			}
 		}
 
 		/// <summary>
         /// Event raised when target rate of <see cref="Type"/> changes.
         /// </summary>
-		public UnityEventInt TargetRateChangedEvent {
+		public UnityEventInt TargetRateChanged {
 			get {
-				if (this._targetRateChangedEvent == null) {
-					this._targetRateChangedEvent = new UnityEventInt();
+				if (this._targetRateChanged == null) {
+					this._targetRateChanged = new UnityEventInt();
 				}
-				return this._targetRateChangedEvent;
+				return this._targetRateChanged;
 			}
 		}
 
@@ -117,7 +117,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 		protected virtual void NotifyCurrentFrameRateChanged(int rate) {
 			if (this._type != FrameRateType.FPS) return;
-			if (this._currentRateChangedEvent != null) this._currentRateChangedEvent.Invoke(rate);
+			if (this._currentRateChanged != null) this._currentRateChanged.Invoke(rate);
 		}
 
 		protected void NotifyTargetFrameRateChanged() {
@@ -125,7 +125,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 		protected virtual void NotifyTargetFrameRateChanged(int rate) {
 			if (this._type != FrameRateType.FPS) return;
-			if (this._targetRateChangedEvent != null) this._targetRateChangedEvent.Invoke(rate);
+			if (this._targetRateChanged != null) this._targetRateChanged.Invoke(rate);
 		}
 
 		protected void NotifyCurrentFixedFrameRateChanged() {
@@ -133,7 +133,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 		protected virtual void NotifyCurrentFixedFrameRateChanged(int rate) {
 			if (this._type != FrameRateType.FixedFPS) return;
-			if (this._currentRateChangedEvent != null) this._currentRateChangedEvent.Invoke(rate);
+			if (this._currentRateChanged != null) this._currentRateChanged.Invoke(rate);
 		}
 
 		protected void NotifyTargetFixedFrameRateChanged() {
@@ -141,7 +141,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 		protected virtual void NotifyTargetFixedFrameRateChanged(int rate) {
 			if (this._type != FrameRateType.FixedFPS) return;
-			if (this._targetRateChangedEvent != null) this._targetRateChangedEvent.Invoke(rate);
+			if (this._targetRateChanged != null) this._targetRateChanged.Invoke(rate);
 		}
 
 		#endregion <<---------- General ---------->>
