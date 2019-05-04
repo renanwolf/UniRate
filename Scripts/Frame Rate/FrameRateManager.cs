@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +8,7 @@ using UnityEditor;
 
 namespace PWR.LowPowerMemoryConsumption {
 
-	[DisallowMultipleComponent]
+    [DisallowMultipleComponent]
 	public class FrameRateManager : MonoBehaviour {
 
 		#region <<---------- Initializers ---------->>
@@ -51,20 +50,6 @@ namespace PWR.LowPowerMemoryConsumption {
 		[SerializeField][Range(FrameRateRequest.MinRate, 120)] private int _fallbackFrameRate = 18;
 
 		[SerializeField][Range(FrameRateRequest.MinRate, 120)] private int _fallbackFixedFrameRate = 18;
-
-		[Space]
-		[SerializeField][Range(MinNumberOfSamples, 120)] private int _smoothFramesCount = 4;
-
-		/// <summary>
-		/// Number of frame rate samples to calculate <see cref="FrameRate"/>.
-		/// </summary>
-		public int SmoothFramesCount {
-			get { return this._smoothFramesCount; }
-			set {
-				if (value < MinNumberOfSamples) throw new ArgumentOutOfRangeException("SmoothFramesCount", value, "must be greather or equals to " + MinNumberOfSamples);
-				this._smoothFramesCount = value;
-			}
-		}
 
 		/// <summary>
 		/// Target frame rate to set if there are no active requests.
@@ -147,8 +132,6 @@ namespace PWR.LowPowerMemoryConsumption {
 			}
 		}
 		private Action<int> _targetFixedFrameRateChanged;
-
-		private List<int> _samplesFrameRate = new List<int>();
 
 		/// <summary>
 		/// Current frames per second.
@@ -262,12 +245,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		private void Update() {
 
 			//calculate current frame rate
-			this._samplesFrameRate.Add(Mathf.RoundToInt(1.0f / Time.unscaledDeltaTime));
-			int maxSamples = Mathf.Max(MinNumberOfSamples, this._smoothFramesCount);
-			while(this._samplesFrameRate.Count > maxSamples) this._samplesFrameRate.RemoveAt(0);
-			float sum = 0;
-			for (int i = 0; i < this._samplesFrameRate.Count; i++) sum += this._samplesFrameRate[i];
-			this.FrameRate = Mathf.RoundToInt( sum / (float)this._samplesFrameRate.Count );
+			this.FrameRate = Mathf.RoundToInt(1.0f / Time.unscaledDeltaTime);
 
 			//check if application target frame rate has changed from elsewhere
 			if (Application.targetFrameRate != this._targetFrameRate) {
@@ -345,46 +323,38 @@ namespace PWR.LowPowerMemoryConsumption {
 		#region <<---------- Requests Management ---------->>
 
 		/// <summary>
-		/// Check if a request is added and active.
+		/// Check if a frame rateb request is added and started.
 		/// </summary>
 		/// <param name="request">Request to check.</param>
 		/// <returns></returns>
-		public bool ContainsRequest(FrameRateRequest request) {
-			return request != null && this._requests != null && this._requests.Contains(request);
+		public bool HasRequest(FrameRateRequest request) {
+			return this._requests != null && this._requests.Contains(request);
 		}
 
 		/// <summary>
-		/// Add and activate a new frame rate request.
+		/// Start a new frame rate request.
 		/// </summary>
-		/// <param name="request">Request to add.</param>
-		/// <returns>Returns the request.</returns>
-		public FrameRateRequest AddRequest(FrameRateRequest request) {
-			if (request == null) return null;
-			if (this.ContainsRequest(request)) return request;
+		/// <param name="rateType">Frame rate type.</param>
+		/// <param name="rateValue">Frame rate value.</param>
+		/// <returns>Returns the new request.</returns>
+		public FrameRateRequest StartRequest(FrameRateType rateType, int rateValue) {
+			var request = new FrameRateRequest(rateType, rateValue);
+			if (!request.IsValid) {
+				throw new ArgumentOutOfRangeException("request", request, "invalid request");
+			}
 			if (this._requests == null) this._requests = new List<FrameRateRequest>();
 			this._requests.Add(request);
-			request.Changed += this.OnRequestChanged;
 			this.RecalculateTargetsRateIfPlaying();
 			return request;
 		}
-
+		
 		/// <summary>
-		/// Remove and deactivate a frame rate request.
+		/// Stop and remove a frame rate request.
 		/// </summary>
-		/// <param name="request">Request to remove.</param>
-		public void RemoveRequest(FrameRateRequest request) {
-			if (request == null || !this.ContainsRequest(request)) return;
+		/// <param name="request">Request to stop and remove.</param>
+		public void StopRequest(FrameRateRequest request) {
+			if (!this.HasRequest(request)) return;
 			this._requests.Remove(request);
-			request.Changed -= this.OnRequestChanged;
-			this.RecalculateTargetsRateIfPlaying();
-		}
-
-		private void OnRequestChanged(FrameRateRequest request) {
-			if (request == null) return;
-			if (!this.ContainsRequest(request)) {
-				request.Changed -= this.OnRequestChanged;
-				return;
-			}
 			this.RecalculateTargetsRateIfPlaying();
 		}
 
@@ -416,22 +386,24 @@ namespace PWR.LowPowerMemoryConsumption {
 			int newTarget = FrameRateRequest.MinRate - 1;
 			int newTargetFixed = FrameRateRequest.MinRate - 1;
 
-			if (this._requests != null && this._requests.Count > 0) {
-				for (int i = this._requests.Count - 1; i >= 0; i--) {
-					if (this._requests[i] == null) {
-						this._requests.RemoveAt(i);
-						continue;
-					}
-					if (!this._requests[i].IsValid) continue;
-
-					switch (this._requests[i].Type) {
-						case FrameRateType.FPS:
-							newTarget = Mathf.Max(newTarget, this._requests[i].Rate);
-						break;
-
-						case FrameRateType.FixedFPS:
-							newTargetFixed = Mathf.Max(newTargetFixed, this._requests[i].Rate);
-						break;
+			if (this._requests != null) {
+				int count = this._requests.Count;
+				if (count > 0) {
+					FrameRateRequest request;
+					for (int i = count - 1; i >= 0; i--) {
+						request = this._requests[i];
+						if (!request.IsValid) {
+							this._requests.RemoveAt(i);
+							continue;
+						}
+						switch (request.Type) {
+							case FrameRateType.FPS:
+								newTarget = Mathf.Max(newTarget, request.Rate);
+							break;
+							case FrameRateType.FixedFPS:
+								newTargetFixed = Mathf.Max(newTargetFixed, request.Rate);
+							break;
+						}
 					}
 				}
 			}
@@ -454,25 +426,46 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Legacy Support ---------->>
 
-		[Obsolete("use CurrentFrameRateChanged event instead", false)] // ObsoletedWarning 2018/08/22 - ObsoletedError 20##/##/##
+		[Obsolete("use StopRequest() instead", true)] // ObsoletedWarning 2019/05/04 - ObsoletedError 2019/05/04
+		public void RemoveRequest(FrameRateRequest request) {
+			this.StopRequest(request);
+		}
+
+		[Obsolete("use StartRequest() instead", true)] // ObsoletedWarning 2019/05/04 - ObsoletedError 2019/05/04
+		public FrameRateRequest AddRequest(FrameRateRequest request) {
+			return this.StartRequest(request.Type, request.Rate);
+		}
+
+		[Obsolete("use HasRequest() instead", false)] // ObsoletedWarning 2019/05/04 - ObsoletedError 20##/##/##
+		public bool ContainsRequest(FrameRateRequest request) {
+			return this.HasRequest(request);
+		}
+
+		[Obsolete("has no effect anymore", false)] // ObsoletedWarning 2019/05/04 - ObsoletedError 20##/##/##
+		public int SmoothFramesCount {
+			get { return 0; }
+			set { }
+		}
+
+		[Obsolete("use CurrentFrameRateChanged event instead", true)] // ObsoletedWarning 2018/08/22 - ObsoletedError 2019/05/04
 		public event Action<int> onFrameRate {
 			add { this.FrameRateChanged += value; }
 			remove { this.FrameRateChanged -= value; }
 		}
 
-		[Obsolete("use CurrentFixedFrameRateChanged event instead", false)] // ObsoletedWarning 2018/08/22 - ObsoletedError 20##/##/##
+		[Obsolete("use CurrentFixedFrameRateChanged event instead", true)] // ObsoletedWarning 2018/08/22 - ObsoletedError 2019/05/04
 		public event Action<int> onFixedFrameRate {
 			add { this.FixedFrameRateChanged += value; }
 			remove { this.FixedFrameRateChanged -= value; }
 		}
 
-		[Obsolete("use TargetFrameRateChanged event instead", false)] // ObsoletedWarning 2018/08/22 - ObsoletedError 20##/##/##
+		[Obsolete("use TargetFrameRateChanged event instead", true)] // ObsoletedWarning 2018/08/22 - ObsoletedError 2019/05/04
 		public event Action<int> onTargetFrameRate {
 			add { this.TargetFrameRateChanged += value; }
 			remove { this.TargetFrameRateChanged -= value; }
 		}
 
-		[Obsolete("use TargetFixedFrameRateChanged event instead", false)] // ObsoletedWarning 2018/08/22 - ObsoletedError 20##/##/##
+		[Obsolete("use TargetFixedFrameRateChanged event instead", true)] // ObsoletedWarning 2018/08/22 - ObsoletedError 2019/05/04
 		public event Action<int> onTargetFixedFrameRate {
 			add { this.TargetFixedFrameRateChanged += value; }
 			remove { this.TargetFixedFrameRateChanged -= value; }

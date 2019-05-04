@@ -2,7 +2,6 @@
 
 namespace PWR.LowPowerMemoryConsumption {
 
-	[DisallowMultipleComponent]
 	public class RenderIntervalRequester : MonoBehaviour {
 
 		#region <<---------- Properties and Fields ---------->>
