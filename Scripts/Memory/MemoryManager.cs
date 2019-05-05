@@ -51,7 +51,16 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// <summary>
 		/// Event raised when application receives low memory warning.
 		/// </summary>
-		public event Action LowMemory;
+		public event Action LowMemory {
+			add {
+				this._lowMemory -= value;
+				this._lowMemory += value;
+			}
+			remove {
+				this._lowMemory -= value;
+			}
+		}
+		private Action _lowMemory;
 
 		/// <summary>
 		/// According to Unity documentation, lowMemory event is only supported on iOS and Android.
@@ -102,7 +111,7 @@ namespace PWR.LowPowerMemoryConsumption {
 
 			this.name = DefaultName;
 			this.transform.SetParent(null, false);
-			DontDestroyOnLoad(this);
+			if (Application.isPlaying) DontDestroyOnLoad(this);
 
 			if (!MemoryManager.IsSupported) Debug.LogWarning("[" + typeof(MemoryManager).Name + "] " + MemoryManager.NotSupportedMessage, this);
         }
@@ -141,9 +150,9 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// <summary>
 		/// Unload unused assets invoking <see cref="Resources.UnloadUnusedAssets"/> in a Coroutine.
 		/// </summary>
-		/// <param name="finished">Callback raised when unload finishes.</param>
-		public void UnloadUnusedAssets(Action finished) {
-			if (finished != null) this._finishedUnloadUnusedAssetsOnce += finished;
+		/// <param name="onFinished">Callback raised when unload finishes.</param>
+		public void UnloadUnusedAssets(Action onFinished) {
+			if (onFinished != null) this._finishedUnloadUnusedAssetsOnce += onFinished;
 			if (this._coroutineUnloadUnusedAssets != null) return;
 			this._coroutineUnloadUnusedAssets = this.StartCoroutine(this.CoroutineUnloadUnusedAssets());
 		}
@@ -200,7 +209,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		protected virtual void OnLowMemory() {
 			Debug.LogWarning("[" + typeof(MemoryManager).Name + "] received application low memory callback", this);
 
-			var eventLowMemory = this.LowMemory;
+			var eventLowMemory = this._lowMemory;
 			if (eventLowMemory != null) eventLowMemory();
 
 			if (this.unloadUnusedAssetsOnLowMemory) {
