@@ -24,9 +24,9 @@ To create the FrameRateManager instace while editing your scene, just create an 
 
 #### Requests
 
-To request a framerate to the manager you can use a `FrameRateRequest` by code or the `FrameRateRequester` component.
+To request a framerate to the manager you can use a `FrameRateRequest` by code or the `FrameRateRequestComponent`.
 
-##### FrameRateRequester Component
+##### FrameRateRequestComponent
 
 This component will start the framerate request at `OnEnable` and stop at `OnDisable`.
 
@@ -45,19 +45,14 @@ public class MyCodeAnimation : MonoBehaviour {
   private FrameRateRequest requestFPS;
   private FrameRateRequest requestFixedFPS;
 
-  void Start() {
-    requestFPS = FrameRateRequest.FPS().WithRate(60);
-    requestFixedFPS = FrameRateRequest.FixedFPS().WithRate(50);
-  }
-
   void OnEnable() {
-    requestFPS.Start();
-    requestFixedFPS.Start();
+    this.requestFPS = FrameRateManager.Instance.StartRequest(FrameRateType.FPS, 60);
+    this.requestFixedFPS = FrameRateManager.Instance.StartRequest(FrameRateType.FixedFPS, 50);
   }
 
   void OnDisable() {
-    requestFPS.Stop();
-    requestFixedFPS.Stop();
+    FrameRateManager.Instance.StopRequest(this.requestFPS);
+    FrameRateManager.Instance.StopRequest(this.requestFixedFPS);
   }
 
   void Update() {
@@ -90,9 +85,9 @@ Add this component to your cameras to start managing the render interval of them
 
 #### Requests
 
-To request a render interval to a camera you can use a `RenderIntervalRequest` by code or the `RenderIntervalRequester` component.
+To request a render interval to a camera you can use a `RenderIntervalRequest` by code or the `RenderIntervalRequestComponent`.
 
-##### RenderIntervalRequester Component
+##### RenderIntervalRequestComponent
 
 This component will start the render interval request at `OnEnable` and stop at `OnDisable`.
 
@@ -113,13 +108,13 @@ public class MyOtherCodeAnimation : MonoBehaviour {
   }
 
   IEnumarator AnimCoroutine() {
-     var request = RenderIntervalRequest.WithInterval(1).Start(manager);
+     var request = this.manager.StartRequest(1);
      var finished = false;
      while (!finished) {
        //anim logic
        yield return null;
      }
-     request.Stop();
+     this.manager.StopRequest(request);
   }
 }
 ```
