@@ -207,46 +207,36 @@ namespace PWR.LowPowerMemoryConsumption {
 		#region <<---------- Requests Management ---------->>
 
 		/// <summary>
-		/// Check if a request is added and active.
+		/// Check if a request is added and started.
 		/// </summary>
 		/// <param name="request">Request to check.</param>
-		/// <returns></returns>
-		public bool ContainsRequest(RenderIntervalRequest request) {
-			return request != null && this._requests != null && this._requests.Contains(request);
+		public bool HasRequest(RenderIntervalRequest request) {
+			return this._requests != null && this._requests.Contains(request);
 		}
 
 		/// <summary>
-		/// Add and activate a new render rate request.
+		/// Start a new render rate request.
 		/// </summary>
-		/// <param name="request">Request to add.</param>
-		/// <returns>Returns the request.</returns>
-		public RenderIntervalRequest AddRequest(RenderIntervalRequest request) {
-			if (request == null) return null;
-			if (this.ContainsRequest(request)) return request;
+		/// <param name="interval">Render interval.</param>
+		/// <returns>Returns the new request.</returns>
+		public RenderIntervalRequest StartRequest(int interval) {
+			var request = new RenderIntervalRequest(interval, this);
+			if (!request.IsValid) {
+				throw new ArgumentOutOfRangeException("request", request, "invalid request");
+			}
 			if (this._requests == null) this._requests = new List<RenderIntervalRequest>();
 			this._requests.Add(request);
-			request.Changed += this.NotifyRequestChanged;
 			this.RecalculateRenderIntervalIfPlaying();
 			return request;
 		}
 
 		/// <summary>
-		/// Remove and deactivate a render rate request.
+		/// Stop and remove a render rate request.
 		/// </summary>
 		/// <param name="request">Request to remove.</param>
-		public void RemoveRequest(RenderIntervalRequest request) {
-			if (request == null || !this.ContainsRequest(request)) return;
+		public void StopRequest(RenderIntervalRequest request) {
+			if (!this.HasRequest(request)) return;
 			this._requests.Remove(request);
-			request.Changed -= this.NotifyRequestChanged;
-			this.RecalculateRenderIntervalIfPlaying();
-		}
-
-		private void NotifyRequestChanged(RenderIntervalRequest request) {
-			if (request == null) return;
-			if (!this.ContainsRequest(request)) {
-				request.Changed -= this.NotifyRequestChanged;
-				return;
-			}
 			this.RecalculateRenderIntervalIfPlaying();
 		}
 
@@ -280,16 +270,20 @@ namespace PWR.LowPowerMemoryConsumption {
 			int minValue = int.MaxValue;
 			bool anyValidRequest = false;
 
-			if (this._requests != null && this._requests.Count > 0) {
-				for (int i = this._requests.Count - 1; i >= 0; i--) {
-					if (this._requests[i] == null || (this._requests[i].Manager != null && this._requests[i].Manager != this)) {
-						this._requests.RemoveAt(i);
-						continue;
+			if (this._requests != null) {
+				int count = this._requests.Count;
+				if (count > 0) {
+					RenderIntervalRequest request;
+					int myInstanceID = this.GetInstanceID();
+					for (int i = count - 1; i >= 0; i--) {
+						request = this._requests[i];
+						if (request.ManagerInstanceID != myInstanceID || !request.IsValid) {
+							this._requests.RemoveAt(i);
+							continue;
+						}
+						anyValidRequest = true;
+						minValue = Mathf.Min(minValue, request.Interval);
 					}
-					if (!this._requests[i].IsValid) continue;
-
-					anyValidRequest = true;
-					minValue = Mathf.Min(minValue, this._requests[i].Interval);
 				}
 			}
 
@@ -301,5 +295,30 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		#endregion <<---------- General ---------->>
+
+
+
+
+		#region <<---------- Legacy Support ---------->>
+
+		// ObsoletedWarning 2019/05/04 - ObsoletedError 20##/##/##
+		[Obsolete("use HasRequest() instead", false)]
+		public bool ContainsRequest(RenderIntervalRequest request) {
+			return this.HasRequest(request);
+		}
+
+		// ObsoletedWarning 2019/05/04 - ObsoletedError 2019/05/04
+		[Obsolete("use StartRequest() instead", true)]
+		public RenderIntervalRequest AddRequest(RenderIntervalRequest request) {
+			return this.StartRequest(request.Interval);
+		}
+
+		// ObsoletedWarning 2019/05/04 - ObsoletedError 2019/05/04
+		[Obsolete("use StopRequest() instead", true)]
+		public void RemoveRequest(RenderIntervalRequest request) {
+			this.StopRequest(request);
+		}
+
+		#endregion <<---------- Legacy Support ---------->>
 	}
 }

@@ -688,7 +688,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7a2f92d5b1114a2ba21d54ae7b463f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _fallbackRenderInterval: 4
+  _fallbackRenderInterval: 2
   _framesBypassAtStartToPreventFlickering: 30
 --- !u!20 &895519026
 Camera:
@@ -7278,7 +7278,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1863868857}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cef5e52f037b54908bcc587756181cba, type: 3}
+  m_Script: {fileID: 11500000, guid: b7a337e31f770407fac5a8d7a24367f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _manager: {fileID: 895519024}

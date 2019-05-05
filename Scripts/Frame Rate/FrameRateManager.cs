@@ -323,10 +323,9 @@ namespace PWR.LowPowerMemoryConsumption {
 		#region <<---------- Requests Management ---------->>
 
 		/// <summary>
-		/// Check if a frame rateb request is added and started.
+		/// Check if a frame rate request is added and started.
 		/// </summary>
 		/// <param name="request">Request to check.</param>
-		/// <returns></returns>
 		public bool HasRequest(FrameRateRequest request) {
 			return this._requests != null && this._requests.Contains(request);
 		}
@@ -426,46 +425,54 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Legacy Support ---------->>
 
-		[Obsolete("use StopRequest() instead", true)] // ObsoletedWarning 2019/05/04 - ObsoletedError 2019/05/04
+		// ObsoletedWarning 2019/05/04 - ObsoletedError 2019/05/04
+		[Obsolete("use StopRequest() instead", true)]
 		public void RemoveRequest(FrameRateRequest request) {
 			this.StopRequest(request);
 		}
 
-		[Obsolete("use StartRequest() instead", true)] // ObsoletedWarning 2019/05/04 - ObsoletedError 2019/05/04
+		// ObsoletedWarning 2019/05/04 - ObsoletedError 2019/05/04
+		[Obsolete("use StartRequest() instead", true)]
 		public FrameRateRequest AddRequest(FrameRateRequest request) {
 			return this.StartRequest(request.Type, request.Rate);
 		}
 
-		[Obsolete("use HasRequest() instead", false)] // ObsoletedWarning 2019/05/04 - ObsoletedError 20##/##/##
+		// ObsoletedWarning 2019/05/04 - ObsoletedError 20##/##/##
+		[Obsolete("use HasRequest() instead", false)]
 		public bool ContainsRequest(FrameRateRequest request) {
 			return this.HasRequest(request);
 		}
 
-		[Obsolete("has no effect anymore", false)] // ObsoletedWarning 2019/05/04 - ObsoletedError 20##/##/##
+		// ObsoletedWarning 2019/05/04 - ObsoletedError 20##/##/##
+		[Obsolete("has no effect anymore", false)]
 		public int SmoothFramesCount {
 			get { return 0; }
 			set { }
 		}
 
-		[Obsolete("use CurrentFrameRateChanged event instead", true)] // ObsoletedWarning 2018/08/22 - ObsoletedError 2019/05/04
+		// ObsoletedWarning 2018/08/22 - ObsoletedError 2019/05/04
+		[Obsolete("use CurrentFrameRateChanged event instead", true)]
 		public event Action<int> onFrameRate {
 			add { this.FrameRateChanged += value; }
 			remove { this.FrameRateChanged -= value; }
 		}
 
-		[Obsolete("use CurrentFixedFrameRateChanged event instead", true)] // ObsoletedWarning 2018/08/22 - ObsoletedError 2019/05/04
+		// ObsoletedWarning 2018/08/22 - ObsoletedError 2019/05/04
+		[Obsolete("use CurrentFixedFrameRateChanged event instead", true)]
 		public event Action<int> onFixedFrameRate {
 			add { this.FixedFrameRateChanged += value; }
 			remove { this.FixedFrameRateChanged -= value; }
 		}
 
-		[Obsolete("use TargetFrameRateChanged event instead", true)] // ObsoletedWarning 2018/08/22 - ObsoletedError 2019/05/04
+		// ObsoletedWarning 2018/08/22 - ObsoletedError 2019/05/04
+		[Obsolete("use TargetFrameRateChanged event instead", true)]
 		public event Action<int> onTargetFrameRate {
 			add { this.TargetFrameRateChanged += value; }
 			remove { this.TargetFrameRateChanged -= value; }
 		}
 
-		[Obsolete("use TargetFixedFrameRateChanged event instead", true)] // ObsoletedWarning 2018/08/22 - ObsoletedError 2019/05/04
+		// ObsoletedWarning 2018/08/22 - ObsoletedError 2019/05/04
+		[Obsolete("use TargetFixedFrameRateChanged event instead", true)]
 		public event Action<int> onTargetFixedFrameRate {
 			add { this.TargetFixedFrameRateChanged += value; }
 			remove { this.TargetFixedFrameRateChanged -= value; }
