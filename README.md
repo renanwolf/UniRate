@@ -34,7 +34,7 @@ In the inspetor you can choose the framerate value and the type between FPS and 
 
 ##### Request by code
 
-```
+```csharp
 using UnityEngine;
 using PWR.LowPowerMemoryConsumption;
 
@@ -73,6 +73,68 @@ public class MyCodeAnimation : MonoBehaviour {
 
 In order to get callbacks from the FrameRateManager, you can start listening to its events by code or use the `FrameRateTrigger` component.
 
+#### FrameRateLooper
+
+It's a class to help you to execute heavy loops while keeping the desired frame rate, running the loop inside a coroutine and when necessary waiting a frame.
+
+```csharp
+using UnityEngine;
+using System.Collections.Generic;
+using PWR.LowPowerMemoryConsumption;
+
+public class ListItemsUI : MonoBehaviour {
+
+  public GameObject itemPrefab;
+
+  private FrameRateRequest requestFPS;
+  private FrameRateLooper looperFPS;
+
+  public List<MyItemData> datasource;
+
+  void Awake() {
+    this.datasource = this.FetchDataSource();
+
+    this.looperFPS = new FrameRateLooper() {
+      FrameRateToKeep = 30,
+      MinCyclesPerFrame = 2,
+      MaxCyclesPerFrame = 10,
+      TimeoutWaitForFrameRate = 1f
+    };
+    this.looperFPS.Count = this.datasource.Count;
+
+    this.looperFPS.LoopStarted += (looper) => {
+      looper.Index = 0;
+      this.requestFPS = FrameRateManager.Instance.StartRequest(FrameRateType.FPS, 60);
+    };
+
+    this.looperFPS.LoopFinished += (looper) => {
+      FrameRateManager.Instance.StopRequest(this.requestFPS);
+    };
+
+    this.looperFPS.LoopCycle(looper => {
+
+      var item = Instantiate(this.itemPrefab);
+      item.transform.SetParent(this.transform);
+      item.GetComponent<MyItemComponent>().LoadData(this.datasource[looper.Index]);
+
+      looper.Index += 1;
+    });
+
+    this.looperFPS.LoopWhile(looper => looper.Index < looper.Count);
+  }
+
+  void OnEnable() {
+    this.looperFPS.Start(this);
+  }
+
+  void OnDisable() {
+    this.looperFPS.Stop();
+  }
+  
+  List<MyItemData> FetchDataSource() { ... }
+}
+```
+
 ## Render Interval
 
 #### Manager
@@ -95,7 +157,7 @@ In the inspetor you can choose the interval value and the target `RenderInterval
 
 ##### Request by code
 
-```
+```csharp
 using UnityEngine;
 using PWR.LowPowerMemoryConsumption;
 
@@ -141,7 +203,7 @@ This component will be listening to the MemoryManager while active and enable. I
 
 ##### Start/Stop listening by code
 
-```
+```csharp
 using UnityEngine;
 using PWR.LowPowerMemoryConsumption;
 
