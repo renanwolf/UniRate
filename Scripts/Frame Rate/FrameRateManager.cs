@@ -487,14 +487,34 @@ namespace PWR.LowPowerMemoryConsumption {
 		#if UNITY_EDITOR
 		[CustomEditor(typeof(FrameRateManager))]
 		private class CustomInspector : Editor {
-
+			private FrameRateManager _script;
+			private bool _live;
+			private void OnEnable() {
+				this._script = (FrameRateManager)this.target;
+			}
+			public override bool RequiresConstantRepaint() {
+				return Application.isPlaying && this._live;
+			}
 			public override void OnInspectorGUI() {
 				this.serializedObject.Update();
 				this.DrawDefaultInspector();
 
 				if (!FrameRateManager.IsSupported) {
 					EditorGUILayout.HelpBox(FrameRateManager.NotSupportedMessage, MessageType.Warning);
+					return;
 				}
+
+				if (!Application.isPlaying) return;
+
+				EditorGUILayout.Space();
+				this._live = EditorGUILayout.ToggleLeft("LIVE", this._live);
+				if (!this._live) return;
+
+				int count = this._script._requests == null ? 0 : this._script._requests.Count;
+				EditorGUILayout.LabelField("Requests: " + count);
+				EditorGUILayout.LabelField("FixedFPS: " + this._script._currentFixedFrameRate.ToString("000"));
+				EditorGUILayout.LabelField("FPS: " + this._script._currentFrameRate.ToString("000"));
+				
 			}
 		}
 		#endif
