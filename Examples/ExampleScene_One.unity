@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311947, g: 0.38074005, b: 0.35872722, a: 1}
+  m_IndirectSpecularColor: {r: 0.3731316, g: 0.38074896, b: 0.3587254, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -667,8 +667,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 895519027}
-  - component: {fileID: 895519026}
   - component: {fileID: 895519024}
+  - component: {fileID: 895519026}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -688,6 +688,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7a2f92d5b1114a2ba21d54ae7b463f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _identifier: 
   _fallbackRenderInterval: 2
   _framesBypassAtStartToPreventFlickering: 30
 --- !u!20 &895519026
@@ -6369,7 +6370,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f76eae0c6f66c48889c7fa2c52795cd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _manager: {fileID: 895519024}
+  _managerPointer:
+    _byReference: 1
+    _identifier: 
+    _reference: {fileID: 895519024}
   _renderIntervalChanged:
     m_PersistentCalls:
       m_Calls:
@@ -7281,7 +7285,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7a337e31f770407fac5a8d7a24367f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _manager: {fileID: 895519024}
+  _managerPointer:
+    _byReference: 1
+    _identifier: 
+    _reference: {fileID: 895519024}
   _interval: 3
 --- !u!1 &1956114037
 GameObject:
