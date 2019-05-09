@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 namespace PWR.LowPowerMemoryConsumption {
 
-	[DisallowMultipleComponent]
+    [DisallowMultipleComponent]
 	[RequireComponent(typeof(Camera))]
 	public class RenderIntervalManager : MonoBehaviour {
 
@@ -19,9 +24,19 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Properties and Fields ---------->>
 
+		[SerializeField] private string _identifier;
+
 		[SerializeField][Range(RenderIntervalRequest.MinInterval, 60)] private int _fallbackRenderInterval = 2;
 
 		[SerializeField][Range(0, 60)] private int _framesBypassAtStartToPreventFlickering = 30;
+
+		/// <summary>
+		/// Identifier to help find this component on <see cref="Instances"/> enumerable.
+		/// </summary>
+		public string Identifier {
+			get { return this._identifier; }
+			set { this._identifier = value; }
+		}
 
 		/// <summary>
 		/// Render interval to set if there are no active requests.
@@ -111,6 +126,17 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		private int _updatesAfterAwake;
 
+		/// <summary>
+		/// All awaked instances.
+		/// </summary>
+		public static IEnumerable<RenderIntervalManager> Instances {
+			get {
+				if (_instances != null) return _instances;
+				return Enumerable.Empty<RenderIntervalManager>();
+			}
+		}
+		private static HashSet<RenderIntervalManager> _instances;
+
 		#endregion <<---------- Properties and Fields ---------->>
 
 
@@ -119,6 +145,7 @@ namespace PWR.LowPowerMemoryConsumption {
 		#region <<---------- MonoBehaviour ---------->>
 
 		protected virtual void Awake() {
+			this.AddToStaticInstances();
 			this.RecalculateRenderIntervalIfPlaying();
 			this.AssertIsRenderingFlag();
 			this._updatesAfterAwake = 0;
@@ -161,6 +188,10 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		protected virtual void OnDisable() {
 			this.AssertIsRenderingFlag();
+		}
+
+		protected virtual void OnDestroy() {
+			this.RemoveFromStaticInstances();
 		}
 
 		#if UNITY_EDITOR
@@ -294,6 +325,16 @@ namespace PWR.LowPowerMemoryConsumption {
 			this.RenderInterval = minValue;
 		}
 
+		private void AddToStaticInstances() {
+			if (_instances == null) _instances = new HashSet<RenderIntervalManager>();
+			_instances.Add(this);
+		}
+
+		private void RemoveFromStaticInstances() {
+			if (_instances == null) return;
+			_instances.Remove(this);
+		}
+
 		#endregion <<---------- General ---------->>
 
 
@@ -320,5 +361,39 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		#endregion <<---------- Legacy Support ---------->>
+
+
+
+
+		#region <<---------- Custom Inspector ---------->>
+		#if UNITY_EDITOR
+		[CustomEditor(typeof(RenderIntervalManager))]
+		[CanEditMultipleObjects]
+		private class CustomInspector : Editor {
+			private RenderIntervalManager _script;
+			private bool _live;
+			private void OnEnable() {
+				this._script = (RenderIntervalManager)this.target;
+			}
+			public override bool RequiresConstantRepaint() {
+				return Application.isPlaying && this._live && !this.serializedObject.isEditingMultipleObjects;
+			}
+			public override void OnInspectorGUI() {
+				this.serializedObject.Update();
+				this.DrawDefaultInspector();
+
+				if (!Application.isPlaying || this.serializedObject.isEditingMultipleObjects) return;
+
+				EditorGUILayout.Space();
+				this._live = EditorGUILayout.ToggleLeft("LIVE", this._live);
+				if (!this._live) return;
+
+				int count = this._script._requests == null ? 0 : this._script._requests.Count;
+				EditorGUILayout.LabelField("Requests: " + count);
+				EditorGUILayout.LabelField("Interval: " + this._script._renderInterval.ToString("000"));
+			}
+		}
+		#endif
+		#endregion <<---------- Custom Inspector ---------->>
 	}
 }

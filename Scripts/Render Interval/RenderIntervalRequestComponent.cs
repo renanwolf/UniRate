@@ -2,7 +2,7 @@
 
 namespace PWR.LowPowerMemoryConsumption {
 
-	public class RenderIntervalRequestComponent : MonoBehaviour {
+    public class RenderIntervalRequestComponent : MonoBehaviour {
 
         #region <<---------- Initializers ---------->>
 
@@ -15,7 +15,7 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		[SerializeField] private RenderIntervalManager _manager;
+		[SerializeField] private RenderIntervalManagerPointer _managerPointer;
 
 		[SerializeField][Range(RenderIntervalRequest.MinInterval, 60)] private int _interval = RenderIntervalRequest.MinInterval;
 
@@ -32,18 +32,20 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		/// <summary>
-		/// Render interval manager to start the request.
+		/// Manager pointer.
 		/// </summary>
-		public RenderIntervalManager Manager {
-			get { return this._manager; }
-			set {
-				if (this._manager == value) return;
-				this._manager = value;
-				if (!Application.isPlaying || !this.IsRequestValuesDifferentFromFields()) return;
-				this.AssertCurrentRequestRunning(this.isActiveAndEnabled);
+		public RenderIntervalManagerPointer ManagerPointer {
+			get {
+				if (this._managerPointer == null) {
+					this._managerPointer = new RenderIntervalManagerPointer();
+					if (Application.isPlaying && this.IsRequestValuesDifferentFromFields()) {
+						this.AssertCurrentRequestRunning(this.isActiveAndEnabled);
+					}
+				}
+				return this._managerPointer;
 			}
 		}
-		
+
 		private RenderIntervalRequest _request;
 
 		private bool _isApplicationQuitting = false;
@@ -54,6 +56,13 @@ namespace PWR.LowPowerMemoryConsumption {
 
 
 		#region <<---------- MonoBehaviour ---------->>
+
+		protected virtual void Awake() {
+			this.ManagerPointer.Changed += (pointer) => {
+				if (!Application.isPlaying || this == null || !this.IsRequestValuesDifferentFromFields()) return;
+				this.AssertCurrentRequestRunning(this.isActiveAndEnabled);
+			};
+		}
 
 		protected virtual void OnEnable() {
 			this.AssertCurrentRequestRunning(true);
@@ -87,19 +96,21 @@ namespace PWR.LowPowerMemoryConsumption {
 		#region <<---------- General ---------->>
 
 		private void AssertCurrentRequestRunning(bool running) {
-			if (this._manager == null) return;
-			this._manager.StopRequest(this._request);
+			var mngr = this.ManagerPointer.GetManager();
+			if (mngr == null) return;
+			mngr.StopRequest(this._request);
 			if (!running) {
 				this._request = RenderIntervalRequest.Invalid;
 				return;
 			}
-			this._request = this._manager.StartRequest(this._interval);
+			this._request = mngr.StartRequest(this._interval);
 		}
 
 		private bool IsRequestValuesDifferentFromFields() {
 			if (this._request.Interval != this._interval) return true;
-			int myManagerID = this._manager == null ? -1 : this._manager.GetInstanceID();
-			return this._request.ManagerInstanceID != myManagerID;
+			var mngr = this.ManagerPointer.GetManager();
+			int myManagerInstanceID = mngr == null ? -1 : mngr.GetInstanceID();
+			return this._request.ManagerInstanceID != myManagerInstanceID;
 		}
 
 		#endregion <<---------- General ---------->>

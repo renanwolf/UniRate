@@ -6,7 +6,7 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		[SerializeField] private RenderIntervalManager _manager;
+		[SerializeField] private RenderIntervalManagerPointer _managerPointer;
 
 		[SerializeField] private UnityEventInt _renderIntervalChanged;
 
@@ -39,11 +39,14 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// <summary>
 		/// Render interval manager to listen.
 		/// </summary>
-		public RenderIntervalManager Manager {
-			get { return this._manager; }
-			set {
-				this._manager = value;
-				this.StartListeningIfActiveEnabledPlaying();
+		public RenderIntervalManagerPointer ManagerPointer {
+			get {
+				if (this._managerPointer == null) {
+					this._managerPointer = new RenderIntervalManagerPointer();
+					this.NotifyAllEventsIfActiveEnabledPlaying();
+					this.StartListeningIfActiveEnabledPlaying();
+				}
+				return this._managerPointer;
 			}
 		}
 
@@ -56,16 +59,26 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- MonoBehaviour ---------->>
 
+		protected virtual void Awake() {
+			this.ManagerPointer.Changed += (pointer) => {
+				if (this == null) return;
+				this.NotifyAllEventsIfActiveEnabledPlaying();
+				this.StartListeningIfActiveEnabledPlaying();
+			};
+		}
+
 		protected virtual void OnEnable() {
 			this.NotifyAllEvents();
 			this.StartListeningIfActiveEnabledPlaying();
 		}
 
 		protected virtual void OnDisable() {
-			if (this._isApplicationQuitting || this._manager == null) return;
+			if (this._isApplicationQuitting || this._managerPointer == null) return;
+			var mngr = this._managerPointer.GetManager();
+			if (mngr == null) return;
 			
-			this._manager.RenderIntervalChanged -= this.OnRenderIntervalChanged;
-			this._manager.IsRenderingChanged -= this.OnIsRenderingChanged;
+			mngr.RenderIntervalChanged -= this.OnRenderIntervalChanged;
+			mngr.IsRenderingChanged -= this.OnIsRenderingChanged;
 		}
 
 		protected virtual void OnApplicationQuit() {
@@ -74,6 +87,7 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#if UNITY_EDITOR
 		protected virtual void OnValidate() {
+			this.NotifyAllEventsIfActiveEnabledPlaying();
 			this.StartListeningIfActiveEnabledPlaying();
 		}
 		#endif
@@ -85,29 +99,47 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- General ---------->>
 
-		private void NotifyAllEvents() {
-			this.OnRenderIntervalChanged();
-			this.OnIsRenderingChanged();
-		}
-
-		protected void StartListeningIfActiveEnabledPlaying() {
-			if (!this.isActiveAndEnabled || this._manager == null) return;
+		private void NotifyAllEventsIfActiveEnabledPlaying() {
+			if (!this.isActiveAndEnabled) return;
 			#if UNITY_EDITOR
 			if (!Application.isPlaying) return;
 			#endif
-			this._manager.RenderIntervalChanged += this.OnRenderIntervalChanged;
-			this._manager.IsRenderingChanged += this.OnIsRenderingChanged;
+			this.NotifyAllEvents();
 		}
 
-		protected void OnIsRenderingChanged() {
-			if (this._manager == null) {
+		private void NotifyAllEvents() {
+			RenderIntervalManager mngr = null;
+			if (this._managerPointer != null) {
+				mngr = this._managerPointer.GetManager();
+			}
+			this.OnRenderIntervalChanged(mngr);
+			this.OnIsRenderingChanged(mngr);
+		}
+
+		protected void StartListeningIfActiveEnabledPlaying() {
+			if (!this.isActiveAndEnabled || this._managerPointer == null) return;
+			#if UNITY_EDITOR
+			if (!Application.isPlaying) return;
+			#endif
+			var mngr = this._managerPointer.GetManager();
+			mngr.RenderIntervalChanged += this.OnRenderIntervalChanged;
+			mngr.IsRenderingChanged += this.OnIsRenderingChanged;
+		}
+
+		protected void OnIsRenderingChanged(RenderIntervalManager myManager) {
+			if (myManager == null) {
 				this.OnIsRenderingChanged(null, false);
 				return;
 			}
-			this.OnIsRenderingChanged(this._manager, this._manager.IsRendering);
+			this.OnIsRenderingChanged(myManager, myManager.IsRendering);
 		}
 		protected virtual void OnIsRenderingChanged(RenderIntervalManager manager, bool isRendering) {
-			if (this._manager != manager) {
+			RenderIntervalManager mngr = null;
+			if (this._managerPointer != null) {
+				mngr = this._managerPointer.GetManager();
+			}
+
+			if (mngr == null || mngr != manager) {
 				if (manager != null) {
 					manager.IsRenderingChanged -= this.OnIsRenderingChanged;
 				}
@@ -116,15 +148,20 @@ namespace PWR.LowPowerMemoryConsumption {
 			if (this._isRenderingChanged != null) this._isRenderingChanged.Invoke(isRendering);
 		}
 
-		protected void OnRenderIntervalChanged() {
-			if (this._manager == null) {
+		protected void OnRenderIntervalChanged(RenderIntervalManager myManager) {
+			if (myManager == null) {
 				this.OnRenderIntervalChanged(null, RenderIntervalRequest.MinInterval);
 				return;
 			}
-			this.OnRenderIntervalChanged(this._manager, this._manager.RenderInterval);
+			this.OnRenderIntervalChanged(myManager, myManager.RenderInterval);
 		}
 		protected virtual void OnRenderIntervalChanged(RenderIntervalManager manager, int interval) {
-			if (this._manager != manager) {
+			RenderIntervalManager mngr = null;
+			if (this._managerPointer != null) {
+				mngr = this._managerPointer.GetManager();
+			}
+
+			if (mngr == null || mngr != manager) {
 				if (manager != null) {
 					manager.RenderIntervalChanged -= this.OnRenderIntervalChanged;
 				}
@@ -134,5 +171,22 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 
 		#endregion <<---------- General ---------->>
+
+
+
+
+		#region <<---------- Legacy Support ---------->>
+		
+		// ObsoletedWarning 2019/05/09 - ObsoletedError 2019/05/09
+		[System.Obsolete("use ManagerPointer instead", true)]
+		public RenderIntervalManager Manager {
+			get { return this.ManagerPointer.ManagerByReference; }
+			set {
+				this.ManagerPointer.ManagerByReference = value;
+				this.StartListeningIfActiveEnabledPlaying();
+			}
+		}
+		
+		#endregion <<---------- Legacy Support ---------->>
 	}
 }

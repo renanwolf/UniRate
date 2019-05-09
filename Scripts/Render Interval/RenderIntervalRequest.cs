@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 namespace PWR.LowPowerMemoryConsumption {
 
@@ -65,14 +66,8 @@ namespace PWR.LowPowerMemoryConsumption {
 		/// Find manager by its instance ID.
 		/// </summary>
 		public RenderIntervalManager FindManager() {
-			var managers = Resources.FindObjectsOfTypeAll<RenderIntervalManager>();
-			if (managers == null) return null;
-			int count = managers.Length;
-			if (count <= 0) return null;
-			RenderIntervalManager mngr;
-			for (int i = 0; i < count; i++) {
-				mngr = managers[i];
-				if (mngr == null || mngr.GetInstanceID() != this._managerInstanceID) continue;
+			foreach (var mngr in RenderIntervalManager.Instances) {
+				if (mngr.GetInstanceID() != this._managerInstanceID) continue;
 				return mngr;
 			}
 			return null;
