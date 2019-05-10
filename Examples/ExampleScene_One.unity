@@ -1351,7 +1351,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d12daf54c3624166b2bb406236a9c24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefix: 'RenderInterval: '
+  prefix: 'Render Interval: '
   suffix: 
   FormatFloat: 0.00
   FormatInt: 0
@@ -6296,10 +6296,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d12daf54c3624166b2bb406236a9c24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefix: 'RenderInterval: '
+  prefix: 'Rend. Interval: '
   suffix: 
   FormatFloat: 0.00
-  FormatInt: 0
+  FormatInt: 00
   TextEvent:
     m_PersistentCalls:
       m_Calls:
