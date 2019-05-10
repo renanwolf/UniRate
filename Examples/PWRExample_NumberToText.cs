@@ -4,7 +4,7 @@ using UnityEngine.Events;
 
 namespace PWR.LowPowerMemoryConsumption.Examples {
 
-	public class NumberToText : MonoBehaviour {
+	public class PWRExample_NumberToText : MonoBehaviour {
 
 		[Serializable]
 		public class Event : UnityEvent<string> { }

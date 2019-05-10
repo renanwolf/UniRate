@@ -4,7 +4,7 @@ using UnityEngine.Events;
 
 namespace PWR.LowPowerMemoryConsumption.Examples {
 
-	public class FloatToInt : MonoBehaviour {
+	public class PWRExample_FloatToInt : MonoBehaviour {
 
 		[Serializable]
 		public class Event : UnityEvent<int> { }
