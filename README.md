@@ -163,20 +163,20 @@ using PWR.LowPowerMemoryConsumption;
 
 public class MyOtherCodeAnimation : MonoBehaviour {
 
-  public RenderIntervalManager manager;
+  public RenderIntervalManagerPointer managerPointer;
 
   void OnEnable() {
     StartCorouitne(AnimCoroutine());
   }
 
   IEnumarator AnimCoroutine() {
-     var request = this.manager.StartRequest(1);
+     var request = this.managerPointer.GetManager().StartRequest(1);
      var finished = false;
      while (!finished) {
        //anim logic
        yield return null;
      }
-     this.manager.StopRequest(request);
+     this.managerPointer.GetManager().StopRequest(request);
   }
 }
 ```
@@ -222,3 +222,29 @@ public class MyHeavyAssets : MonoBehaviour {
   }
 }
 ```
+
+## Power Profiles
+
+`PowerProfile`s are `ScriptableObject`s that are useful to combine multiple kind of requests to the `FrameRateManager` and `RenderIntervalManager`. They work with a retain/release pattern. When retain count is greater than zero it starts its requests to the managers, otherwise stop them.
+
+To create a profile, right click in a folder inside the Project window and go to 'Create > PWR > Power Profiles'
+
+#### Components
+
+There are a few componets already created to retain/release a `PowerProfile` in some circumstances, if they aren't enough you can create yours.
+
+##### PowerProfileComponent
+
+This component will retain the `PowerProfile` at `OnEnable` and release it at `OnDisable`.
+
+##### PowerProfileTouches
+
+This component will retain the `PowerProfile` when `Input.touchCount` returns greater then zero and will release it delayed when `Input.touchCount` returns zero.
+
+##### PowerProfileScrollRect
+
+This component will retain the `PowerProfile` when the `ScrollRect` changes its normalized position and will release it delayed as setup from the inspector.
+
+##### PowerProfileInputField and PowerProfileTMPInputField
+
+This component will retain the `PowerProfile` when the input field values changes and will release it delayed as setup from the inspector.

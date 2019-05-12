@@ -65,13 +65,6 @@ namespace PWR.LowPowerMemoryConsumption {
 
 
 
-        #region <<---------- Legacy Support ---------->>
-
-        #endregion <<---------- Legacy Support ---------->>
-
-
-
-
         #region <<---------- Custom Inspector ---------->>
 		#if UNITY_EDITOR
 		[CustomEditor(typeof(LowMemoryTrigger), true)]
