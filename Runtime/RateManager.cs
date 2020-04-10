@@ -272,7 +272,7 @@ namespace UniRate {
                     // QualitySettings.vSyncCount value must be 0, 1, 2, 3, or 4.
                     // QualitySettings.vSyncCount is ignored on iOS.
                     QualitySettings.vSyncCount = Mathf.Clamp(
-                        Mathf.FloorToInt((float)Screen.currentResolution.refreshRate / (float)targetUpdateRate),
+                        Mathf.RoundToInt((float)Screen.currentResolution.refreshRate / (float)targetUpdateRate),
                         0,
                         4
                     );
