@@ -7,7 +7,7 @@ namespace UniRate {
         #region <<---------- Initializers ---------->>
         
         protected RateRequest(RateManager rateManager) {
-            this.RateManager = (rateManager != null ? rateManager : throw new ArgumentNullException(nameof(rateManager)));
+            this._rateManager = (rateManager != null ? rateManager : throw new ArgumentNullException(nameof(rateManager)));
         }
         
         #endregion <<---------- Initializers ---------->>
@@ -17,7 +17,8 @@ namespace UniRate {
 
         #region <<---------- Properties and Fields ---------->>
         
-        protected RateManager RateManager { get; private set; }
+        protected RateManager RateManager => this._rateManager;
+        private readonly RateManager _rateManager;
         
         #endregion <<---------- Properties and Fields ---------->>
 

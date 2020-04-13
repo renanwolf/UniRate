@@ -24,6 +24,7 @@ namespace UniRate.Examples {
         private RateManager _rateManager;
 
         private UpdateRateRequest _updateRateRequest;
+        private FixedUpdateRateRequest _fixedUpdateRateRequest;
         
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -43,11 +44,16 @@ namespace UniRate.Examples {
             this._toggleModeThrottleEndOfFrame.onValueChanged.AddListener(this.OnToggleModeThrottleEndOfFrameValueChanged);
 
             this.ApplyTextUpdateRate(this._rateManager.UpdateRate, this._rateManager.TargetUpdateRate);
+            this.ApplyTextFixedUpdateRate(this._rateManager.FixedUpdateRate, this._rateManager.TargetFixedUpdateRate);
 
             this.ApplySliderUpdateRate(this._rateManager.TargetUpdateRate);
+            this.ApplySliderFixedUpdateRate(this._rateManager.TargetFixedUpdateRate);
 
             this._rateManager.UpdateRateChanged += this.OnUpdateRateChanged;
             this._rateManager.TargetUpdateRateChanged += this.OnTargetUpdateRateChanged;
+
+            this._rateManager.FixedUpdateRateChanged += this.OnFixedUpdateRateChanged;
+            this._rateManager.TargetFixedUpdateRateChanged += this.OnTargetFixedUpdateRateChanged;
 
             this._sliderUpdateRate.onValueChanged.AddListener(this.OnSliderUpdateRateChanged);
             this._sliderFixedUpdateRate.onValueChanged.AddListener(this.OnSliderFixedUpdateRateChanged);
@@ -66,12 +72,18 @@ namespace UniRate.Examples {
             this._rateManager.UpdateRateChanged -= this.OnUpdateRateChanged;
             this._rateManager.TargetUpdateRateChanged -= this.OnTargetUpdateRateChanged;
 
+            this._rateManager.FixedUpdateRateChanged -= this.OnFixedUpdateRateChanged;
+            this._rateManager.TargetFixedUpdateRateChanged -= this.OnTargetFixedUpdateRateChanged;
+
             this._sliderUpdateRate.onValueChanged.RemoveListener(this.OnSliderUpdateRateChanged);
             this._sliderFixedUpdateRate.onValueChanged.RemoveListener(this.OnSliderFixedUpdateRateChanged);
             this._sliderRenderInterval.onValueChanged.RemoveListener(this.OnSliderRenderIntervalChanged);
 
             this._updateRateRequest?.Dispose();
             this._updateRateRequest = null;
+
+            this._fixedUpdateRateRequest?.Dispose();
+            this._fixedUpdateRateRequest = null;
         }
         
         #endregion <<---------- MonoBehaviour ---------->>
@@ -93,6 +105,14 @@ namespace UniRate.Examples {
             this.ApplyTextUpdateRate(updateRate, manager.TargetUpdateRate);
         }
 
+        private void OnTargetFixedUpdateRateChanged(RateManager manager, int targetFixedUpdateRate) {
+            this.ApplyTextFixedUpdateRate(manager.FixedUpdateRate, targetFixedUpdateRate);
+        }
+
+        private void OnFixedUpdateRateChanged(RateManager manager, int fixedUpdateRate) {
+            this.ApplyTextFixedUpdateRate(fixedUpdateRate, manager.TargetFixedUpdateRate);
+        }
+
         private void OnToggleModeTargetFrameRateValueChanged(bool isOn) {
             if (!isOn || this._rateManager == null) return;
             this._rateManager.UpdateRateMode = UpdateRateMode.ApplicationTargetFrameRate;
@@ -111,12 +131,13 @@ namespace UniRate.Examples {
         private void OnSliderUpdateRateChanged(float value) {
             if (this._rateManager == null) return;
             this._updateRateRequest?.Dispose();
-            this._updateRateRequest = this._rateManager.CreateUpdateRateRequest(Mathf.RoundToInt(value));
+            this._updateRateRequest = this._rateManager.RequestUpdateRate(Mathf.RoundToInt(value));
         }
 
         private void OnSliderFixedUpdateRateChanged(float value) {
             if (this._rateManager == null) return;
-            
+            this._fixedUpdateRateRequest?.Dispose();
+            this._fixedUpdateRateRequest = this._rateManager.RequestFixedUpdateRate(Mathf.RoundToInt(value));
         }
 
         private void OnSliderRenderIntervalChanged(float value) {
@@ -135,8 +156,16 @@ namespace UniRate.Examples {
             this._textUpdateRate.text = $"Update: {rate.ToString("000")} / {target.ToString("000")}";
         }
 
+        private void ApplyTextFixedUpdateRate(int rate, int target) {
+            this._textFixedUpdateRate.text = $"Fixed Update: {rate.ToString("000")} / {target.ToString("000")}";
+        }
+
         private void ApplySliderUpdateRate(int target) {
             this._sliderUpdateRate.value = target;
+        }
+
+        private void ApplySliderFixedUpdateRate(int target) {
+            this._sliderFixedUpdateRate.value = target;
         }
 
         private void ApplyTogglesUpdateRateMode(UpdateRateMode updateRateMode) {

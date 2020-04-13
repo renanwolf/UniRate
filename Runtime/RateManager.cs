@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 using UnityObject = UnityEngine.Object;
 
 namespace UniRate {
@@ -49,24 +53,10 @@ namespace UniRate {
 
 
 
-        #region <<---------- Properties and Fields ---------->>
-
-        [Space]
+        #region <<---------- UpdateRate Properties and Fields ---------->>
+        
         [SerializeField] private UpdateRateMode _updateRateMode = UpdateRateMode.ApplicationTargetFrameRate;
         [SerializeField] private int _fallbackUpdateRate = 20;
-
-        /// <summary>
-        /// Target update rate per seconds.
-        /// </summary>
-        public int TargetUpdateRate {
-            get => this._targetUpdateRate;
-            private set {
-                if (this._targetUpdateRate == value) return;
-                this._targetUpdateRate = value;
-                this.OnTargetUpdateRateChanged(this._targetUpdateRate);
-            }
-        }
-        private int _targetUpdateRate;
 
         /// <summary>
         /// Update rate mode.
@@ -77,6 +67,18 @@ namespace UniRate {
                 if (this._updateRateMode == value) return;
                 this._updateRateMode = value;
                 this.OnUpdateRateModeChanged(this._updateRateMode);
+            }
+        }
+
+        /// <summary>
+        /// Fallback update rate per seconds when there are no active requests.
+        /// </summary>
+        public int FallbackUpdateRate {
+            get => this._fallbackUpdateRate;
+            set {
+                if (this._fallbackUpdateRate == value) return;
+                this._fallbackUpdateRate = value;
+                this.OnFallbackUpdateRateChanged(this._fallbackUpdateRate);
             }
         }
 
@@ -94,30 +96,17 @@ namespace UniRate {
         private int _updateRate;
 
         /// <summary>
-        /// Fallback update rate per seconds when there are no active requests.
+        /// Target update rate per seconds.
         /// </summary>
-        public int FallbackUpdateRate {
-            get => this._fallbackUpdateRate;
-            set {
-                if (this._fallbackUpdateRate == value) return;
-                this._fallbackUpdateRate = value;
-                this.OnFallbackUpdateRateChanged(this._fallbackUpdateRate);
+        public int TargetUpdateRate {
+            get => this._targetUpdateRate;
+            private set {
+                if (this._targetUpdateRate == value) return;
+                this._targetUpdateRate = value;
+                this.OnTargetUpdateRateChanged(this._targetUpdateRate);
             }
         }
-
-        /// <summary>
-		/// Event raised when <see cref="TargetUpdateRate"/> changes.
-		/// </summary>
-        public event Action<RateManager, int> TargetUpdateRateChanged {
-            add {
-                this._targetUpdateRateChanged -= value;
-                this._targetUpdateRateChanged += value;
-            }
-            remove {
-                this._targetUpdateRateChanged -= value;
-            }
-        }
-        private Action<RateManager, int> _targetUpdateRateChanged;
+        private int _targetUpdateRate;
 
         /// <summary>
 		/// Event raised when <see cref="UpdateRateMode"/> changes.
@@ -147,11 +136,120 @@ namespace UniRate {
         }
         private Action<RateManager, int> _updateRateChanged;
 
+        /// <summary>
+		/// Event raised when <see cref="TargetUpdateRate"/> changes.
+		/// </summary>
+        public event Action<RateManager, int> TargetUpdateRateChanged {
+            add {
+                this._targetUpdateRateChanged -= value;
+                this._targetUpdateRateChanged += value;
+            }
+            remove {
+                this._targetUpdateRateChanged -= value;
+            }
+        }
+        private Action<RateManager, int> _targetUpdateRateChanged;
+        
         private Coroutine _coroutineThrottleEndOfFrame;
 
         private readonly HashSet<UpdateRateRequest> _updateRateRequests = new HashSet<UpdateRateRequest>();
         
+        #endregion <<---------- UpdateRate Properties and Fields ---------->>
+
+
+
+
+        #region <<---------- FixedUpdateRate Properties and Fields ---------->>
+        
+        [Space]
+        [SerializeField] private int _fallbackFixedUpdateRate = 20;
+
+        /// <summary>
+        /// Fallback fixed update rate per seconds when there are no active requests.
+        /// </summary>
+        public int FallbackFixedUpdateRate {
+            get => this._fallbackFixedUpdateRate;
+            set {
+                if (this._fallbackFixedUpdateRate == value) return;
+                this._fallbackFixedUpdateRate = value;
+                this.OnFallbackFixedUpdateRateChanged(this._fallbackFixedUpdateRate);
+            }
+        }
+
+        /// <summary>
+        /// Current fixed update rate per seconds.
+        /// </summary>
+        public int FixedUpdateRate {
+            get => this._fixedUpdateRate;
+            private set {
+                if (this._fixedUpdateRate == value) return;
+                this._fixedUpdateRate = value;
+                this.OnFixedUpdateRateChanged(this._fixedUpdateRate);
+            }
+        }
+        private int _fixedUpdateRate;
+
+        /// <summary>
+        /// Target fixed update rate per seconds.
+        /// </summary>
+        public int TargetFixedUpdateRate {
+            get => this._targetFixedUpdateRate;
+            private set {
+                if (this._targetFixedUpdateRate == value) return;
+                this._targetFixedUpdateRate = value;
+                this.OnTargetFixedUpdateRateChanged(this._targetFixedUpdateRate);
+            }
+        }
+        private int _targetFixedUpdateRate;
+
+        /// <summary>
+		/// Event raised when <see cref="FixedUpdateRate"/> changes.
+		/// </summary>
+        public event Action<RateManager, int> FixedUpdateRateChanged {
+            add {
+                this._fixedUpdateRateChanged -= value;
+                this._fixedUpdateRateChanged += value;
+            }
+            remove {
+                this._fixedUpdateRateChanged -= value;
+            }
+        }
+        private Action<RateManager, int> _fixedUpdateRateChanged;
+
+        /// <summary>
+		/// Event raised when <see cref="TargetFixedUpdateRate"/> changes.
+		/// </summary>
+        public event Action<RateManager, int> TargetFixedUpdateRateChanged {
+            add {
+                this._targetFixedUpdateRateChanged -= value;
+                this._targetFixedUpdateRateChanged += value;
+            }
+            remove {
+                this._targetFixedUpdateRateChanged -= value;
+            }
+        }
+        private Action<RateManager, int> _targetFixedUpdateRateChanged;
+
+        private readonly HashSet<FixedUpdateRateRequest> _fixedUpdateRateRequests = new HashSet<FixedUpdateRateRequest>();
+        
+        #endregion <<---------- FixedUpdateRate Properties and Fields ---------->>
+
+
+
+
+        #region <<---------- Properties and Fields ---------->>
+
         internal static bool IsApplicationQuitting { get; private set; }
+
+        internal bool IsDebugBuild {
+            get {
+                #if UNITY_EDITOR
+                return EditorUserBuildSettings.development;
+                #else
+                return Debug.isDebugBuild;
+                #endif
+            }
+        }
         
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -178,11 +276,17 @@ namespace UniRate {
 
         private void OnEnable() {
             this.ApplyTargetUpdateRate(this._updateRateRequests, this._fallbackUpdateRate);
+            this.ApplyTargetFixedUpdateRate(this._fixedUpdateRateRequests, this._fallbackFixedUpdateRate);
         }
 
         private void Update() {
             this.UpdateRate = Mathf.RoundToInt(1f / Time.unscaledDeltaTime);
             this.ApplyUpdateRateUnitySettings(this._updateRateMode, this._targetUpdateRate);
+        }
+
+        private void FixedUpdate() {
+            this.FixedUpdateRate = Mathf.RoundToInt(1f / Time.fixedUnscaledDeltaTime);
+            this.ApplyFixedUpdateRateUnitySettings(this._targetFixedUpdateRate);
         }
 
         private void OnApplicationQuit() {
@@ -199,8 +303,25 @@ namespace UniRate {
 
 
 
-        #region <<---------- Callbacks ---------->>
+        #region <<---------- UpdateRate Callbacks ---------->>
         
+        private void OnUpdateRateModeChanged(UpdateRateMode updateRateMode) {
+            this.ApplyUpdateRateSettings(updateRateMode, this._targetUpdateRate);
+            var e = this._updateRateModeChanged;
+            if (e == null) return;
+            e(this, updateRateMode);
+        }
+
+        private void OnFallbackUpdateRateChanged(int fallbackUpdateRate) {
+            this.ApplyTargetUpdateRate(this._updateRateRequests, fallbackUpdateRate);
+        }
+
+        private void OnUpdateRateChanged(int updateRate) {
+            var e = this._updateRateChanged;
+            if (e == null) return;
+            e(this, updateRate);
+        }
+
         private void OnTargetUpdateRateChanged(int targetUpdateRate) {
             this.ApplyUpdateRateSettings(this._updateRateMode, targetUpdateRate);
             var e = this._targetUpdateRateChanged;
@@ -208,28 +329,39 @@ namespace UniRate {
             e(this, targetUpdateRate);
         }
 
-        private void OnUpdateRateModeChanged(UpdateRateMode updateRateMode) {
-            this.ApplyUpdateRateSettings(updateRateMode, this._targetUpdateRate);
-            var e = this._updateRateModeChanged;
-            if (e == null) return;
-            e(this, updateRateMode);
-        }
-        
-        private void OnUpdateRateChanged(int updateRate) {
-            var e = this._updateRateChanged;
-            if (e == null) return;
-            e(this, updateRate);
-        }
-
-        private void OnFallbackUpdateRateChanged(int fallbackUpdateRate) {
-            this.ApplyTargetUpdateRate(this._updateRateRequests, fallbackUpdateRate);
-        }
-
         private void OnUpdateRateRequestsChanged(IEnumerable<UpdateRateRequest> requests) {
             this.ApplyTargetUpdateRate(requests, this._fallbackUpdateRate);
         }
 
-        #endregion <<---------- Callbacks ---------->>
+        #endregion <<---------- UpdateRate Callbacks ---------->>
+
+
+
+
+        #region <<---------- FixedUpdateRate Callbacks ---------->>
+        
+        private void OnFallbackFixedUpdateRateChanged(int fallbackFixedUpdateRate) {
+            this.ApplyTargetFixedUpdateRate(this._fixedUpdateRateRequests, fallbackFixedUpdateRate);
+        }
+
+        private void OnFixedUpdateRateChanged(int fixedUpdateRate) {
+            var e = this._fixedUpdateRateChanged;
+            if (e == null) return;
+            e(this, fixedUpdateRate);
+        }
+
+        private void OnTargetFixedUpdateRateChanged(int targetFixedUpdateRate) {
+            this.ApplyFixedUpdateRateUnitySettings(targetFixedUpdateRate);
+            var e = this._targetFixedUpdateRateChanged;
+            if (e == null) return;
+            e(this, targetFixedUpdateRate);
+        }
+
+        private void OnFixedUpdateRateRequestsChanged(IEnumerable<FixedUpdateRateRequest> requests) {
+            this.ApplyTargetFixedUpdateRate(requests, this._fallbackFixedUpdateRate);
+        }
+        
+        #endregion <<---------- FixedUpdateRate Callbacks ---------->>
 
 
 
@@ -239,8 +371,8 @@ namespace UniRate {
         /// <summary>
         /// Create a new <see cref="UpdateRateRequest"/>.
         /// </summary>
-        public UpdateRateRequest CreateUpdateRateRequest(int updateRate) {
-            if (Debug.isDebugBuild) {
+        public UpdateRateRequest RequestUpdateRate(int updateRate) {
+            if (this.IsDebugBuild) {
                 Debug.Log($"[{nameof(RateManager)}] creating update rate request {updateRate.ToString()}");
             }
             var request = new UpdateRateRequest(this, updateRate);
@@ -249,13 +381,35 @@ namespace UniRate {
             return request;
         }
 
+        /// <summary>
+        /// Create a new <see cref="FixedUpdateRateRequest"/>.
+        /// </summary>
+        public FixedUpdateRateRequest RequestFixedUpdateRate(int fixedUpdateRate) {
+            if (this.IsDebugBuild) {
+                Debug.Log($"[{nameof(RateManager)}] creating fixed update rate request {fixedUpdateRate.ToString()}");
+            }
+            var request = new FixedUpdateRateRequest(this, fixedUpdateRate);
+            this._fixedUpdateRateRequests.Add(request);
+            this.OnFixedUpdateRateRequestsChanged(this._fixedUpdateRateRequests);
+            return request;
+        }
+
         internal void CancelUpdateRateRequest(UpdateRateRequest request) {
             if (request == null) return;
-            if (Debug.isDebugBuild) {
+            if (this.IsDebugBuild) {
                 Debug.Log($"[{nameof(RateManager)}] removing update rate request {request.UpdateRate.ToString()}");
             }
             if (!this._updateRateRequests.Remove(request)) return;
             this.OnUpdateRateRequestsChanged(this._updateRateRequests);
+        }
+
+        internal void CancelFixedUpdateRateRequest(FixedUpdateRateRequest request) {
+            if (request == null) return;
+            if (this.IsDebugBuild) {
+                Debug.Log($"[{nameof(RateManager)}] removing fixed update rate request {request.FixedUpdateRate.ToString()}");
+            }
+            if (!this._fixedUpdateRateRequests.Remove(request)) return;
+            this.OnFixedUpdateRateRequestsChanged(this._fixedUpdateRateRequests);
         }
         
         private void ApplyUpdateRateUnitySettings(UpdateRateMode updateRateMode, int targetUpdateRate) {
@@ -305,7 +459,7 @@ namespace UniRate {
             var target = int.MinValue;
             bool anyRequest = false;
             foreach (var request in requests) {
-                if (request == null || request.IsDisposed) continue;
+                if (request.IsDisposed) continue;
                 anyRequest = true;
                 target = Mathf.Max(target, request.UpdateRate);
             }
@@ -315,7 +469,7 @@ namespace UniRate {
         private IEnumerator ThrottleEndOfFrame() {
             // https://blogs.unity3d.com/pt/2019/06/03/precise-framerates-in-unity/
             var currentFrameTime = Time.realtimeSinceStartup;
-            while (true) {
+            while (this._updateRateMode == UpdateRateMode.ThrottleEndOfFrame) {
                 yield return new WaitForEndOfFrame();
                 currentFrameTime += (1f / (float)this._targetUpdateRate);
                 var t = Time.realtimeSinceStartup;
@@ -328,7 +482,22 @@ namespace UniRate {
                 }
             }
         }
-        
+
+        private void ApplyFixedUpdateRateUnitySettings(int targetFixedUpdateRate) {
+            Time.fixedDeltaTime = (1f / (float)targetFixedUpdateRate);
+        }
+
+        private void ApplyTargetFixedUpdateRate(IEnumerable<FixedUpdateRateRequest> requests, int fallback) {
+            var target = int.MinValue;
+            bool anyRequest = false;
+            foreach (var request in requests) {
+                if (request.IsDisposed) continue;
+                anyRequest = true;
+                target = Mathf.Max(target, request.FixedUpdateRate);
+            }
+            this.TargetFixedUpdateRate = (anyRequest ? target : fallback);
+        }
+
         #endregion <<---------- General ---------->>
     }
 }
