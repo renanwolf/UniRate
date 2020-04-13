@@ -1,5 +1,7 @@
 # Unity LowPower and Memory Consumption
 
+> WIP converting to UniRate
+
 LowPowerMemoryConsumption is a Unity plugin to reduce device's battery usage, main focused on GUI oriented apps and turn-based games. To optimize energy drain this package provides a framerate management to reduce the CPU usage and a render interval management to reduce the GPU usage.
 
 ## Quick Start
