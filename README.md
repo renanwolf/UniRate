@@ -8,7 +8,7 @@ LowPowerMemoryConsumption is a Unity plugin to reduce device's battery usage, ma
 
 #### Installation
 
-Import the .unitypackage to your project or download the repository and import the files to your project's Assets folder.
+Import the [.unitypackage](https://github.com/renanwolf/Unity-LowPowerMemoryConsumption/releases/tag/v1.1.0) to your project or download the repository from the `release` branch and import the files to your project's Assets folder.
 
 #### Namespace
 
