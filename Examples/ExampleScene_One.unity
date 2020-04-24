@@ -614,7 +614,7 @@ GameObject:
   - component: {fileID: 476410226}
   - component: {fileID: 476410225}
   m_Layer: 0
-  m_Name: Rate Manager
+  m_Name: UniRate (RateManager)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

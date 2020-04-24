@@ -14,18 +14,18 @@ namespace UniRate {
 
     [DisallowMultipleComponent]
     public sealed class RateManager : MonoBehaviour {
-        
+
         #region <<---------- Initializers ---------->>
-        
+
         private RateManager() { }
-        
+
         #endregion <<---------- Initializers ---------->>
 
 
 
 
         #region <<---------- Instance ---------->>
-        
+
         /// <summary>
         /// The singleton instance of <see cref="RateManager"/>.
         /// </summary>
@@ -47,14 +47,14 @@ namespace UniRate {
             }
         }
         private static RateManager _instance;
-        
+
         #endregion <<---------- Instance ---------->>
 
 
 
 
         #region <<---------- UpdateRate Properties and Fields ---------->>
-        
+
         [SerializeField] private UpdateRateMode _updateRateMode = UpdateRateMode.ApplicationTargetFrameRate;
         [SerializeField] private int _fallbackUpdateRate = 20;
 
@@ -149,18 +149,18 @@ namespace UniRate {
             }
         }
         private Action<RateManager, int> _targetUpdateRateChanged;
-        
+
         private Coroutine _coroutineThrottleEndOfFrame;
 
         private readonly HashSet<UpdateRateRequest> _updateRateRequests = new HashSet<UpdateRateRequest>();
-        
+
         #endregion <<---------- UpdateRate Properties and Fields ---------->>
 
 
 
 
         #region <<---------- FixedUpdateRate Properties and Fields ---------->>
-        
+
         [Space]
         [SerializeField] private int _fallbackFixedUpdateRate = 20;
 
@@ -231,7 +231,7 @@ namespace UniRate {
         private Action<RateManager, int> _targetFixedUpdateRateChanged;
 
         private readonly HashSet<FixedUpdateRateRequest> _fixedUpdateRateRequests = new HashSet<FixedUpdateRateRequest>();
-        
+
         #endregion <<---------- FixedUpdateRate Properties and Fields ---------->>
 
 
@@ -241,7 +241,7 @@ namespace UniRate {
 
         internal static bool IsApplicationQuitting { get; private set; }
 
-        internal bool IsDebugBuild {
+        internal static bool IsDebugBuild {
             get {
                 #if UNITY_EDITOR
                 return EditorUserBuildSettings.development;
@@ -250,33 +250,35 @@ namespace UniRate {
                 #endif
             }
         }
-        
+
+        private static readonly string GameObjectName = $"UniRate ({nameof(RateManager)})";
+
         #endregion <<---------- Properties and Fields ---------->>
 
 
 
 
         #region <<---------- MonoBehaviour ---------->>
-        
+
         private void Awake() {
-            
+
             if (_instance == null) {
                 _instance = this;
             }
             else if (_instance != this) {
-                Debug.LogWarning($"[{nameof(RateManager)}] trying to create another instance at '{this.gameObject.scene.name}/{this.gameObject.name}', destroying it", this);
+                Debug.LogWarning($"[{nameof(RateManager)}] trying to awake another instance at '{this.gameObject.scene.name}/{this.gameObject.name}', destroying it", this.gameObject);
                 Destroy(this);
                 return;
             }
 
-            this.gameObject.name = nameof(RateManager);
+            this.gameObject.name = GameObjectName;
             this.transform.SetParent(null, false);
             DontDestroyOnLoad(this);
         }
 
         private void OnEnable() {
-            this.ApplyTargetUpdateRate(this._updateRateRequests, this._fallbackUpdateRate);
-            this.ApplyTargetFixedUpdateRate(this._fixedUpdateRateRequests, this._fallbackFixedUpdateRate);
+            this.TargetUpdateRate = this.CalculateTargetUpdateRate(this._updateRateRequests, this._fallbackUpdateRate);
+            this.TargetFixedUpdateRate = this.CalculateTargetFixedUpdateRate(this._fixedUpdateRateRequests, this._fallbackFixedUpdateRate);
         }
 
         private void Update() {
@@ -292,11 +294,26 @@ namespace UniRate {
         private void OnApplicationQuit() {
             IsApplicationQuitting = true;
         }
-        
+
         private void OnDestroy() {
-			if (_instance != this) return;
-			_instance = null;
-		}
+            if (_instance != this) return;
+            _instance = null;
+        }
+
+        #if UNITY_EDITOR
+
+        private void OnValidate() {
+            if (!Application.isPlaying) return;
+            this.TargetUpdateRate = this.CalculateTargetUpdateRate(this._updateRateRequests, this._fallbackUpdateRate);
+            this.TargetFixedUpdateRate = this.CalculateTargetFixedUpdateRate(this._fixedUpdateRateRequests, this._fallbackFixedUpdateRate);
+            this.ApplyUpdateRateSettings(this._updateRateMode, this._targetUpdateRate);
+        }
+
+        private void Reset() {
+            this.gameObject.name = GameObjectName;
+        }
+
+        #endif
 
         #endregion <<---------- MonoBehaviour ---------->>
 
@@ -304,8 +321,11 @@ namespace UniRate {
 
 
         #region <<---------- UpdateRate Callbacks ---------->>
-        
+
         private void OnUpdateRateModeChanged(UpdateRateMode updateRateMode) {
+            if (IsDebugBuild) {
+                Debug.Log($"[{nameof(RateManager)}] {nameof(this.UpdateRateMode)} changed to {updateRateMode.ToString()}");
+            }
             this.ApplyUpdateRateSettings(updateRateMode, this._targetUpdateRate);
             var e = this._updateRateModeChanged;
             if (e == null) return;
@@ -313,7 +333,10 @@ namespace UniRate {
         }
 
         private void OnFallbackUpdateRateChanged(int fallbackUpdateRate) {
-            this.ApplyTargetUpdateRate(this._updateRateRequests, fallbackUpdateRate);
+            if (IsDebugBuild) {
+                Debug.Log($"[{nameof(RateManager)}] {nameof(this.FallbackUpdateRate)} changed to {fallbackUpdateRate.ToString()}");
+            }
+            this.TargetUpdateRate = this.CalculateTargetUpdateRate(this._updateRateRequests, fallbackUpdateRate);
         }
 
         private void OnUpdateRateChanged(int updateRate) {
@@ -323,6 +346,9 @@ namespace UniRate {
         }
 
         private void OnTargetUpdateRateChanged(int targetUpdateRate) {
+            if (IsDebugBuild) {
+                Debug.Log($"[{nameof(RateManager)}] {nameof(this.TargetUpdateRate)} changed to {targetUpdateRate.ToString()}");
+            }
             this.ApplyUpdateRateSettings(this._updateRateMode, targetUpdateRate);
             var e = this._targetUpdateRateChanged;
             if (e == null) return;
@@ -330,7 +356,7 @@ namespace UniRate {
         }
 
         private void OnUpdateRateRequestsChanged(IEnumerable<UpdateRateRequest> requests) {
-            this.ApplyTargetUpdateRate(requests, this._fallbackUpdateRate);
+            this.TargetUpdateRate = this.CalculateTargetUpdateRate(requests, this._fallbackUpdateRate);
         }
 
         #endregion <<---------- UpdateRate Callbacks ---------->>
@@ -339,9 +365,12 @@ namespace UniRate {
 
 
         #region <<---------- FixedUpdateRate Callbacks ---------->>
-        
+
         private void OnFallbackFixedUpdateRateChanged(int fallbackFixedUpdateRate) {
-            this.ApplyTargetFixedUpdateRate(this._fixedUpdateRateRequests, fallbackFixedUpdateRate);
+            if (IsDebugBuild) {
+                Debug.Log($"[{nameof(RateManager)}] {nameof(this.FallbackFixedUpdateRate)} changed to {fallbackFixedUpdateRate.ToString()}");
+            }
+            this.TargetFixedUpdateRate = this.CalculateTargetFixedUpdateRate(this._fixedUpdateRateRequests, fallbackFixedUpdateRate);
         }
 
         private void OnFixedUpdateRateChanged(int fixedUpdateRate) {
@@ -351,6 +380,9 @@ namespace UniRate {
         }
 
         private void OnTargetFixedUpdateRateChanged(int targetFixedUpdateRate) {
+            if (IsDebugBuild) {
+                Debug.Log($"[{nameof(RateManager)}] {nameof(this.TargetFixedUpdateRate)} changed to {targetFixedUpdateRate.ToString()}");
+            }
             this.ApplyFixedUpdateRateUnitySettings(targetFixedUpdateRate);
             var e = this._targetFixedUpdateRateChanged;
             if (e == null) return;
@@ -358,9 +390,9 @@ namespace UniRate {
         }
 
         private void OnFixedUpdateRateRequestsChanged(IEnumerable<FixedUpdateRateRequest> requests) {
-            this.ApplyTargetFixedUpdateRate(requests, this._fallbackFixedUpdateRate);
+            this.TargetFixedUpdateRate = this.CalculateTargetFixedUpdateRate(requests, this._fallbackFixedUpdateRate);
         }
-        
+
         #endregion <<---------- FixedUpdateRate Callbacks ---------->>
 
 
@@ -372,7 +404,7 @@ namespace UniRate {
         /// Create a new <see cref="UpdateRateRequest"/>.
         /// </summary>
         public UpdateRateRequest RequestUpdateRate(int updateRate) {
-            if (this.IsDebugBuild) {
+            if (IsDebugBuild) {
                 Debug.Log($"[{nameof(RateManager)}] creating update rate request {updateRate.ToString()}");
             }
             var request = new UpdateRateRequest(this, updateRate);
@@ -385,7 +417,7 @@ namespace UniRate {
         /// Create a new <see cref="FixedUpdateRateRequest"/>.
         /// </summary>
         public FixedUpdateRateRequest RequestFixedUpdateRate(int fixedUpdateRate) {
-            if (this.IsDebugBuild) {
+            if (IsDebugBuild) {
                 Debug.Log($"[{nameof(RateManager)}] creating fixed update rate request {fixedUpdateRate.ToString()}");
             }
             var request = new FixedUpdateRateRequest(this, fixedUpdateRate);
@@ -396,7 +428,7 @@ namespace UniRate {
 
         internal void CancelUpdateRateRequest(UpdateRateRequest request) {
             if (request == null) return;
-            if (this.IsDebugBuild) {
+            if (IsDebugBuild) {
                 Debug.Log($"[{nameof(RateManager)}] removing update rate request {request.UpdateRate.ToString()}");
             }
             if (!this._updateRateRequests.Remove(request)) return;
@@ -405,57 +437,97 @@ namespace UniRate {
 
         internal void CancelFixedUpdateRateRequest(FixedUpdateRateRequest request) {
             if (request == null) return;
-            if (this.IsDebugBuild) {
+            if (IsDebugBuild) {
                 Debug.Log($"[{nameof(RateManager)}] removing fixed update rate request {request.FixedUpdateRate.ToString()}");
             }
             if (!this._fixedUpdateRateRequests.Remove(request)) return;
             this.OnFixedUpdateRateRequestsChanged(this._fixedUpdateRateRequests);
         }
-        
-        private void ApplyUpdateRateUnitySettings(UpdateRateMode updateRateMode, int targetUpdateRate) {
+
+        private bool ApplyUpdateRateUnitySettings(UpdateRateMode updateRateMode, int targetUpdateRate) {
+            int newVSyncCount = 1;
+            int newTargetFrameRate = targetUpdateRate;
+
             switch (updateRateMode) {
-                
+
                 case UpdateRateMode.ApplicationTargetFrameRate:
-                    QualitySettings.vSyncCount = 0;
-                    Application.targetFrameRate = targetUpdateRate;
+                    newVSyncCount = 0;
+                    newTargetFrameRate = targetUpdateRate;
                     break;
-                
+
                 case UpdateRateMode.VSyncCount:
                     // UNITY DOCS https://docs.unity3d.com/ScriptReference/QualitySettings-vSyncCount.html?_ga=2.244925125.1929096148.1586530815-1497395495.1586530815
                     // If QualitySettings.vSyncCount is set to a value other than 'Don't Sync' (0), the value of Application.targetFrameRate will be ignored.
                     // QualitySettings.vSyncCount value must be 0, 1, 2, 3, or 4.
                     // QualitySettings.vSyncCount is ignored on iOS.
-                    QualitySettings.vSyncCount = Mathf.Clamp(
+                    newVSyncCount = Mathf.Clamp(
                         Mathf.RoundToInt((float)Screen.currentResolution.refreshRate / (float)targetUpdateRate),
-                        0,
+                        1,
                         4
                     );
-                    Application.targetFrameRate = targetUpdateRate;
+                    newTargetFrameRate = targetUpdateRate;
                     break;
-                
+
                 case UpdateRateMode.ThrottleEndOfFrame:
-                    QualitySettings.vSyncCount = 0;
-                    Application.targetFrameRate = 9999;
+                    newVSyncCount = 0;
+                    newTargetFrameRate = 9999;
                     break;
+
+                default:
+                    Debug.LogError($"[{nameof(RateManager)}] not handling {nameof(UpdateRateMode)}.{updateRateMode.ToString()}");
+                    return false;
             }
+
+            bool changed = false;
+
+            if (QualitySettings.vSyncCount != newVSyncCount) {
+                changed = true;
+                if (IsDebugBuild) {
+                    Debug.Log($"[{nameof(RateManager)}] setting QualitySettings.vSyncCount to {newVSyncCount.ToString()}");
+                }
+                QualitySettings.vSyncCount = newVSyncCount;
+            }
+
+            if (Application.targetFrameRate != newTargetFrameRate) {
+                changed = true;
+                if (IsDebugBuild) {
+                    Debug.Log($"[{nameof(RateManager)}] setting Application.targetFrameRate to {newTargetFrameRate.ToString()}");
+                }
+                Application.targetFrameRate = newTargetFrameRate;
+            }
+
+            return changed;
         }
 
-        private void ApplyUpdateRateSettings(UpdateRateMode updateRateMode, int targetUpdateRate) {
+        private bool ApplyUpdateRateSettings(UpdateRateMode updateRateMode, int targetUpdateRate) {
+            bool changed = false;
             bool isThrottleEndOfFrame = (updateRateMode == UpdateRateMode.ThrottleEndOfFrame);
 
             if (!isThrottleEndOfFrame && this._coroutineThrottleEndOfFrame != null) {
+                changed = true;
+                if (IsDebugBuild) {
+                    Debug.Log($"[{nameof(RateManager)}] stopping end of frame throttle");
+                }
                 this.StopCoroutine(this._coroutineThrottleEndOfFrame);
                 this._coroutineThrottleEndOfFrame = null;
             }
 
-            this.ApplyUpdateRateUnitySettings(updateRateMode, targetUpdateRate);
+            if (this.ApplyUpdateRateUnitySettings(updateRateMode, targetUpdateRate)) {
+                changed = true;
+            }
 
             if (isThrottleEndOfFrame && this._coroutineThrottleEndOfFrame == null) {
+                changed = true;
+                if (IsDebugBuild) {
+                    Debug.Log($"[{nameof(RateManager)}] starting end of frame throttle");
+                }
                 this._coroutineThrottleEndOfFrame = this.StartCoroutine(this.ThrottleEndOfFrame());
             }
+
+            return changed;
         }
 
-        private void ApplyTargetUpdateRate(IEnumerable<UpdateRateRequest> requests, int fallback) {
+        private int CalculateTargetUpdateRate(IEnumerable<UpdateRateRequest> requests, int fallback) {
             var target = int.MinValue;
             bool anyRequest = false;
             foreach (var request in requests) {
@@ -463,7 +535,7 @@ namespace UniRate {
                 anyRequest = true;
                 target = Mathf.Max(target, request.UpdateRate);
             }
-            this.TargetUpdateRate = (anyRequest ? target : fallback);
+            return (anyRequest ? target : fallback);
         }
 
         private IEnumerator ThrottleEndOfFrame() {
@@ -483,11 +555,17 @@ namespace UniRate {
             }
         }
 
-        private void ApplyFixedUpdateRateUnitySettings(int targetFixedUpdateRate) {
-            Time.fixedDeltaTime = (1f / (float)targetFixedUpdateRate);
+        private bool ApplyFixedUpdateRateUnitySettings(int targetFixedUpdateRate) {
+            float newFixedDeltaTime = (1f / (float)targetFixedUpdateRate);
+            if (newFixedDeltaTime == Time.fixedDeltaTime) return false;
+            if (IsDebugBuild) {
+                Debug.Log($"[{nameof(RateManager)}] setting Time.fixedDeltaTime to {newFixedDeltaTime.ToString("0.0##")}");
+            }
+            Time.fixedDeltaTime = newFixedDeltaTime;
+            return true;
         }
 
-        private void ApplyTargetFixedUpdateRate(IEnumerable<FixedUpdateRateRequest> requests, int fallback) {
+        private int CalculateTargetFixedUpdateRate(IEnumerable<FixedUpdateRateRequest> requests, int fallback) {
             var target = int.MinValue;
             bool anyRequest = false;
             foreach (var request in requests) {
@@ -495,7 +573,7 @@ namespace UniRate {
                 anyRequest = true;
                 target = Mathf.Max(target, request.FixedUpdateRate);
             }
-            this.TargetFixedUpdateRate = (anyRequest ? target : fallback);
+            return (anyRequest ? target : fallback);
         }
 
         #endregion <<---------- General ---------->>
