@@ -365,6 +365,11 @@ namespace UniRate {
 
         #region <<---------- Properties and Fields ---------->>
 
+        /// <summary>
+        /// Display rate informations on screen?
+        /// </summary>
+        public bool DisplayOnScreenInformation { get; set; }
+
         internal static bool IsApplicationQuitting { get; private set; }
 
         internal static bool IsDebugBuild {
@@ -378,6 +383,10 @@ namespace UniRate {
         }
 
         private static readonly string GameObjectName = $"UniRate ({nameof(RateManager)})";
+
+        private GUIStyle _guiStyleLabel;
+        private GUIContent _guiContentText;
+        private Texture2D _guiBackgroundTexture;
 
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -400,6 +409,8 @@ namespace UniRate {
             this.gameObject.name = GameObjectName;
             this.transform.SetParent(null, false);
             DontDestroyOnLoad(this);
+
+            this.DisplayOnScreenInformation = IsDebugBuild;
         }
 
         private void OnEnable() {
@@ -431,8 +442,12 @@ namespace UniRate {
         }
 
         private void OnDestroy() {
-            if (_instance != this) return;
-            _instance = null;
+            if (_instance == this) {
+                _instance = null;
+            }
+            if (this._guiBackgroundTexture != null) {
+                Destroy(this._guiBackgroundTexture);
+            }
         }
 
         #if UNITY_EDITOR
@@ -449,6 +464,41 @@ namespace UniRate {
         }
 
         #endif
+
+        private void OnGUI() {
+            if (!this.DisplayOnScreenInformation) return;
+
+            if (this._guiBackgroundTexture == null) {
+                this._guiBackgroundTexture = new Texture2D(2, 2);
+                var colorArray = this._guiBackgroundTexture.GetPixels32();
+                var color = new Color32(0, 0, 0, 80);
+                for (int i = colorArray.Length - 1; i >= 0; i--) {
+                    colorArray[i] = color;
+                }
+                this._guiBackgroundTexture.SetPixels32(colorArray);
+                this._guiBackgroundTexture.Apply();
+            }
+
+            if (this._guiStyleLabel == null) {
+                this._guiStyleLabel = new GUIStyle(GUI.skin.label);
+                this._guiStyleLabel.fontSize = 11;
+                this._guiStyleLabel.normal.background = this._guiBackgroundTexture;
+                this._guiStyleLabel.padding = new RectOffset(2, 2, 1, 1);
+            }
+
+            if (this._guiContentText == null) {
+                this._guiContentText = new GUIContent();
+            }
+            this._guiContentText.text = $"Update Mode: {this._updateRateMode.ToString()}\nUpdate Rate: {this._updateRate.ToString("000")} / {this._targetUpdateRate.ToString("000")}\nFixed Update Rate: {this._fixedUpdateRate.ToString("000")} / {this._targetFixedUpdateRate.ToString("000")}\n{(this.IsRenderIntervalSupported ? $"Will Render: {this.WillRender.ToString()}" : "Render interval not supported")}\nRender Interval: {this._renderInterval.ToString()} / {this._targetRenderInterval.ToString()}\nRender Rate: {this.RenderRate.ToString("000")}";
+
+            var safeArea = Screen.safeArea;
+            this._guiStyleLabel.CalcMinMaxWidth(this._guiContentText, out float minWidth, out float maxWidth);
+            var width = Mathf.Min(safeArea.width - 10, maxWidth);
+            float space = Mathf.Min(5f, ((safeArea.width - width) / 2f));
+            var rectLine = new Rect(safeArea.x + space, safeArea.y + space, width, this._guiStyleLabel.CalcHeight(this._guiContentText, width));
+
+            GUI.Label(rectLine, this._guiContentText, this._guiStyleLabel);
+        }
 
         #endregion <<---------- MonoBehaviour ---------->>
 
