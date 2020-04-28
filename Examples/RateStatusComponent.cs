@@ -25,6 +25,7 @@ namespace UniRate.Examples {
 
         private UpdateRateRequest _updateRateRequest;
         private FixedUpdateRateRequest _fixedUpdateRateRequest;
+        private RenderIntervalRequest _renderIntervalRequest;
         
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -45,15 +46,20 @@ namespace UniRate.Examples {
 
             this.ApplyTextUpdateRate(this._rateManager.UpdateRate, this._rateManager.TargetUpdateRate);
             this.ApplyTextFixedUpdateRate(this._rateManager.FixedUpdateRate, this._rateManager.TargetFixedUpdateRate);
+            this.ApplyTextRenderInterval(this._rateManager.RenderInterval, this._rateManager.TargetRenderInterval);
 
             this.ApplySliderUpdateRate(this._rateManager.TargetUpdateRate);
             this.ApplySliderFixedUpdateRate(this._rateManager.TargetFixedUpdateRate);
+            this.ApplySliderRenderInterval(this._rateManager.TargetRenderInterval);
 
             this._rateManager.UpdateRateChanged += this.OnUpdateRateChanged;
             this._rateManager.TargetUpdateRateChanged += this.OnTargetUpdateRateChanged;
 
             this._rateManager.FixedUpdateRateChanged += this.OnFixedUpdateRateChanged;
             this._rateManager.TargetFixedUpdateRateChanged += this.OnTargetFixedUpdateRateChanged;
+
+            this._rateManager.RenderIntervalChanged += this.OnRenderIntervalChanged;
+            this._rateManager.TargetRenderIntervalChanged += this.OnTargetRenderIntervalChanged;
 
             this._sliderUpdateRate.onValueChanged.AddListener(this.OnSliderUpdateRateChanged);
             this._sliderFixedUpdateRate.onValueChanged.AddListener(this.OnSliderFixedUpdateRateChanged);
@@ -75,6 +81,9 @@ namespace UniRate.Examples {
             this._rateManager.FixedUpdateRateChanged -= this.OnFixedUpdateRateChanged;
             this._rateManager.TargetFixedUpdateRateChanged -= this.OnTargetFixedUpdateRateChanged;
 
+            this._rateManager.RenderIntervalChanged -= this.OnRenderIntervalChanged;
+            this._rateManager.TargetRenderIntervalChanged -= this.OnTargetRenderIntervalChanged;
+
             this._sliderUpdateRate.onValueChanged.RemoveListener(this.OnSliderUpdateRateChanged);
             this._sliderFixedUpdateRate.onValueChanged.RemoveListener(this.OnSliderFixedUpdateRateChanged);
             this._sliderRenderInterval.onValueChanged.RemoveListener(this.OnSliderRenderIntervalChanged);
@@ -84,6 +93,9 @@ namespace UniRate.Examples {
 
             this._fixedUpdateRateRequest?.Dispose();
             this._fixedUpdateRateRequest = null;
+
+            this._renderIntervalRequest?.Dispose();
+            this._renderIntervalRequest = null;
         }
         
         #endregion <<---------- MonoBehaviour ---------->>
@@ -111,6 +123,14 @@ namespace UniRate.Examples {
 
         private void OnFixedUpdateRateChanged(RateManager manager, int fixedUpdateRate) {
             this.ApplyTextFixedUpdateRate(fixedUpdateRate, manager.TargetFixedUpdateRate);
+        }
+
+        private void OnRenderIntervalChanged(RateManager manager, int renderInterval) {
+            this.ApplyTextRenderInterval(renderInterval, manager.TargetRenderInterval);
+        }
+
+        private void OnTargetRenderIntervalChanged(RateManager manager, int targetRenderInterval) {
+            this.ApplyTextRenderInterval(manager.RenderInterval, targetRenderInterval);
         }
 
         private void OnToggleModeTargetFrameRateValueChanged(bool isOn) {
@@ -142,7 +162,8 @@ namespace UniRate.Examples {
 
         private void OnSliderRenderIntervalChanged(float value) {
             if (this._rateManager == null) return;
-            
+            this._renderIntervalRequest?.Dispose();
+            this._renderIntervalRequest = this._rateManager.RequestRenderInterval(Mathf.RoundToInt(value));
         }
         
         #endregion <<---------- Callbacks ---------->>
@@ -160,12 +181,20 @@ namespace UniRate.Examples {
             this._textFixedUpdateRate.text = $"Fixed Update: {rate.ToString("000")} / {target.ToString("000")}";
         }
 
+        private void ApplyTextRenderInterval(int rate, int target) {
+            this._textRenderInterval.text = $"Render Interval: {rate.ToString()} / {target.ToString()}";
+        }
+
         private void ApplySliderUpdateRate(int target) {
             this._sliderUpdateRate.value = target;
         }
 
         private void ApplySliderFixedUpdateRate(int target) {
             this._sliderFixedUpdateRate.value = target;
+        }
+
+        private void ApplySliderRenderInterval(int target) {
+            this._sliderRenderInterval.value = target;
         }
 
         private void ApplyTogglesUpdateRateMode(UpdateRateMode updateRateMode) {

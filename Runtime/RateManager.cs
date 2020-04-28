@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
+#if UNITY_2019_3_OR_NEWER
+using UnityEngine.Rendering;
+#endif
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -237,6 +241,128 @@ namespace UniRate {
 
 
 
+        #region <<---------- RenderInterval Properties and Fields ---------->>
+
+        [Space]
+        [SerializeField] private int _fallbackRenderInterval = 3;
+
+        /// <summary>
+        /// Fallback render interval when there are no active requests.
+        /// </summary>
+        public int FallbackRenderInterval {
+            get => this._fallbackRenderInterval;
+            set {
+                if (this._fallbackRenderInterval == value) return;
+                this._fallbackRenderInterval = value;
+                this.OnFallbackRenderIntervalChanged(this._fallbackRenderInterval);
+            }
+        }
+
+        /// <summary>
+        /// Current render interval.
+        /// </summary>
+        public int RenderInterval {
+            get => this._renderInterval;
+            private set {
+                if (this._renderInterval == value) return;
+                this._renderInterval = value;
+                this.OnRenderIntervalChanged(this._renderInterval);
+            }
+        }
+        private int _renderInterval;
+
+        /// <summary>
+        /// Target render interval.
+        /// </summary>
+        public int TargetRenderInterval {
+            get => this._targetRenderInterval;
+            private set {
+                if (this._targetRenderInterval == value) return;
+                this._targetRenderInterval = value;
+                this.OnTargetRenderIntervalChanged(this._targetRenderInterval);
+            }
+        }
+        private int _targetRenderInterval;
+
+        /// <summary>
+		/// Event raised when <see cref="RenderInterval"/> changes.
+		/// </summary>
+        public event Action<RateManager, int> RenderIntervalChanged {
+            add {
+                this._renderIntervalChanged -= value;
+                this._renderIntervalChanged += value;
+            }
+            remove {
+                this._renderIntervalChanged -= value;
+            }
+        }
+        private Action<RateManager, int> _renderIntervalChanged;
+
+        /// <summary>
+		/// Event raised when <see cref="TargetRenderInterval"/> changes.
+		/// </summary>
+        public event Action<RateManager, int> TargetRenderIntervalChanged {
+            add {
+                this._targetRenderIntervalChanged -= value;
+                this._targetRenderIntervalChanged += value;
+            }
+            remove {
+                this._targetRenderIntervalChanged -= value;
+            }
+        }
+        private Action<RateManager, int> _targetRenderIntervalChanged;
+
+        /// <summary>
+        /// Current render rate.
+        /// </summary>
+        public int RenderRate {
+            get {
+                #if !UNITY_2019_3_OR_NEWER
+                return this._updateRate;
+                #else
+                return (this._updateRate / this._renderInterval);
+                #endif
+            }
+        }
+
+        /// <summary>
+        /// Will current frame render?
+        /// </summary>
+        public bool WillRender {
+            get {
+                #if !UNITY_2019_3_OR_NEWER
+                return true;
+                #else
+                return OnDemandRendering.willCurrentFrameRender;
+                #endif
+            }
+        }
+
+        /// <summary>
+        /// Is render interval supported?
+        /// </summary>
+        /// <value></value>
+        public bool IsRenderIntervalSupported {
+            get {
+                #if UNITY_2019_3_OR_NEWER
+                return true;
+                #else
+                return false;
+                #endif
+            }
+        }
+
+        private readonly HashSet<RenderIntervalRequest> _renderIntervalRequests = new HashSet<RenderIntervalRequest>();
+        
+        #if !UNITY_2019_3_OR_NEWER
+        private bool _loggedRenderIntervalNotSupported;
+        #endif
+        
+        #endregion <<---------- RenderInterval Properties and Fields ---------->>
+
+
+
+
         #region <<---------- Properties and Fields ---------->>
 
         internal static bool IsApplicationQuitting { get; private set; }
@@ -279,9 +405,18 @@ namespace UniRate {
         private void OnEnable() {
             this.TargetUpdateRate = this.CalculateTargetUpdateRate(this._updateRateRequests, this._fallbackUpdateRate);
             this.TargetFixedUpdateRate = this.CalculateTargetFixedUpdateRate(this._fixedUpdateRateRequests, this._fallbackFixedUpdateRate);
+            this.TargetRenderInterval = this.CalculateTargetRenderInterval(this._renderIntervalRequests, this._fallbackRenderInterval);
         }
 
         private void Update() {
+            
+            #if UNITY_2019_3_OR_NEWER
+            this.RenderInterval = OnDemandRendering.renderFrameInterval;
+            this.ApplyRenderIntervalUnitySettings(this._targetRenderInterval);
+            #else
+            this.RenderInterval = 1;
+            #endif
+
             this.UpdateRate = Mathf.RoundToInt(1f / Time.unscaledDeltaTime);
             this.ApplyUpdateRateUnitySettings(this._updateRateMode, this._targetUpdateRate);
         }
@@ -398,6 +533,40 @@ namespace UniRate {
 
 
 
+        #region <<---------- RenderInterval Callbacks ---------->>
+        
+        private void OnFallbackRenderIntervalChanged(int fallbackRenderInterval) {
+            if (IsDebugBuild) {
+                Debug.Log($"[{nameof(RateManager)}] {nameof(this.FallbackRenderInterval)} changed to {fallbackRenderInterval.ToString()}");
+            }
+            this.TargetRenderInterval = this.CalculateTargetRenderInterval(this._renderIntervalRequests, fallbackRenderInterval);
+        }
+
+        private void OnRenderIntervalChanged(int renderInterval) {
+            var e = this._renderIntervalChanged;
+            if (e == null) return;
+            e(this, renderInterval);
+        }
+
+        private void OnTargetRenderIntervalChanged(int targetRenderInterval) {
+            if (IsDebugBuild) {
+                Debug.Log($"[{nameof(RateManager)}] {nameof(this.TargetRenderInterval)} changed to {targetRenderInterval.ToString()}");
+            }
+            this.ApplyRenderIntervalUnitySettings(targetRenderInterval);
+            var e = this._targetRenderIntervalChanged;
+            if (e == null) return;
+            e(this, targetRenderInterval);
+        }
+
+        private void OnRenderIntervalRequestsChanged(IEnumerable<RenderIntervalRequest> requests) {
+            this.TargetRenderInterval = this.CalculateTargetRenderInterval(requests, this._fallbackRenderInterval);
+        }
+        
+        #endregion <<---------- RenderInterval Callbacks ---------->>
+
+
+
+
         #region <<---------- General ---------->>
 
         /// <summary>
@@ -426,6 +595,24 @@ namespace UniRate {
             return request;
         }
 
+        /// <summary>
+        /// Create a new <see cref="FixedUpdateRateRequest"/>.
+        /// </summary>
+        public RenderIntervalRequest RequestRenderInterval(int renderInterval) {
+            if (IsDebugBuild) {
+                Debug.Log($"[{nameof(RateManager)}] creating render interval request {renderInterval.ToString()}");
+            }
+
+            #if !UNITY_2019_3_OR_NEWER
+            this.LogRenderIntervalNotSupportedOnce();
+            #endif
+
+            var request = new RenderIntervalRequest(this, renderInterval);
+            this._renderIntervalRequests.Add(request);
+            this.OnRenderIntervalRequestsChanged(this._renderIntervalRequests);
+            return request;
+        }
+
         internal void CancelUpdateRateRequest(UpdateRateRequest request) {
             if (request == null) return;
             if (IsDebugBuild) {
@@ -442,6 +629,20 @@ namespace UniRate {
             }
             if (!this._fixedUpdateRateRequests.Remove(request)) return;
             this.OnFixedUpdateRateRequestsChanged(this._fixedUpdateRateRequests);
+        }
+
+        internal void CancelRenderIntervalRequest(RenderIntervalRequest request) {
+            if (request == null) return;
+            if (IsDebugBuild) {
+                Debug.Log($"[{nameof(RateManager)}] removing render interval request {request.RenderInterval.ToString()}");
+            }
+
+            #if !UNITY_2019_3_OR_NEWER
+            this.LogRenderIntervalNotSupportedOnce();
+            #endif
+            
+            if (!this._renderIntervalRequests.Remove(request)) return;
+            this.OnRenderIntervalRequestsChanged(this._renderIntervalRequests);
         }
 
         private bool ApplyUpdateRateUnitySettings(UpdateRateMode updateRateMode, int targetUpdateRate) {
@@ -461,7 +662,7 @@ namespace UniRate {
                     // QualitySettings.vSyncCount value must be 0, 1, 2, 3, or 4.
                     // QualitySettings.vSyncCount is ignored on iOS.
                     newVSyncCount = Mathf.Clamp(
-                        Mathf.RoundToInt((float)Screen.currentResolution.refreshRate / (float)targetUpdateRate),
+                        Screen.currentResolution.refreshRate / targetUpdateRate,
                         1,
                         4
                     );
@@ -572,6 +773,44 @@ namespace UniRate {
                 if (request.IsDisposed) continue;
                 anyRequest = true;
                 target = Mathf.Max(target, request.FixedUpdateRate);
+            }
+            return (anyRequest ? target : fallback);
+        }
+
+        #if !UNITY_2019_3_OR_NEWER
+
+        private void LogRenderIntervalNotSupportedOnce() {
+            if (this._loggedRenderIntervalNotSupported) return;
+            this._loggedRenderIntervalNotSupported = true;
+            Debug.LogWarning($"[{nameof(RateManager)}] render interval is only supported on Unity 2019.3 or newer");
+        }
+        
+        #endif
+
+        private bool ApplyRenderIntervalUnitySettings(int targetRenderInterval) {
+            #if UNITY_2019_3_OR_NEWER
+
+            if (OnDemandRendering.renderFrameInterval == targetRenderInterval) return false;
+            if (IsDebugBuild) {
+                Debug.Log($"[{nameof(RateManager)}] setting OnDemandRendering.renderFrameInterval to {targetRenderInterval.ToString()}");
+            }
+            OnDemandRendering.renderFrameInterval = targetRenderInterval;
+            return true;
+
+            #else
+
+            return false;
+
+            #endif
+        }
+
+        private int CalculateTargetRenderInterval(IEnumerable<RenderIntervalRequest> requests, int fallback) {
+            var target = int.MaxValue;
+            bool anyRequest = false;
+            foreach (var request in requests) {
+                if (request.IsDisposed) continue;
+                anyRequest = true;
+                target = Mathf.Min(target, request.RenderInterval);
             }
             return (anyRequest ? target : fallback);
         }
