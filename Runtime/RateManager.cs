@@ -154,8 +154,6 @@ namespace UniRate {
         }
         private Action<RateManager, int> _targetUpdateRateChanged;
 
-        private Coroutine _coroutineThrottleEndOfFrame;
-
         private readonly HashSet<UpdateRateRequest> _updateRateRequests = new HashSet<UpdateRateRequest>();
 
         #endregion <<---------- UpdateRate Properties and Fields ---------->>
@@ -456,7 +454,7 @@ namespace UniRate {
             if (!Application.isPlaying) return;
             this.TargetUpdateRate = this.CalculateTargetUpdateRate(this._updateRateRequests, this._fallbackUpdateRate);
             this.TargetFixedUpdateRate = this.CalculateTargetFixedUpdateRate(this._fixedUpdateRateRequests, this._fallbackFixedUpdateRate);
-            this.ApplyUpdateRateSettings(this._updateRateMode, this._targetUpdateRate);
+            this.ApplyUpdateRateUnitySettings(this._updateRateMode, this._targetUpdateRate);
         }
 
         private void Reset() {
@@ -511,7 +509,7 @@ namespace UniRate {
             if (IsDebugBuild) {
                 Debug.Log($"[{nameof(RateManager)}] {nameof(this.UpdateRateMode)} changed to {updateRateMode.ToString()}");
             }
-            this.ApplyUpdateRateSettings(updateRateMode, this._targetUpdateRate);
+            this.ApplyUpdateRateUnitySettings(updateRateMode, this._targetUpdateRate);
             var e = this._updateRateModeChanged;
             if (e == null) return;
             e(this, updateRateMode);
@@ -534,7 +532,7 @@ namespace UniRate {
             if (IsDebugBuild) {
                 Debug.Log($"[{nameof(RateManager)}] {nameof(this.TargetUpdateRate)} changed to {targetUpdateRate.ToString()}");
             }
-            this.ApplyUpdateRateSettings(this._updateRateMode, targetUpdateRate);
+            this.ApplyUpdateRateUnitySettings(this._updateRateMode, targetUpdateRate);
             var e = this._targetUpdateRateChanged;
             if (e == null) return;
             e(this, targetUpdateRate);
@@ -719,11 +717,6 @@ namespace UniRate {
                     newTargetFrameRate = targetUpdateRate;
                     break;
 
-                case UpdateRateMode.ThrottleEndOfFrame:
-                    newVSyncCount = 0;
-                    newTargetFrameRate = 9999;
-                    break;
-
                 default:
                     Debug.LogError($"[{nameof(RateManager)}] not handling {nameof(UpdateRateMode)}.{updateRateMode.ToString()}");
                     return false;
@@ -750,34 +743,6 @@ namespace UniRate {
             return changed;
         }
 
-        private bool ApplyUpdateRateSettings(UpdateRateMode updateRateMode, int targetUpdateRate) {
-            bool changed = false;
-            bool isThrottleEndOfFrame = (updateRateMode == UpdateRateMode.ThrottleEndOfFrame);
-
-            if (!isThrottleEndOfFrame && this._coroutineThrottleEndOfFrame != null) {
-                changed = true;
-                if (IsDebugBuild) {
-                    Debug.Log($"[{nameof(RateManager)}] stopping end of frame throttle");
-                }
-                this.StopCoroutine(this._coroutineThrottleEndOfFrame);
-                this._coroutineThrottleEndOfFrame = null;
-            }
-
-            if (this.ApplyUpdateRateUnitySettings(updateRateMode, targetUpdateRate)) {
-                changed = true;
-            }
-
-            if (isThrottleEndOfFrame && this._coroutineThrottleEndOfFrame == null) {
-                changed = true;
-                if (IsDebugBuild) {
-                    Debug.Log($"[{nameof(RateManager)}] starting end of frame throttle");
-                }
-                this._coroutineThrottleEndOfFrame = this.StartCoroutine(this.ThrottleEndOfFrame());
-            }
-
-            return changed;
-        }
-
         private int CalculateTargetUpdateRate(IEnumerable<UpdateRateRequest> requests, int fallback) {
             var target = int.MinValue;
             bool anyRequest = false;
@@ -787,23 +752,6 @@ namespace UniRate {
                 target = Mathf.Max(target, request.UpdateRate);
             }
             return (anyRequest ? target : fallback);
-        }
-
-        private IEnumerator ThrottleEndOfFrame() {
-            // https://blogs.unity3d.com/pt/2019/06/03/precise-framerates-in-unity/
-            var currentFrameTime = Time.realtimeSinceStartup;
-            while (this._updateRateMode == UpdateRateMode.ThrottleEndOfFrame) {
-                yield return new WaitForEndOfFrame();
-                currentFrameTime += (1f / (float)this._targetUpdateRate);
-                var t = Time.realtimeSinceStartup;
-                var sleepTime = (currentFrameTime - t - 0.01f);
-                if (sleepTime > 0) {
-                    Thread.Sleep((int)(sleepTime * 1000));
-                }
-                while (t < currentFrameTime) {
-                    t = Time.realtimeSinceStartup;
-                }
-            }
         }
 
         private bool ApplyFixedUpdateRateUnitySettings(int targetFixedUpdateRate) {

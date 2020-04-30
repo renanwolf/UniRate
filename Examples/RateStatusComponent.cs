@@ -14,7 +14,6 @@ namespace UniRate.Examples {
         [Space]
         [SerializeField] private Toggle _toggleModeTargetFrameRate;
         [SerializeField] private Toggle _toggleModeVSyncCount;
-        [SerializeField] private Toggle _toggleModeThrottleEndOfFrame;
 
         [Space]
         [SerializeField] private Slider _sliderUpdateRate;
@@ -42,7 +41,6 @@ namespace UniRate.Examples {
 
             this._toggleModeTargetFrameRate.onValueChanged.AddListener(this.OnToggleModeTargetFrameRateValueChanged);
             this._toggleModeVSyncCount.onValueChanged.AddListener(this.OnToggleModeVSyncCountValueChanged);
-            this._toggleModeThrottleEndOfFrame.onValueChanged.AddListener(this.OnToggleModeThrottleEndOfFrameValueChanged);
 
             this.ApplyTextUpdateRate(this._rateManager.UpdateRate, this._rateManager.TargetUpdateRate);
             this.ApplyTextFixedUpdateRate(this._rateManager.FixedUpdateRate, this._rateManager.TargetFixedUpdateRate);
@@ -73,7 +71,6 @@ namespace UniRate.Examples {
 
             this._toggleModeTargetFrameRate.onValueChanged.RemoveListener(this.OnToggleModeTargetFrameRateValueChanged);
             this._toggleModeVSyncCount.onValueChanged.RemoveListener(this.OnToggleModeVSyncCountValueChanged);
-            this._toggleModeThrottleEndOfFrame.onValueChanged.RemoveListener(this.OnToggleModeThrottleEndOfFrameValueChanged);
 
             this._rateManager.UpdateRateChanged -= this.OnUpdateRateChanged;
             this._rateManager.TargetUpdateRateChanged -= this.OnTargetUpdateRateChanged;
@@ -143,11 +140,6 @@ namespace UniRate.Examples {
             this._rateManager.UpdateRateMode = UpdateRateMode.VSyncCount;
         }
 
-        private void OnToggleModeThrottleEndOfFrameValueChanged(bool isOn) {
-            if (!isOn || this._rateManager == null) return;
-            this._rateManager.UpdateRateMode = UpdateRateMode.ThrottleEndOfFrame;
-        }
-
         private void OnSliderUpdateRateChanged(float value) {
             if (this._rateManager == null) return;
             this._updateRateRequest?.Dispose();
@@ -200,7 +192,6 @@ namespace UniRate.Examples {
         private void ApplyTogglesUpdateRateMode(UpdateRateMode updateRateMode) {
             this._toggleModeTargetFrameRate.isOn = (updateRateMode == UpdateRateMode.ApplicationTargetFrameRate);
             this._toggleModeVSyncCount.isOn = (updateRateMode == UpdateRateMode.VSyncCount);
-            this._toggleModeThrottleEndOfFrame.isOn = (updateRateMode == UpdateRateMode.ThrottleEndOfFrame);
         }
         
         #endregion <<---------- General ---------->>

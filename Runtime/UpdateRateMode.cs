@@ -12,11 +12,6 @@ namespace UniRate {
         /// <summary>
         /// Uses the <see cref="QualitySettings.vSyncCount"/> to manage the update rate.
         /// </summary>
-        VSyncCount,
-
-        /// <summary>
-        /// Uses an end of frame coroutine with throttling to manage the update rate.
-        /// </summary>
-        ThrottleEndOfFrame
+        VSyncCount
     }
 }
