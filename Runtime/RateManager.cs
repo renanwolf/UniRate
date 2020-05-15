@@ -103,7 +103,7 @@ namespace UniRate {
         /// Target update rate per seconds.
         /// </summary>
         public int TargetUpdateRate {
-            get => this._targetUpdateRate;
+            get => this.ApplyTargetUpdateRateIfDirty();
             private set {
                 if (this._targetUpdateRate == value) return;
                 this._targetUpdateRate = value;
@@ -154,6 +154,7 @@ namespace UniRate {
         }
         private Action<RateManager, int> _targetUpdateRateChanged;
 
+        private bool _targetUpdateRateDirty = true;
         private readonly HashSet<UpdateRateRequest> _updateRateRequests = new HashSet<UpdateRateRequest>();
 
         #endregion <<---------- UpdateRate Properties and Fields ---------->>
@@ -195,7 +196,7 @@ namespace UniRate {
         /// Target fixed update rate per seconds.
         /// </summary>
         public int TargetFixedUpdateRate {
-            get => this._targetFixedUpdateRate;
+            get => this.ApplyTargetFixedUpdateRateIfDirty();
             private set {
                 if (this._targetFixedUpdateRate == value) return;
                 this._targetFixedUpdateRate = value;
@@ -232,6 +233,7 @@ namespace UniRate {
         }
         private Action<RateManager, int> _targetFixedUpdateRateChanged;
 
+        private bool _targetFixedUpdateRateDirty = true;
         private readonly HashSet<FixedUpdateRateRequest> _fixedUpdateRateRequests = new HashSet<FixedUpdateRateRequest>();
 
         #endregion <<---------- FixedUpdateRate Properties and Fields ---------->>
@@ -273,7 +275,7 @@ namespace UniRate {
         /// Target render interval.
         /// </summary>
         public int TargetRenderInterval {
-            get => this._targetRenderInterval;
+            get => this.ApplyTargetRenderIntervalIfDirty();
             private set {
                 if (this._targetRenderInterval == value) return;
                 this._targetRenderInterval = value;
@@ -350,6 +352,7 @@ namespace UniRate {
             }
         }
 
+        private bool _targetRenderIntervalDirty = true;
         private readonly HashSet<RenderIntervalRequest> _renderIntervalRequests = new HashSet<RenderIntervalRequest>();
         
         #if !UNITY_2019_3_OR_NEWER
@@ -412,27 +415,27 @@ namespace UniRate {
         }
 
         private void OnEnable() {
-            this.TargetUpdateRate = this.CalculateTargetUpdateRate(this._updateRateRequests, this._fallbackUpdateRate);
-            this.TargetFixedUpdateRate = this.CalculateTargetFixedUpdateRate(this._fixedUpdateRateRequests, this._fallbackFixedUpdateRate);
-            this.TargetRenderInterval = this.CalculateTargetRenderInterval(this._renderIntervalRequests, this._fallbackRenderInterval);
+            this._targetUpdateRateDirty = true;
+            this._targetFixedUpdateRateDirty = true;
+            this._targetRenderIntervalDirty = true;
         }
 
         private void Update() {
             
+            this.ApplyRenderIntervalUnitySettings(this.TargetRenderInterval);
             #if UNITY_2019_3_OR_NEWER
             this.RenderInterval = OnDemandRendering.renderFrameInterval;
-            this.ApplyRenderIntervalUnitySettings(this._targetRenderInterval);
             #else
             this.RenderInterval = 1;
             #endif
 
+            this.ApplyUpdateRateUnitySettings(this._updateRateMode, this.TargetUpdateRate);
             this.UpdateRate = Mathf.RoundToInt(1f / Time.unscaledDeltaTime);
-            this.ApplyUpdateRateUnitySettings(this._updateRateMode, this._targetUpdateRate);
         }
 
         private void FixedUpdate() {
+            this.ApplyFixedUpdateRateUnitySettings(this.TargetFixedUpdateRate);
             this.FixedUpdateRate = Mathf.RoundToInt(1f / Time.fixedUnscaledDeltaTime);
-            this.ApplyFixedUpdateRateUnitySettings(this._targetFixedUpdateRate);
         }
 
         private void OnApplicationQuit() {
@@ -452,9 +455,10 @@ namespace UniRate {
 
         private void OnValidate() {
             if (!Application.isPlaying) return;
-            this.TargetUpdateRate = this.CalculateTargetUpdateRate(this._updateRateRequests, this._fallbackUpdateRate);
-            this.TargetFixedUpdateRate = this.CalculateTargetFixedUpdateRate(this._fixedUpdateRateRequests, this._fallbackFixedUpdateRate);
-            this.ApplyUpdateRateUnitySettings(this._updateRateMode, this._targetUpdateRate);
+            this._targetUpdateRateDirty = true;
+            this._targetFixedUpdateRateDirty = true;
+            this._targetRenderIntervalDirty = true;
+            this.ApplyUpdateRateUnitySettings(this._updateRateMode, this.TargetUpdateRate);
         }
 
         private void Reset() {
@@ -509,7 +513,7 @@ namespace UniRate {
             if (IsDebugBuild) {
                 Debug.Log($"[{nameof(RateManager)}] {nameof(this.UpdateRateMode)} changed to {updateRateMode.ToString()}");
             }
-            this.ApplyUpdateRateUnitySettings(updateRateMode, this._targetUpdateRate);
+            this.ApplyUpdateRateUnitySettings(updateRateMode, this.TargetUpdateRate);
             var e = this._updateRateModeChanged;
             if (e == null) return;
             e(this, updateRateMode);
@@ -519,7 +523,7 @@ namespace UniRate {
             if (IsDebugBuild) {
                 Debug.Log($"[{nameof(RateManager)}] {nameof(this.FallbackUpdateRate)} changed to {fallbackUpdateRate.ToString()}");
             }
-            this.TargetUpdateRate = this.CalculateTargetUpdateRate(this._updateRateRequests, fallbackUpdateRate);
+            this._targetUpdateRateDirty = true;
         }
 
         private void OnUpdateRateChanged(int updateRate) {
@@ -539,7 +543,7 @@ namespace UniRate {
         }
 
         private void OnUpdateRateRequestsChanged(IEnumerable<UpdateRateRequest> requests) {
-            this.TargetUpdateRate = this.CalculateTargetUpdateRate(requests, this._fallbackUpdateRate);
+            this._targetUpdateRateDirty = true;
         }
 
         #endregion <<---------- UpdateRate Callbacks ---------->>
@@ -553,7 +557,7 @@ namespace UniRate {
             if (IsDebugBuild) {
                 Debug.Log($"[{nameof(RateManager)}] {nameof(this.FallbackFixedUpdateRate)} changed to {fallbackFixedUpdateRate.ToString()}");
             }
-            this.TargetFixedUpdateRate = this.CalculateTargetFixedUpdateRate(this._fixedUpdateRateRequests, fallbackFixedUpdateRate);
+            this._targetFixedUpdateRateDirty = true;
         }
 
         private void OnFixedUpdateRateChanged(int fixedUpdateRate) {
@@ -573,7 +577,7 @@ namespace UniRate {
         }
 
         private void OnFixedUpdateRateRequestsChanged(IEnumerable<FixedUpdateRateRequest> requests) {
-            this.TargetFixedUpdateRate = this.CalculateTargetFixedUpdateRate(requests, this._fallbackFixedUpdateRate);
+            this._targetFixedUpdateRateDirty = true;
         }
 
         #endregion <<---------- FixedUpdateRate Callbacks ---------->>
@@ -587,7 +591,7 @@ namespace UniRate {
             if (IsDebugBuild) {
                 Debug.Log($"[{nameof(RateManager)}] {nameof(this.FallbackRenderInterval)} changed to {fallbackRenderInterval.ToString()}");
             }
-            this.TargetRenderInterval = this.CalculateTargetRenderInterval(this._renderIntervalRequests, fallbackRenderInterval);
+            this._targetRenderIntervalDirty = true;
         }
 
         private void OnRenderIntervalChanged(int renderInterval) {
@@ -607,7 +611,7 @@ namespace UniRate {
         }
 
         private void OnRenderIntervalRequestsChanged(IEnumerable<RenderIntervalRequest> requests) {
-            this.TargetRenderInterval = this.CalculateTargetRenderInterval(requests, this._fallbackRenderInterval);
+            this._targetRenderIntervalDirty = true;
         }
         
         #endregion <<---------- RenderInterval Callbacks ---------->>
@@ -811,6 +815,30 @@ namespace UniRate {
                 target = Mathf.Min(target, request.RenderInterval);
             }
             return (anyRequest ? target : fallback);
+        }
+
+        private int ApplyTargetUpdateRateIfDirty() {
+            if (!this._targetUpdateRateDirty) return this._targetUpdateRate;
+            this._targetUpdateRateDirty = false;
+            int target = this.CalculateTargetUpdateRate(this._updateRateRequests, this._fallbackUpdateRate);
+            this.TargetUpdateRate = target;
+            return target;
+        }
+
+        private int ApplyTargetFixedUpdateRateIfDirty() {
+            if (!this._targetFixedUpdateRateDirty) return this._targetFixedUpdateRate;
+            this._targetFixedUpdateRateDirty = false;
+            int target = this.CalculateTargetFixedUpdateRate(this._fixedUpdateRateRequests, this._fallbackFixedUpdateRate);
+            this.TargetFixedUpdateRate = target;
+            return target;
+        }
+
+        private int ApplyTargetRenderIntervalIfDirty() {
+            if (!this._targetRenderIntervalDirty) return this._targetRenderInterval;
+            this._targetRenderIntervalDirty = false;
+            int target = this.CalculateTargetRenderInterval(this._renderIntervalRequests, this._fallbackRenderInterval);
+            this.TargetRenderInterval = target;
+            return target;
         }
 
         #endregion <<---------- General ---------->>
