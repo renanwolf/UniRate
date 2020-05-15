@@ -619,8 +619,8 @@ namespace UniRate {
 
 
 
-        #region <<---------- General ---------->>
-
+        #region <<---------- Requests ---------->>
+        
         /// <summary>
         /// Create a new <see cref="UpdateRateRequest"/>.
         /// </summary>
@@ -632,6 +632,13 @@ namespace UniRate {
             this._updateRateRequests.Add(request);
             this.OnUpdateRateRequestsChanged(this._updateRateRequests);
             return request;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="UpdateRateRequest"/>.
+        /// </summary>
+        public UpdateRateRequest RequestUpdateRate(RatePreset preset) {
+            return this.RequestUpdateRate(preset.UpdateRate);
         }
 
         /// <summary>
@@ -650,6 +657,13 @@ namespace UniRate {
         /// <summary>
         /// Create a new <see cref="FixedUpdateRateRequest"/>.
         /// </summary>
+        public FixedUpdateRateRequest RequestFixedUpdateRate(RatePreset preset) {
+            return this.RequestFixedUpdateRate(preset.FixedUpdateRate);
+        }
+
+        /// <summary>
+        /// Create a new <see cref="FixedUpdateRateRequest"/>.
+        /// </summary>
         public RenderIntervalRequest RequestRenderInterval(int renderInterval) {
             if (IsDebugBuild) {
                 Debug.Log($"[{nameof(RateManager)}] creating render interval request {renderInterval.ToString()}");
@@ -663,6 +677,13 @@ namespace UniRate {
             this._renderIntervalRequests.Add(request);
             this.OnRenderIntervalRequestsChanged(this._renderIntervalRequests);
             return request;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="FixedUpdateRateRequest"/>.
+        /// </summary>
+        public RenderIntervalRequest RequestRenderInterval(RatePreset preset) {
+            return this.RequestRenderInterval(preset.RenderInterval);
         }
 
         internal void CancelUpdateRateRequest(UpdateRateRequest request) {
@@ -696,6 +717,13 @@ namespace UniRate {
             if (!this._renderIntervalRequests.Remove(request)) return;
             this.OnRenderIntervalRequestsChanged(this._renderIntervalRequests);
         }
+        
+        #endregion <<---------- Requests ---------->>
+
+
+
+
+        #region <<---------- General ---------->>
 
         private bool ApplyUpdateRateUnitySettings(UpdateRateMode updateRateMode, int targetUpdateRate) {
             int newVSyncCount = 1;
