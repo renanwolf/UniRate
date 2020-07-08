@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
 
 #if UNITY_2019_3_OR_NEWER
@@ -59,7 +57,7 @@ namespace UniRate {
 
         #region <<---------- UpdateRate Properties and Fields ---------->>
 
-        [SerializeField] private UpdateRateMode _updateRateMode = UpdateRateMode.ApplicationTargetFrameRate;
+        [SerializeField] private UpdateRateMode _updateRateMode = UpdateRateMode.VSyncCount;
         [SerializeField] private int _fallbackUpdateRate = 20;
 
         /// <summary>
