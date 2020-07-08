@@ -471,7 +471,7 @@ namespace UniRate {
             if (this._guiBackgroundTexture == null) {
                 this._guiBackgroundTexture = new Texture2D(2, 2);
                 var colorArray = this._guiBackgroundTexture.GetPixels32();
-                var color = new Color32(0, 0, 0, 80);
+                var color = new Color32(0, 0, 0, 50);
                 for (int i = colorArray.Length - 1; i >= 0; i--) {
                     colorArray[i] = color;
                 }
