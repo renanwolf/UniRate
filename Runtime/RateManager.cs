@@ -58,7 +58,7 @@ namespace UniRate {
         #region <<---------- UpdateRate Properties and Fields ---------->>
 
         [SerializeField] private UpdateRateMode _updateRateMode = UpdateRateMode.VSyncCount;
-        [SerializeField] private int _fallbackUpdateRate = 20;
+        [SerializeField] private int _fallbackUpdateRate = 15;
 
         /// <summary>
         /// Update rate mode.
@@ -163,7 +163,7 @@ namespace UniRate {
         #region <<---------- FixedUpdateRate Properties and Fields ---------->>
 
         [Space]
-        [SerializeField] private int _fallbackFixedUpdateRate = 20;
+        [SerializeField] private int _fallbackFixedUpdateRate = 15;
 
         /// <summary>
         /// Fallback fixed update rate per seconds when there are no active requests.
