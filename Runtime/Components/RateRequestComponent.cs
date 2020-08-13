@@ -2,7 +2,7 @@
 
 namespace UniRate {
 
-    public class RateRequestComponent : MonoBehaviour {
+    public abstract class RateRequestComponent : MonoBehaviour {
 
         #region <<---------- Enum Preset Options ---------->>
         
@@ -35,41 +35,26 @@ namespace UniRate {
         protected RateManager Manager => this._manager;
         private RateManager _manager;
 
+        protected int ElapsedFramesSinceRequestsStarted => (Time.frameCount - this._requestsStartedAtFrame);
+        private int _requestsStartedAtFrame;
+
+        protected bool IsRequesting => this._isRequesting;
+        private bool _isRequesting;
+
         private RenderIntervalRequest _requestRenderInterval;
         private UpdateRateRequest _requestUpdateRate;
         private FixedUpdateRateRequest _requestFixedUpdateRate;
         
         #endregion <<---------- Properties and Fields ---------->>
-
-
-
-
-        #region <<---------- MonoBehaviour ---------->>
-
-        protected virtual void OnEnable() {
-            this._manager = RateManager.Instance;
-            this.StartRequests(this._manager, this.GetCurrentPreset());
-        }
-
-        protected virtual void OnDisable() {
-            this.StopRequests();
-        }
-
-        #if UNITY_EDITOR
-
-        protected virtual void OnValidate() {
-            if (!Application.isPlaying || !this.isActiveAndEnabled || this._manager == null) return;
-            this.StartRequests(this._manager, this.GetCurrentPreset());
-        }
-
-        #endif
         
-        #endregion <<---------- MonoBehaviour ---------->>
-
-
-
-
+        
+        
+        
         #region <<---------- General ---------->>
+
+        protected void CacheManager() {
+            this._manager = RateManager.Instance;
+        }
 
         protected RatePreset GetCurrentPreset() {
             int renderInterval;
@@ -132,6 +117,9 @@ namespace UniRate {
                 this._requestFixedUpdateRate.Dispose();
                 this._requestFixedUpdateRate = manager.RequestFixedUpdateRate(preset.FixedUpdateRate);
             }
+
+            this._requestsStartedAtFrame = Time.frameCount;
+            this._isRequesting = true;
         }
 
         protected void StopRequests() {
@@ -143,6 +131,9 @@ namespace UniRate {
             
             this._requestFixedUpdateRate?.Dispose();
             this._requestFixedUpdateRate = null;
+
+            this._isRequesting = false;
+            this._requestsStartedAtFrame = 0;
         }
         
         #endregion <<---------- General ---------->>
