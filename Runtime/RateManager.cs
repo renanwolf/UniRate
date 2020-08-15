@@ -453,7 +453,7 @@ namespace UniRate {
             if (this._guiBackgroundTexture == null) {
                 this._guiBackgroundTexture = new Texture2D(2, 2);
                 var colorArray = this._guiBackgroundTexture.GetPixels32();
-                var color = new Color32(0, 0, 0, 50);
+                var color = new Color32(0, 0, 0, 60);
                 for (int i = colorArray.Length - 1; i >= 0; i--) {
                     colorArray[i] = color;
                 }
@@ -463,7 +463,7 @@ namespace UniRate {
 
             if (this._guiStyleLabel == null) {
                 this._guiStyleLabel = new GUIStyle(GUI.skin.label);
-                this._guiStyleLabel.fontSize = 11;
+                this._guiStyleLabel.fontSize = 12;
                 this._guiStyleLabel.normal.background = this._guiBackgroundTexture;
                 this._guiStyleLabel.padding = new RectOffset(2, 2, 1, 1);
             }
