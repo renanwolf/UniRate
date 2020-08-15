@@ -89,8 +89,12 @@ namespace UniRate {
         
         private bool GetIsMoving(ScrollRect scrollRect) {
             var velocity = scrollRect.velocity;
-            return (velocity.x != 0f || velocity.y != 0f);
+            return (!this.IsFloatApproximatelyWithThreshold(velocity.x, 0f, 0.0001f) || !this.IsFloatApproximatelyWithThreshold(velocity.y, 0f, 0.0001f));
         }
+
+        private bool IsFloatApproximatelyWithThreshold(float value, float compareValue, float threshold) {
+			return (value >= (compareValue - threshold) && value <= (compareValue + threshold));
+		}
         
         #endregion <<---------- General ---------->>
     }
