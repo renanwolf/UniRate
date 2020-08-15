@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace PWR.LowPowerMemoryConsumption {
 
+	[Obsolete]
 	public class FrameRateTrigger : MonoBehaviour {
 
 		#region <<---------- Properties and Fields ---------->>

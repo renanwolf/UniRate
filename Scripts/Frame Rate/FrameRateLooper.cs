@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace PWR.LowPowerMemoryConsumption {
 
+    [Obsolete("OBSOLETE, this package will no longer provide the FrameRateLooper on next versions")]
     public class FrameRateLooper {
 
         #region <<---------- Properties and Fields ---------->>

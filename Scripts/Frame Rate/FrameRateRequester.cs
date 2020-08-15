@@ -1,9 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
 
 namespace PWR.LowPowerMemoryConsumption {
 
-	// ObsoletedWarning 2019/05/09 - ObsoletedError 20##/##/##
-	[System.Obsolete("OBSOLETE, use FrameRateRequestComponent instead")]
+	[Obsolete("OBSOLETE, use RateRequestWhileEnabledComponent instead")]
 	public class FrameRateRequester : FrameRateRequestComponent {
 
 		#region <<---------- Initializers ---------->>

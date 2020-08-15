@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace PWR.LowPowerMemoryConsumption {
 
+	[Obsolete("OBSOLETE, use RateRequestWhileEnabledComponent instead")]
 	public class FrameRateRequestComponent : MonoBehaviour {
 
 		#region <<---------- Initializers ---------->>
