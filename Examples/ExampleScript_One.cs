@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace UniRate.Examples {
 
-    public class RateStatusComponent : MonoBehaviour {
+    public class ExampleScript_One : MonoBehaviour {
         
         #region <<---------- Properties and Fields ---------->>
         
