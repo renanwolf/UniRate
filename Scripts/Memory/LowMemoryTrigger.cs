@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -8,6 +8,7 @@ using UnityEditor;
 
 namespace PWR.LowPowerMemoryConsumption {
 
+    [Obsolete("OBSOLETE, this package will no longer provide the MemoryManager system on next versions")]
     public class LowMemoryTrigger : MonoBehaviour {
 
         #region <<---------- Properties and Fields ---------->>

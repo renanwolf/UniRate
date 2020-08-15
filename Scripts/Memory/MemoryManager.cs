@@ -9,6 +9,7 @@ using UnityEditor;
 namespace PWR.LowPowerMemoryConsumption {
 
 	[DisallowMultipleComponent]
+	[Obsolete("OBSOLETE, this package will no longer provide the MemoryManager system on next versions")]
     public class MemoryManager : MonoBehaviour {
 
         #region <<---------- Singleton ---------->>
