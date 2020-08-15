@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using UnityEngine;
+using UnityEditor;
 
 namespace UniRate.Editor {
 
@@ -16,6 +17,8 @@ namespace UniRate.Editor {
 
         private SerializedProperty _propRenderIntervalPresetOption;
         private SerializedProperty _propRenderIntervalCustomValue;
+
+        private SerializedProperty _propDelaySecondsToStopRequests;
 
         private readonly string[] _displayUpdateRate = new [] {
             $"{RateRequestComponent.PresetOptions.Ultra.ToString()}  ({RatePreset.Ultra.UpdateRate.ToString()})",
@@ -65,11 +68,21 @@ namespace UniRate.Editor {
             
             this._propRenderIntervalPresetOption = this.serializedObject.FindProperty("_renderIntervalPresetOption");
             this._propRenderIntervalCustomValue = this.serializedObject.FindProperty("_renderIntervalCustomValue");
+
+            this._propDelaySecondsToStopRequests = this.serializedObject.FindProperty("_delaySecondsToStopRequests");
         }
 
         public override void OnInspectorGUI() {
             this.serializedObject.Update();
             this.DrawDefaultInspector();
+
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(this._propDelaySecondsToStopRequests, new GUIContent("Delay Seconds to Stop Requests"));
+            if (EditorGUI.EndChangeCheck()) {
+                this.serializedObject.ApplyModifiedProperties();
+            }
+            EditorGUILayout.Space();
+
             bool isCustom;
 
             EditorGUI.BeginChangeCheck();

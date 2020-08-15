@@ -20,8 +20,6 @@ namespace UniRate {
             }
         }
         private bool _isFocused;
-
-        private const int StopDelayFrames = 3;
         
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -43,7 +41,7 @@ namespace UniRate {
 
         private void Update() {
             this.IsFocused = this._inputField.isFocused;
-            if (this._isFocused || !this.IsRequesting || this.ElapsedFramesSinceRequestsStarted <= StopDelayFrames) return;
+            if (this._isFocused || !this.IsRequesting || this.ElapsedSecondsSinceRequestsStarted <= this.DelaySecondsToStopRequests) return;
             this.StopRequests();
         }
 
@@ -76,7 +74,7 @@ namespace UniRate {
                 this.Manager.ApplyTargetsIfDirty();
                 return;
             }
-            if (!this.IsRequesting || this.ElapsedFramesSinceRequestsStarted <= StopDelayFrames) return;
+            if (!this.IsRequesting || this.ElapsedSecondsSinceRequestsStarted <= this.DelaySecondsToStopRequests) return;
             this.StopRequests();
         }
         

@@ -15,8 +15,6 @@ namespace UniRate {
             }
         }
         private bool _isTouching;
-
-        private const int StopDelayFrames = 5;
         
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -35,7 +33,7 @@ namespace UniRate {
 
         private void Update() {
             this.IsTouching = this.GetHasTouchesOrClicks();
-            if (this._isTouching || !this.IsRequesting || this.ElapsedFramesSinceRequestsStarted <= StopDelayFrames) return;
+            if (this._isTouching || !this.IsRequesting || this.ElapsedSecondsSinceRequestsStarted <= this.DelaySecondsToStopRequests) return;
             this.StopRequests();
         }
 
@@ -66,7 +64,7 @@ namespace UniRate {
                 this.Manager.ApplyTargetsIfDirty();
                 return;
             }
-            if (!this.IsRequesting || this.ElapsedFramesSinceRequestsStarted <= StopDelayFrames) return;
+            if (!this.IsRequesting || this.ElapsedSecondsSinceRequestsStarted <= this.DelaySecondsToStopRequests) return;
             this.StopRequests();
         }
         

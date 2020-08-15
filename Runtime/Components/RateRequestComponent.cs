@@ -22,6 +22,8 @@ namespace UniRate {
         
         
         #region <<---------- Properties and Fields ---------->>
+
+        [SerializeField][HideInInspector] private float _delaySecondsToStopRequests = 2f;
         
         [SerializeField][HideInInspector] private PresetOptions _renderIntervalPresetOption = PresetOptions.High;
         [SerializeField][HideInInspector] private int _renderIntervalCustomValue = RatePreset.High.RenderInterval;
@@ -35,8 +37,10 @@ namespace UniRate {
         protected RateManager Manager => this._manager;
         private RateManager _manager;
 
-        protected int ElapsedFramesSinceRequestsStarted => (Time.frameCount - this._requestsStartedAtFrame);
-        private int _requestsStartedAtFrame;
+        protected float DelaySecondsToStopRequests => this._delaySecondsToStopRequests;
+
+        protected float ElapsedSecondsSinceRequestsStarted => (Time.realtimeSinceStartup - this._requestsStartedAtRealTime);
+        private float _requestsStartedAtRealTime;
 
         protected bool IsRequesting => this._isRequesting;
         private bool _isRequesting;
@@ -118,7 +122,7 @@ namespace UniRate {
                 this._requestFixedUpdateRate = manager.RequestFixedUpdateRate(preset.FixedUpdateRate);
             }
 
-            this._requestsStartedAtFrame = Time.frameCount;
+            this._requestsStartedAtRealTime = Time.realtimeSinceStartup;
             this._isRequesting = true;
         }
 
@@ -133,7 +137,7 @@ namespace UniRate {
             this._requestFixedUpdateRate = null;
 
             this._isRequesting = false;
-            this._requestsStartedAtFrame = 0;
+            this._requestsStartedAtRealTime = 0f;
         }
         
         #endregion <<---------- General ---------->>

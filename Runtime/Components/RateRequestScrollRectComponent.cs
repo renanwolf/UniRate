@@ -19,8 +19,6 @@ namespace UniRate {
             }
         }
         private bool _isMoving;
-
-        private const int StopDelayFrames = 3;
         
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -41,7 +39,7 @@ namespace UniRate {
 
         private void Update() {
             this.IsMoving = this.GetIsMoving(this._scrollRect);
-            if (this._isMoving || !this.IsRequesting || this.ElapsedFramesSinceRequestsStarted <= StopDelayFrames) return;
+            if (this._isMoving || !this.IsRequesting || this.ElapsedSecondsSinceRequestsStarted <= this.DelaySecondsToStopRequests) return;
             this.StopRequests();
         }
 
@@ -73,7 +71,7 @@ namespace UniRate {
                 this.Manager.ApplyTargetsIfDirty();
                 return;
             }
-            if (!this.IsRequesting || this.ElapsedFramesSinceRequestsStarted <= StopDelayFrames) return;
+            if (!this.IsRequesting || this.ElapsedSecondsSinceRequestsStarted <= this.DelaySecondsToStopRequests) return;
             this.StopRequests();
         }
         
