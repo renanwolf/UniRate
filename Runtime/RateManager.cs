@@ -475,9 +475,10 @@ namespace UniRate {
 
             var safeArea = Screen.safeArea;
             this._guiStyleLabel.CalcMinMaxWidth(this._guiContentText, out float minWidth, out float maxWidth);
-            var width = Mathf.Min(safeArea.width - 10, maxWidth);
-            float space = Mathf.Min(5f, ((safeArea.width - width) / 2f));
-            var rectLine = new Rect(safeArea.x + space, safeArea.y + space, width, this._guiStyleLabel.CalcHeight(this._guiContentText, width));
+            var labelWidth = Mathf.Min(safeArea.width - 10, maxWidth);
+            float labelSpaceH = Mathf.Min(5f, ((safeArea.width - labelWidth) / 2f));
+            float labelSpaceV = Math.Max(Screen.height - safeArea.height, 5f);
+            var rectLine = new Rect(safeArea.x + labelSpaceH, labelSpaceV, labelWidth, this._guiStyleLabel.CalcHeight(this._guiContentText, labelWidth));
 
             GUI.Label(rectLine, this._guiContentText, this._guiStyleLabel);
         }
