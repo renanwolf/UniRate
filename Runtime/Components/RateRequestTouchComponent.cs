@@ -63,6 +63,7 @@ namespace UniRate {
         private void OnIsTouchingChanged(bool isTouching) {
             if (isTouching) {
                 this.StartRequests(this.Manager, this.GetCurrentPreset());
+                this.Manager.ApplyTargetsIfDirty();
                 return;
             }
             if (!this.IsRequesting || this.ElapsedFramesSinceRequestsStarted <= StopDelayFrames) return;

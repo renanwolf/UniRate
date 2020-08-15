@@ -73,6 +73,7 @@ namespace UniRate {
         private void OnIsFocusedChanged(bool isFocused) {
             if (isFocused) {
                 this.StartRequests(this.Manager, this.GetCurrentPreset());
+                this.Manager.ApplyTargetsIfDirty();
                 return;
             }
             if (!this.IsRequesting || this.ElapsedFramesSinceRequestsStarted <= StopDelayFrames) return;

@@ -830,6 +830,12 @@ namespace UniRate {
             return (anyRequest ? target : fallback);
         }
 
+        public void ApplyTargetsIfDirty() {
+            this.ApplyTargetRenderIntervalIfDirty();
+            this.ApplyTargetUpdateRateIfDirty();
+            this.ApplyTargetFixedUpdateRateIfDirty();
+        }
+
         private int ApplyTargetUpdateRateIfDirty() {
             if (!this._targetUpdateRateDirty) return this._targetUpdateRate;
             this._targetUpdateRateDirty = false;

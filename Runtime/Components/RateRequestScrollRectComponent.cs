@@ -70,6 +70,7 @@ namespace UniRate {
         private void OnIsMovingChanged(bool isMoving) {
             if (isMoving) {
                 this.StartRequests(this.Manager, this.GetCurrentPreset());
+                this.Manager.ApplyTargetsIfDirty();
                 return;
             }
             if (!this.IsRequesting || this.ElapsedFramesSinceRequestsStarted <= StopDelayFrames) return;
