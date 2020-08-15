@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -9,6 +8,7 @@ using UnityEditor;
 namespace PWR.LowPowerMemoryConsumption {
 
     [Serializable]
+    [Obsolete]
     public class RenderIntervalManagerPointer {
         
         #region <<---------- Properties and Fields ---------->>
@@ -88,22 +88,7 @@ namespace PWR.LowPowerMemoryConsumption {
 
         #region <<---------- General ---------->>
         
-        /// <summary>
-		/// Get manager by reference or by identifier, depending on <see cref="ByReference"/> flag.
-		/// </summary>
-        public RenderIntervalManager GetManager() {
-            if (this._byReference) return this._reference;
-			if (string.IsNullOrEmpty(this._identifier)) return null;
-            #if UNITY_EDITOR
-            var manager = RenderIntervalManager.Instances.FirstOrDefault(mngr => mngr.Identifier == this._identifier);
-            if (manager == null) {
-                Debug.LogWarning("[" + this.GetType().Name + "] not found '" + typeof(RenderIntervalManager).Name + "' with identifier '" + this._identifier + "'");
-            }
-            return manager;
-            #else
-            return RenderIntervalManager.Instances.FirstOrDefault(mngr => mngr.Identifier == this._identifier);
-            #endif
-        }
+        public RenderIntervalManager GetManager() => null;
         
         #endregion <<---------- General ---------->>
 
