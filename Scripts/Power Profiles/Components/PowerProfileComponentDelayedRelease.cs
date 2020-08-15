@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace PWR.LowPowerMemoryConsumption {
 
+    [Obsolete]
     public abstract class PowerProfileComponentDelayedRelease : PowerProfileComponent {
         
         #region <<---------- Properties and Fields ---------->>

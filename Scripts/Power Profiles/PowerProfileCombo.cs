@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -8,7 +9,7 @@ using UnityEditorInternal;
 
 namespace PWR.LowPowerMemoryConsumption {
 
-    [CreateAssetMenuAttribute(menuName="PWR/Power Profiles/Combo",order=1000)]
+    [Obsolete]
     public class PowerProfileCombo : PowerProfile {
 
         #region <<---------- Properties and Fields ---------->>

@@ -1,5 +1,6 @@
 ﻿//#define TM_PRO
 
+using System;
 using UnityEngine;
 #if TM_PRO
 using TMPro;
@@ -10,6 +11,7 @@ namespace PWR.LowPowerMemoryConsumption {
     #if TM_PRO
     [RequireComponent(typeof(TMP_InputField))]
     #endif
+    [Obsolete("OBSOLETE, use RateRequestTMPInputFieldComponent instead.")]
     public class PowerProfileTMPInputField : PowerProfileComponentDelayedRelease {
 
         #region <<---------- Properties and Fields ---------->>

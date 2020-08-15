@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace PWR.LowPowerMemoryConsumption {
 
     [CreateAssetMenuAttribute(menuName="PWR/Power Profiles/Frame Rate",order=1001)]
+    [Obsolete]
     public class PowerProfileFrameRate : PowerProfile {
 
         #region <<---------- Properties and Fields ---------->>

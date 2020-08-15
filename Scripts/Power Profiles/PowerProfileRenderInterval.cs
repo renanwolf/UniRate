@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace PWR.LowPowerMemoryConsumption {
 
     [CreateAssetMenuAttribute(menuName="PWR/Power Profiles/Render Interval",order=1002)]
+	[Obsolete]
     public class PowerProfileRenderInterval : PowerProfile {
 
         #region <<---------- Properties and Fields ---------->>

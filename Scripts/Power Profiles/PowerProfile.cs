@@ -10,6 +10,7 @@ using UnityEditor;
 namespace PWR.LowPowerMemoryConsumption {
 
     [Serializable]
+    [Obsolete]
     public abstract class PowerProfile : ScriptableObject {
         
         #region <<---------- Properties and Fields ---------->>

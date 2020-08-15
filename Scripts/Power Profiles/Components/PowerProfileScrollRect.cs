@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace PWR.LowPowerMemoryConsumption {
 
     [RequireComponent(typeof(ScrollRect))]
+    [Obsolete("OBSOLETE, use RateRequestScrollRectComponent instead.")]
     public class PowerProfileScrollRect : PowerProfileComponentDelayedRelease {
         
         #region <<---------- Properties and Fields ---------->>

@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace PWR.LowPowerMemoryConsumption {
 
     [RequireComponent(typeof(InputField))]
+    [Obsolete("OBSOLETE, use RateRequestInputFieldComponent instead.")]
     public class PowerProfileInputField : PowerProfileComponentDelayedRelease {
 
         #region <<---------- Properties and Fields ---------->>

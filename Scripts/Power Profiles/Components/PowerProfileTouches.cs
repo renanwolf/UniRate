@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace PWR.LowPowerMemoryConsumption {
 
+    [Obsolete("OBSOLETE, use RateRequestTouchComponent instead")]
     public class PowerProfileTouches : PowerProfileComponentDelayedRelease {
         
         #region <<---------- Properties and Fields ---------->>
