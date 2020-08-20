@@ -42,16 +42,16 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		[Obsolete("OBSOLETE, use RateManager.Instance.FallbackUpdateRate instead.")]
+		[Obsolete("OBSOLETE, use RateManager.Instance.MinimumUpdateRate instead.")]
 		public int FallbackFrameRate {
-			get => RateManager.Instance.FallbackUpdateRate;
-			set => RateManager.Instance.FallbackUpdateRate = value;
+			get => RateManager.Instance.MinimumUpdateRate;
+			set => RateManager.Instance.MinimumUpdateRate = value;
 		}
 
-		[Obsolete("OBSOLETE, use RateManager.Instance.FallbackFixedUpdateRate instead.")]
+		[Obsolete("OBSOLETE, use RateManager.Instance.MinimumFixedUpdateRate instead.")]
 		public int FallbackFixedFrameRate {
-			get => RateManager.Instance.FallbackFixedUpdateRate;
-			set => RateManager.Instance.FallbackFixedUpdateRate = value;
+			get => RateManager.Instance.MinimumFixedUpdateRate;
+			set => RateManager.Instance.MinimumFixedUpdateRate = value;
 		}
 
 		[Obsolete("OBSOLETE, use RateManager.Instance.UpdateRateChanged instead.")]

@@ -19,10 +19,10 @@ namespace PWR.LowPowerMemoryConsumption {
 
 		#region <<---------- Properties and Fields ---------->>
 
-		[Obsolete("OBSOLETE, use RateManager.Instance.FallbackRenderInterval instead.")]
+		[Obsolete("OBSOLETE, use RateManager.Instance.MaximumRenderInterval instead.")]
 		public int FallbackRenderInterval {
-			get => RateManager.Instance.FallbackRenderInterval;
-			set => RateManager.Instance.FallbackRenderInterval = value;
+			get => RateManager.Instance.MaximumRenderInterval;
+			set => RateManager.Instance.MaximumRenderInterval = value;
 		}
 
 		[Obsolete("OBSOLETE, use RateManager.Instance.RenderInterval instead.")]
