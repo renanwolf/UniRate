@@ -1,252 +1,124 @@
-# Unity LowPower and Memory Consumption
+# UniRate
 
-> WIP converting to UniRate
+by Renan Wolf Pace
 
-LowPowerMemoryConsumption is a Unity plugin to reduce device's battery usage, main focused on GUI oriented apps and turn-based games. To optimize energy drain this package provides a framerate management to reduce the CPU usage and a render interval management to reduce the GPU usage.
+## Overview
 
-## Quick Start
+A Unity plugin to easily manage the application frame rate and rendering interval.
 
-#### Installation
+It's not desirable to keep your game always running at the highest frame rate, especially on mobile platforms where you can quickly consume a lot of battery power and increase device heat.
 
-Import the [.unitypackage](https://github.com/renanwolf/Unity-LowPowerMemoryConsumption/releases/tag/v1.1.0) to your project or download the repository from the `release` branch and import the files to your project's Assets folder.
+To help you solve these problems, UniRate provides you a simple solution to control the update rate, fixed update rate and render interval from everywhere in your code without worrying about multiple requests.
 
-#### Namespace
+## Installation
 
-All the scripts are inside the `PWR.LowPowerMemoryConsumption` namespace.
+#### via Package Manager
 
-## Frame Rate
-
-#### Manager
-
-FrameRateManager is a singleton that allows to control the game framerate (FPS) and the fixed framerate (PhysicsFPS). Also provides the current FPS and PhysicsFPS values.
-
-It manages multiples framerate requests and apply the highest one, or the fallback framerate if there are no requests.
-
-To create the FrameRateManager instace while editing your scene, just create an empty GameObject and add the FrameRateManager component, after that you can settup it in the Inspector. Otherwise just access `FrameRateManager.Instance` by code and it will be automatically created.
-
-#### Requests
-
-To request a framerate to the manager you can use a `FrameRateRequest` by code or the `FrameRateRequestComponent`.
-
-##### FrameRateRequestComponent
-
-This component will start the framerate request at `OnEnable` and stop at `OnDisable`.
-
-In the inspetor you can choose the framerate value and the type between FPS and FixedFPS.
-
-##### Request by code
-
-```csharp
-using UnityEngine;
-using PWR.LowPowerMemoryConsumption;
-
-public class MyCodeAnimation : MonoBehaviour {
-
-  public bool animateOnFixedUpdate;
-
-  private FrameRateRequest requestFPS;
-  private FrameRateRequest requestFixedFPS;
-
-  void OnEnable() {
-    this.requestFPS = FrameRateManager.Instance.StartRequest(FrameRateType.FPS, 60);
-    this.requestFixedFPS = FrameRateManager.Instance.StartRequest(FrameRateType.FixedFPS, 50);
-  }
-
-  void OnDisable() {
-    FrameRateManager.Instance.StopRequest(this.requestFPS);
-    FrameRateManager.Instance.StopRequest(this.requestFixedFPS);
-  }
-
-  void Update() {
-    if (animateOnFixedUpdate) return;
-    DoAnimationStep();
-  }
-
-  void FixedUpdate() {
-    if (!animateOnFixedUpdate) return;
-    DoAnimationStep();
-  }
-  
-  void DoAnimationStep() { ... }
+Add this line to the `Packages/manifest.json` file of your Unity project:
+```json
+"dependencies": {
+    "com.pflowr.unirate": "https://github.com/renanwolf/Unity-LowPowerMemoryConsumption.git",
 }
 ```
 
-#### Callbacks and Triggers
+#### via Assets Import Package
 
-In order to get callbacks from the FrameRateManager, you can start listening to its events by code or use the `FrameRateTrigger` component.
+Import the [.unitypackage](https://github.com/renanwolf/Unity-LowPowerMemoryConsumption/releases/latest) from the latest release to your Unity project.
 
-#### FrameRateLooper
+## Rate Manager
 
-It's a class to help you to execute heavy loops while keeping the desired frame rate, running the loop inside a coroutine and when necessary waiting a frame.
+RateManager is the main plugin singleton that allows you to control all the rates and intervals. It is recommended that for anything else than throwaway code, you keep the instance referenced with you while using it.
+
+It manages multiples rate/interval requests and apply the best one.
+
+You can just access the `RateManager.Instance` by code and it will be automatically created, or create an empty `GameObject` and attach the `RateManager` component to it.
+
+#### Setting Up
+
+- `UpdateRateMode`: set to `VSyncCount` or `ApplicationTargetFrameRate` to choose how the update rate will be managed.
+
+- `MinimumUpdateRate`: is the minimum allowed update rate that can be applied. Any request bellow this value will be ignored.
+
+- `MinimumFixedUpdateRate`: is the minimum allowed fixed update rate that can be applied. Any request bellow this value will be ignored.
+
+- `MaximumRenderInterval`: is the maximum allowed render interval that can be applied. Any request above this value will be ignored.
+
+## Rate and Interval Requests
+
+To start a request you need to access the `RateManager.Instance` and use one of the following methods:
+
+- `RequestUpdateRate(int)` to start a new update rate request, it returns the `UpdateRateRequest`.
+
+- `RequestFixedUpdateRate(int)` to start a new fixed update rate request, it returns the `FixedUpdateRateRequest`.
+
+- `RequestRenderInterval(int)` to start a new render interval request, it returns the `RenderIntervalRequest`.
+
+All the requests returned from these methods inherits from `RateRequest` and implements `IDisposable`. Keep the requests with you to be able to cancel them later.
+
+To cancel a request just dispose it!
 
 ```csharp
-using UnityEngine;
-using System.Collections.Generic;
-using PWR.LowPowerMemoryConsumption;
+using UniRate;
+...
 
-public class ListItemsUI : MonoBehaviour {
+private IEnumerator ExampleCoroutineThatPerformsAnimation() {
 
-  public GameObject itemPrefab;
-
-  private FrameRateRequest requestFPS;
-  private FrameRateLooper looperFPS;
-
-  public List<MyItemData> datasource;
-
-  void Awake() {
-    this.datasource = this.FetchDataSource();
-
-    this.looperFPS = new FrameRateLooper() {
-      FrameRateToKeep = 30,
-      MinCyclesPerFrame = 2,
-      MaxCyclesPerFrame = 10,
-      TimeoutWaitForFrameRate = 1f
-    };
-    this.looperFPS.Count = this.datasource.Count;
-
-    this.looperFPS.LoopStarted += (looper) => {
-      looper.Index = 0;
-      this.requestFPS = FrameRateManager.Instance.StartRequest(FrameRateType.FPS, 60);
-    };
-
-    this.looperFPS.LoopFinished += (looper) => {
-      FrameRateManager.Instance.StopRequest(this.requestFPS);
-    };
-
-    this.looperFPS.LoopCycle(looper => {
-
-      var item = Instantiate(this.itemPrefab);
-      item.transform.SetParent(this.transform);
-      item.GetComponent<MyItemComponent>().LoadData(this.datasource[looper.Index]);
-
-      looper.Index += 1;
-    });
-
-    this.looperFPS.LoopWhile(looper => looper.Index < looper.Count);
-  }
-
-  void OnEnable() {
-    this.looperFPS.Start(this);
-  }
-
-  void OnDisable() {
-    this.looperFPS.Stop();
-  }
+  // get the RateManager instance
+  var rateManager = RateManager.Instance;
   
-  List<MyItemData> FetchDataSource() { ... }
+  // starts the requests you need
+  var updateRateRequest = rateManager.RequestUpdateRate(60);
+  var fixedUpdateRateRequest = rateManager.RequestFixedUpdateRate(50);
+  var renderIntervalRequest = rateManager.RequestRenderInterval(1); // only works on Unity 2019.3 or newer
+
+  while (isAnimating) {
+    ...
+    yield return null;
+  }
+
+  // cancel them when you are done
+  updateRateRequest.Dispose();
+  fixedUpdateRateRequest.Dispose();
+  renderIntervalRequest.Dispose();
 }
 ```
+
+## Update Rate
+
+Is the number of `Update` per second that the game executes.
+
+Unity uses the update rate to manage the input system, so if it's too low the engine will not detect user's inputs correctly. It should be fine if it stays at least around 18.
+
+## Fixed Update Rate
+
+Is the number of `FixedUpdate` per second that the game executes.
 
 ## Render Interval
 
-#### Manager
+Is the number of `Update` that will take before the game executes a render. A value of 1 means the game will render on every update, a value of 2 on every other update, and so on.
 
-RenderIntervalManager is a component that allows to control the render interval of a camera. Interval of 1 means the camera will render on every `Update`, interval of 2 means the camera will render on every 2 `Update`s and so on.
+It **only works on Unity 2019.3 or newer**, since its use the new Unity `OnDemandRendering` API.
 
-It manages multiples render interval requests and apply the lowest one, or the fallback interval if there are no requests.
+if you need to verify if the current frame will render just access the `WillRender` flag inside the `RateManager` instance.
 
-Add this component to your cameras to start managing the render interval of them.
+## Ready to use Components
 
-#### Requests
+There are a few components already created to manage requests in some circumstances, if they aren't enough you can create yours.
 
-To request a render interval to a camera you can use a `RenderIntervalRequest` by code or the `RenderIntervalRequestComponent`.
+#### RateRequestWhileEnabledComponent
 
-##### RenderIntervalRequestComponent
+This component will keep the requests active while it is active and enabled.
 
-This component will start the render interval request at `OnEnable` and stop at `OnDisable`.
+#### RateRequestTouchComponent
 
-In the inspetor you can choose the interval value and the target `RenderIntervalManager`.
+This component will keep the requests active while `Input.touchCount` is greater then zero or `Input.GetMouseButton(0, 1, 2)` is true.
 
-##### Request by code
+#### RateRequestScrollRectComponent
 
-```csharp
-using UnityEngine;
-using PWR.LowPowerMemoryConsumption;
+This component will keep the requests active while the `ScrollRect.velocity` is not zero or when it changes the normalized position.
 
-public class MyOtherCodeAnimation : MonoBehaviour {
+#### RateRequestInputFieldComponent _and_ RateRequestTMPInputFieldComponent
 
-  public RenderIntervalManagerPointer managerPointer;
+These components will keep the requests active while the input field is focused or when the text changes.
 
-  void OnEnable() {
-    StartCorouitne(AnimCoroutine());
-  }
-
-  IEnumarator AnimCoroutine() {
-     var request = this.managerPointer.GetManager().StartRequest(1);
-     var finished = false;
-     while (!finished) {
-       //anim logic
-       yield return null;
-     }
-     this.managerPointer.GetManager().StopRequest(request);
-  }
-}
-```
-
-#### Callbacks and Triggers
-
-In order to get callbacks from a RenderIntervalManager, you can start listening to its events by code or use the `RenderIntervalTrigger` component.
-
-## Memory
-
-#### Manager
-
-MemoryManager is a sigleton that will handle application low memory callbacks with options to unload unused assets and collect garbage after the callback.
-
-To create the MemoryManager instace while editing your scene, just create an empty GameObject and add the MemoryManager component, after that you can settup it in the Inspector. Otherwise just access `MemoryManager.Instance` by code and it will be automatically created.
-
-#### Callbacks and Triggers
-
-In order to get low memory callbacks, you can start listening to the MemoryManager by code or use the `LowMemoryTrigger` component.
-
-##### LowMemoryTrigger Component
-
-This component will be listening to the MemoryManager while active and enable. It has a UnityEvent `LowMemory` that you can register functions to receive the low memory callback.
-
-##### Start/Stop listening by code
-
-```csharp
-using UnityEngine;
-using PWR.LowPowerMemoryConsumption;
-
-public class MyHeavyAssets : MonoBehaviour {
-
-  void OnEnable() {
-    MemoryManager.Instance.LowMemory += OnLowMemory;
-  }
-  
-  void OnDisable() {
-    MemoryManager.Instance.LowMemory -= OnLowMemory;
-  }
-  
-  void OnLowMemory() {
-    // change your heavy assets to small ones
-  }
-}
-```
-
-## Power Profiles
-
-`PowerProfile`s are `ScriptableObject`s that are useful to combine multiple kind of requests to the `FrameRateManager` and `RenderIntervalManager`. They work with a retain/release pattern. When retain count is greater than zero it starts its requests to the managers, otherwise stop them.
-
-To create a profile, right click in a folder inside the Project window and go to 'Create > PWR > Power Profiles'
-
-#### Components
-
-There are a few componets already created to retain/release a `PowerProfile` in some circumstances, if they aren't enough you can create yours.
-
-##### PowerProfileComponent
-
-This component will retain the `PowerProfile` at `OnEnable` and release it at `OnDisable`.
-
-##### PowerProfileTouches
-
-This component will retain the `PowerProfile` when `Input.touchCount` returns greater then zero and will release it delayed when `Input.touchCount` returns zero.
-
-##### PowerProfileScrollRect
-
-This component will retain the `PowerProfile` when the `ScrollRect` changes its normalized position and will release it delayed as setup from the inspector.
-
-##### PowerProfileInputField and PowerProfileTMPInputField
-
-This component will retain the `PowerProfile` when the input field values changes and will release it delayed as setup from the inspector.
+To enable the `RateRequestTMPInputFieldComponent` you need to add the `TMPRO` define symbol in your player settings.
