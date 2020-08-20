@@ -594,9 +594,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _updateRateMode: 1
-  _fallbackUpdateRate: 15
-  _fallbackFixedUpdateRate: 15
-  _fallbackRenderInterval: 3
+  _minimumUpdateRate: 15
+  _minimumFixedUpdateRate: 15
+  _maximumRenderInterval: 3
 --- !u!4 &476410226
 Transform:
   m_ObjectHideFlags: 0
