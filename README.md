@@ -14,24 +14,24 @@ To help you solve these problems, UniRate provides you a simple solution to cont
 
 #### via Package Manager
 
-Add this line to the `Packages/manifest.json` file of your Unity project:
+Add the following dependency to the `Packages/manifest.json` file of your Unity project:
 ```json
 "dependencies": {
-    "com.pflowr.unirate": "https://github.com/renanwolf/Unity-LowPowerMemoryConsumption.git",
+    "com.pflowr.unirate": "https://github.com/renanwolf/UniRate.git",
 }
 ```
 
 #### via Assets Import Package
 
-Import the [.unitypackage](https://github.com/renanwolf/Unity-LowPowerMemoryConsumption/releases/latest) from the latest release to your Unity project.
+Import the [.unitypackage](https://github.com/renanwolf/UniRate/releases/latest) from the latest release to your Unity project.
 
 ## Rate Manager
 
-RateManager is the main plugin singleton that allows you to control all the rates and intervals. It is recommended that for anything else than throwaway code, you keep the instance referenced with you while using it.
+The main plugin singleton that allows you to control all the rates and intervals. It is recommended that for anything else than throwaway code, you keep the instance referenced with you while using it.
 
 It manages multiples rate/interval requests and apply the best one.
 
-You can just access the `RateManager.Instance` by code and it will be automatically created, or create an empty `GameObject` and attach the `RateManager` component to it.
+Just access the `RateManager.Instance` by code and it will be automatically created, or create an empty `GameObject` and attach the `RateManager` component to it.
 
 #### Setting Up
 
@@ -97,9 +97,9 @@ Is the number of `FixedUpdate` per second that the game executes.
 
 Is the number of `Update` that will take before the game executes a render. A value of 1 means the game will render on every update, a value of 2 on every other update, and so on.
 
-It **only works on Unity 2019.3 or newer**, since its use the new Unity `OnDemandRendering` API.
+It **only works on Unity 2019.3 or newer**, since its use the new Unity `OnDemandRendering` API. For any previous version the render interval will always be 1, ignoring the requests.
 
-if you need to verify if the current frame will render just access the `WillRender` flag inside the `RateManager` instance.
+To verify if the current frame will render just access the `WillRender` property inside the `RateManager` instance.
 
 ## Ready to use Components
 
