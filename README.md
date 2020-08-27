@@ -1,6 +1,8 @@
 # UniRate
 
-by Renan Wolf Pace
+Created by Renan Wolf Pace
+
+[![GitHub](https://img.shields.io/github/license/renanwolf/UniRate)](LICENSE.md) [![Releases](https://img.shields.io/github/v/release/renanwolf/UniRate.svg)](https://github.com/renanwolf/UniRate/releases)
 
 ## Overview
 
@@ -122,3 +124,42 @@ This component will keep the requests active while the `ScrollRect.velocity` is 
 These components will keep the requests active while the input field is focused or when the text changes.
 
 To enable the `RateRequestTMPInputFieldComponent` you need to add the `TMPRO` define symbol in your player settings.
+
+## Debug
+
+All the debug options can be modified accessing the `RateDebug` static class.
+
+```csharp
+using UniRate.Debug;
+...
+
+private void SetUniRateDebugSettingsForProduction() {
+  RateDebug.LogLevel = RateLogLevel.Warning;
+  RateDebug.DisplayOnScreenData = false;
+}
+
+private void SetUniRateDebugSettingsForTests() {
+  RateDebug.LogLevel = RateLogLevel.Debug;
+  RateDebug.ScreenDataBackgroundColor = new Color(0, 0, 0, 0.5f);
+  RateDebug.ScreenDataFontSize = 10;
+  RateDebug.ScreenDataFontColor = Color.white;
+  RateDebug.ScreenDataVerbose = false;
+  RateDebug.DisplayOnScreenData = true;
+}
+```
+
+#### IsDebugBuild
+
+On editor returns `EditorUserBuildSettings.development`, otherwise returns `Debug.isDebugBuild`.
+
+#### LogLevel
+
+Set to one of the following values `Trace`, `Debug`, `Info`, `Warning`, `Error` or `Off` to filter which logs should be enabled.
+
+The default value on editor is `Trace` if `IsDebugBuild` is true, otherwise `Debug`. In runtime is `Debug` if `IsDebugBuild` is true, otherwise `Info`.
+
+#### DisplayOnScreenData
+
+If enabled will display on the top-left corner of the screen informations about current rates and intervals.
+
+To modify how the on screen data is displayed, change the following properties `ScreenDataVerbose`, `ScreenDataBackgroundColor`, `ScreenDataFontSize` and `ScreenDataFontColor`.
