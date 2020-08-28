@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.1] - 2018-08-28
+### Fixed
+- `package.json` wrong version.
+
 ## [2.1.0] - 2018-08-28
 ### Added
 - Customize background color, text color and font size on `RateDebug` screen data.
