@@ -47,6 +47,11 @@ namespace UniRate {
         }
         private static RateManager _instance;
 
+        /// <summary>
+        /// Check if the instance exists without creating it.
+        /// </summary>
+        public static bool HasInstance => (_instance != null);
+
         #endregion <<---------- Instance ---------->>
 
 
