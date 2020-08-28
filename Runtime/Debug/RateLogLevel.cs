@@ -1,6 +1,6 @@
 ﻿namespace UniRate.Debug {
 
-    public enum LogLevel {
+    public enum RateLogLevel {
         Trace,
         Debug,
         Info,

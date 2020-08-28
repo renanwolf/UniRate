@@ -47,6 +47,11 @@ namespace UniRate {
         }
         private static RateManager _instance;
 
+        /// <summary>
+        /// Check if the instance exists without creating it.
+        /// </summary>
+        public static bool HasInstance => (_instance != null);
+
         #endregion <<---------- Instance ---------->>
 
 
@@ -365,9 +370,7 @@ namespace UniRate {
 
         private static readonly string GameObjectName = $"UniRate ({nameof(RateManager)})";
 
-        private GUIStyle _guiStyleLabel;
-        private GUIContent _guiContentText;
-        private Texture2D _guiBackgroundTexture;
+        private readonly GUIContent _guiContentText = new GUIContent();
 
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -382,8 +385,8 @@ namespace UniRate {
                 _instance = this;
             }
             else if (_instance != this) {
-                if (Debugger.IsLogLevelActive(LogLevel.Warning)) {
-                    Debugger.Log(LogLevel.Warning, $"trying to awake another instance of {nameof(RateManager)} at '{this.gameObject.scene.name}/{this.gameObject.name}', destroying it", this.gameObject);
+                if (RateDebug.IsLogLevelActive(RateLogLevel.Warning)) {
+                    RateDebug.Log(RateLogLevel.Warning, $"trying to awake another instance of {nameof(RateManager)} at '{this.gameObject.scene.name}/{this.gameObject.name}', destroying it", this.gameObject);
                 }
                 Destroy(this);
                 return;
@@ -426,9 +429,6 @@ namespace UniRate {
             if (_instance == this) {
                 _instance = null;
             }
-            if (this._guiBackgroundTexture != null) {
-                Destroy(this._guiBackgroundTexture);
-            }
         }
 
         #if UNITY_EDITOR
@@ -448,39 +448,25 @@ namespace UniRate {
         #endif
 
         private void OnGUI() {
-            if (!Debugger.DisplayOnScreenData) return;
+            if (!RateDebug.DisplayOnScreenData) return;
 
-            if (this._guiBackgroundTexture == null) {
-                this._guiBackgroundTexture = new Texture2D(2, 2);
-                var colorArray = this._guiBackgroundTexture.GetPixels32();
-                var color = new Color32(0, 0, 0, 60);
-                for (int i = colorArray.Length - 1; i >= 0; i--) {
-                    colorArray[i] = color;
-                }
-                this._guiBackgroundTexture.SetPixels32(colorArray);
-                this._guiBackgroundTexture.Apply();
+            if (RateDebug.ScreenDataVerbose) {
+                this._guiContentText.text = $"UpdateMode: {this._updateRateMode.ToString()}\nUpdate/s: {this._updateRate.ToString("000")} / {this._targetUpdateRate.ToString("000")}\nFixedUpdate/s: {this._fixedUpdateRate.ToString("000")} / {this._targetFixedUpdateRate.ToString("000")}\n{(this.IsRenderIntervalSupported ? $"Will Render: {this.WillRender.ToString()}" : "Render interval not supported")}\nRenderInterval: {this._renderInterval.ToString()} / {this._targetRenderInterval.ToString()}\nRender/s: {this.RenderRate.ToString("000")}";
             }
-
-            if (this._guiStyleLabel == null) {
-                this._guiStyleLabel = new GUIStyle(GUI.skin.label);
-                this._guiStyleLabel.fontSize = 12;
-                this._guiStyleLabel.normal.background = this._guiBackgroundTexture;
-                this._guiStyleLabel.padding = new RectOffset(2, 2, 1, 1);
+            else {
+                this._guiContentText.text = $"Update/s: {this._updateRate.ToString("000")} / {this._targetUpdateRate.ToString("000")}\nFixedUpdate/s: {this._fixedUpdateRate.ToString("000")} / {this._targetFixedUpdateRate.ToString("000")}\nRenderInterval: {this._renderInterval.ToString()} / {this._targetRenderInterval.ToString()}\nRender/s: {this.RenderRate.ToString("000")}";
             }
-
-            if (this._guiContentText == null) {
-                this._guiContentText = new GUIContent();
-            }
-            this._guiContentText.text = $"Update Mode: {this._updateRateMode.ToString()}\nUpdate Rate: {this._updateRate.ToString("000")} / {this._targetUpdateRate.ToString("000")}\nFixed Update Rate: {this._fixedUpdateRate.ToString("000")} / {this._targetFixedUpdateRate.ToString("000")}\n{(this.IsRenderIntervalSupported ? $"Will Render: {this.WillRender.ToString()}" : "Render interval not supported")}\nRender Interval: {this._renderInterval.ToString()} / {this._targetRenderInterval.ToString()}\nRender Rate: {this.RenderRate.ToString("000")}";
 
             var safeArea = Screen.safeArea;
-            this._guiStyleLabel.CalcMinMaxWidth(this._guiContentText, out float minWidth, out float maxWidth);
+            RateDebug.ScreenDataStyle.CalcMinMaxWidth(this._guiContentText, out float minWidth, out float maxWidth);
             var labelWidth = Mathf.Min(safeArea.width - 10, maxWidth);
             float labelSpaceH = Mathf.Min(5f, ((safeArea.width - labelWidth) / 2f));
             float labelSpaceV = Math.Max(Screen.height - safeArea.height, 5f);
-            var rectLine = new Rect(safeArea.x + labelSpaceH, labelSpaceV, labelWidth, this._guiStyleLabel.CalcHeight(this._guiContentText, labelWidth));
+            var rectLine = new Rect(safeArea.x + labelSpaceH, labelSpaceV, labelWidth, RateDebug.ScreenDataStyle.CalcHeight(this._guiContentText, labelWidth));
 
-            GUI.Label(rectLine, this._guiContentText, this._guiStyleLabel);
+            if (GUI.Button(rectLine, this._guiContentText, RateDebug.ScreenDataStyle)) {
+                RateDebug.ScreenDataVerbose = !RateDebug.ScreenDataVerbose;
+            }
         }
 
         #endregion <<---------- MonoBehaviour ---------->>
@@ -491,8 +477,8 @@ namespace UniRate {
         #region <<---------- UpdateRate Callbacks ---------->>
 
         private void OnUpdateRateModeChanged(UpdateRateMode updateRateMode) {
-            if (Debugger.IsLogLevelActive(LogLevel.Info)) {
-                Debugger.Log(LogLevel.Info, $"{nameof(this.UpdateRateMode)} changed to {updateRateMode.ToString()}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Info)) {
+                RateDebug.Log(RateLogLevel.Info, $"{nameof(this.UpdateRateMode)} changed to {updateRateMode.ToString()}");
             }
             this.ApplyUpdateRateUnitySettings(updateRateMode, this.TargetUpdateRate);
             var e = this._updateRateModeChanged;
@@ -501,8 +487,8 @@ namespace UniRate {
         }
 
         private void OnMinimumUpdateRateChanged(int minimumUpdateRate) {
-            if (Debugger.IsLogLevelActive(LogLevel.Info)) {
-                Debugger.Log(LogLevel.Info, $"{nameof(this.MinimumUpdateRate)} changed to {minimumUpdateRate.ToString()}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Info)) {
+                RateDebug.Log(RateLogLevel.Info, $"{nameof(this.MinimumUpdateRate)} changed to {minimumUpdateRate.ToString()}");
             }
             this._targetUpdateRateDirty = true;
         }
@@ -514,8 +500,8 @@ namespace UniRate {
         }
 
         private void OnTargetUpdateRateChanged(int targetUpdateRate) {
-            if (Debugger.IsLogLevelActive(LogLevel.Debug)) {
-                Debugger.Log(LogLevel.Debug, $"{nameof(this.TargetUpdateRate)} changed to {targetUpdateRate.ToString()}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Debug)) {
+                RateDebug.Log(RateLogLevel.Debug, $"{nameof(this.TargetUpdateRate)} changed to {targetUpdateRate.ToString()}");
             }
             this.ApplyUpdateRateUnitySettings(this._updateRateMode, targetUpdateRate);
             var e = this._targetUpdateRateChanged;
@@ -535,8 +521,8 @@ namespace UniRate {
         #region <<---------- FixedUpdateRate Callbacks ---------->>
 
         private void OnMinimumFixedUpdateRateChanged(int minimumFixedUpdateRate) {
-            if (Debugger.IsLogLevelActive(LogLevel.Info)) {
-                Debugger.Log(LogLevel.Info, $"{nameof(this.MinimumFixedUpdateRate)} changed to {minimumFixedUpdateRate.ToString()}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Info)) {
+                RateDebug.Log(RateLogLevel.Info, $"{nameof(this.MinimumFixedUpdateRate)} changed to {minimumFixedUpdateRate.ToString()}");
             }
             this._targetFixedUpdateRateDirty = true;
         }
@@ -548,8 +534,8 @@ namespace UniRate {
         }
 
         private void OnTargetFixedUpdateRateChanged(int targetFixedUpdateRate) {
-            if (Debugger.IsLogLevelActive(LogLevel.Debug)) {
-                Debugger.Log(LogLevel.Debug, $"{nameof(this.TargetFixedUpdateRate)} changed to {targetFixedUpdateRate.ToString()}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Debug)) {
+                RateDebug.Log(RateLogLevel.Debug, $"{nameof(this.TargetFixedUpdateRate)} changed to {targetFixedUpdateRate.ToString()}");
             }
             this.ApplyFixedUpdateRateUnitySettings(targetFixedUpdateRate);
             var e = this._targetFixedUpdateRateChanged;
@@ -569,8 +555,8 @@ namespace UniRate {
         #region <<---------- RenderInterval Callbacks ---------->>
         
         private void OnMaximumRenderIntervalChanged(int maximumRenderInterval) {
-            if (Debugger.IsLogLevelActive(LogLevel.Info)) {
-                Debugger.Log(LogLevel.Info, $"{nameof(this.MaximumRenderInterval)} changed to {maximumRenderInterval.ToString()}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Info)) {
+                RateDebug.Log(RateLogLevel.Info, $"{nameof(this.MaximumRenderInterval)} changed to {maximumRenderInterval.ToString()}");
             }
             this._targetRenderIntervalDirty = true;
         }
@@ -582,8 +568,8 @@ namespace UniRate {
         }
 
         private void OnTargetRenderIntervalChanged(int targetRenderInterval) {
-            if (Debugger.IsLogLevelActive(LogLevel.Debug)) {
-                Debugger.Log(LogLevel.Debug, $"{nameof(this.TargetRenderInterval)} changed to {targetRenderInterval.ToString()}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Debug)) {
+                RateDebug.Log(RateLogLevel.Debug, $"{nameof(this.TargetRenderInterval)} changed to {targetRenderInterval.ToString()}");
             }
             this.ApplyRenderIntervalUnitySettings(targetRenderInterval);
             var e = this._targetRenderIntervalChanged;
@@ -606,8 +592,8 @@ namespace UniRate {
         /// Create a new <see cref="UpdateRateRequest"/>.
         /// </summary>
         public UpdateRateRequest RequestUpdateRate(int updateRate) {
-            if (Debugger.IsLogLevelActive(LogLevel.Trace)) {
-                Debugger.Log(LogLevel.Trace, $"creating update rate request {updateRate.ToString()}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Trace)) {
+                RateDebug.Log(RateLogLevel.Trace, $"creating update rate request {updateRate.ToString()}");
             }
             var request = new UpdateRateRequest(this, updateRate);
             this._updateRateRequests.Add(request);
@@ -626,8 +612,8 @@ namespace UniRate {
         /// Create a new <see cref="FixedUpdateRateRequest"/>.
         /// </summary>
         public FixedUpdateRateRequest RequestFixedUpdateRate(int fixedUpdateRate) {
-            if (Debugger.IsLogLevelActive(LogLevel.Trace)) {
-                Debugger.Log(LogLevel.Trace, $"creating fixed update rate request {fixedUpdateRate.ToString()}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Trace)) {
+                RateDebug.Log(RateLogLevel.Trace, $"creating fixed update rate request {fixedUpdateRate.ToString()}");
             }
             var request = new FixedUpdateRateRequest(this, fixedUpdateRate);
             this._fixedUpdateRateRequests.Add(request);
@@ -646,8 +632,8 @@ namespace UniRate {
         /// Create a new <see cref="FixedUpdateRateRequest"/>.
         /// </summary>
         public RenderIntervalRequest RequestRenderInterval(int renderInterval) {
-            if (Debugger.IsLogLevelActive(LogLevel.Trace)) {
-                Debugger.Log(LogLevel.Trace, $"creating render interval request {renderInterval.ToString()}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Trace)) {
+                RateDebug.Log(RateLogLevel.Trace, $"creating render interval request {renderInterval.ToString()}");
             }
 
             #if !UNITY_2019_3_OR_NEWER
@@ -669,8 +655,8 @@ namespace UniRate {
 
         internal void CancelUpdateRateRequest(UpdateRateRequest request) {
             if (request == null) return;
-            if (Debugger.IsLogLevelActive(LogLevel.Trace)) {
-                Debugger.Log(LogLevel.Trace, $"canceling update rate request {request.UpdateRate.ToString()}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Trace)) {
+                RateDebug.Log(RateLogLevel.Trace, $"canceling update rate request {request.UpdateRate.ToString()}");
             }
             if (!this._updateRateRequests.Remove(request)) return;
             this.OnUpdateRateRequestsChanged(this._updateRateRequests);
@@ -678,8 +664,8 @@ namespace UniRate {
 
         internal void CancelFixedUpdateRateRequest(FixedUpdateRateRequest request) {
             if (request == null) return;
-            if (Debugger.IsLogLevelActive(LogLevel.Trace)) {
-                Debugger.Log(LogLevel.Trace, $"canceling fixed update rate request {request.FixedUpdateRate.ToString()}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Trace)) {
+                RateDebug.Log(RateLogLevel.Trace, $"canceling fixed update rate request {request.FixedUpdateRate.ToString()}");
             }
             if (!this._fixedUpdateRateRequests.Remove(request)) return;
             this.OnFixedUpdateRateRequestsChanged(this._fixedUpdateRateRequests);
@@ -687,8 +673,8 @@ namespace UniRate {
 
         internal void CancelRenderIntervalRequest(RenderIntervalRequest request) {
             if (request == null) return;
-            if (Debugger.IsLogLevelActive(LogLevel.Trace)) {
-                Debugger.Log(LogLevel.Trace, $"canceling render interval request {request.RenderInterval.ToString()}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Trace)) {
+                RateDebug.Log(RateLogLevel.Trace, $"canceling render interval request {request.RenderInterval.ToString()}");
             }
 
             #if !UNITY_2019_3_OR_NEWER
@@ -731,8 +717,8 @@ namespace UniRate {
                     break;
 
                 default:
-                    if (Debugger.IsLogLevelActive(LogLevel.Error)) {
-                        Debugger.Log(LogLevel.Error, $"not handling {nameof(UpdateRateMode)}.{updateRateMode.ToString()}");
+                    if (RateDebug.IsLogLevelActive(RateLogLevel.Error)) {
+                        RateDebug.Log(RateLogLevel.Error, $"not handling {nameof(UpdateRateMode)}.{updateRateMode.ToString()}");
                     }
                     return false;
             }
@@ -741,16 +727,16 @@ namespace UniRate {
 
             if (QualitySettings.vSyncCount != newVSyncCount) {
                 changed = true;
-                if (Debugger.IsLogLevelActive(LogLevel.Trace)) {
-                    Debugger.Log(LogLevel.Trace, $"setting QualitySettings.vSyncCount to {newVSyncCount.ToString()}");
+                if (RateDebug.IsLogLevelActive(RateLogLevel.Trace)) {
+                    RateDebug.Log(RateLogLevel.Trace, $"setting QualitySettings.vSyncCount to {newVSyncCount.ToString()}");
                 }
                 QualitySettings.vSyncCount = newVSyncCount;
             }
 
             if (Application.targetFrameRate != newTargetFrameRate) {
                 changed = true;
-                if (Debugger.IsLogLevelActive(LogLevel.Trace)) {
-                    Debugger.Log(LogLevel.Trace, $"setting Application.targetFrameRate to {newTargetFrameRate.ToString()}");
+                if (RateDebug.IsLogLevelActive(RateLogLevel.Trace)) {
+                    RateDebug.Log(RateLogLevel.Trace, $"setting Application.targetFrameRate to {newTargetFrameRate.ToString()}");
                 }
                 Application.targetFrameRate = newTargetFrameRate;
             }
@@ -770,8 +756,8 @@ namespace UniRate {
         private bool ApplyFixedUpdateRateUnitySettings(int targetFixedUpdateRate) {
             float newFixedDeltaTime = (1f / (float)targetFixedUpdateRate);
             if (newFixedDeltaTime == Time.fixedDeltaTime) return false;
-            if (Debugger.IsLogLevelActive(LogLevel.Trace)) {
-                Debugger.Log(LogLevel.Trace, $"setting Time.fixedDeltaTime to {newFixedDeltaTime.ToString("0.0##")}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Trace)) {
+                RateDebug.Log(RateLogLevel.Trace, $"setting Time.fixedDeltaTime to {newFixedDeltaTime.ToString("0.0##")}");
             }
             Time.fixedDeltaTime = newFixedDeltaTime;
             return true;
@@ -802,8 +788,8 @@ namespace UniRate {
             #if UNITY_2019_3_OR_NEWER
 
             if (OnDemandRendering.renderFrameInterval == targetRenderInterval) return false;
-            if (Debugger.IsLogLevelActive(LogLevel.Trace)) {
-                Debugger.Log(LogLevel.Trace, $"setting OnDemandRendering.renderFrameInterval to {targetRenderInterval.ToString()}");
+            if (RateDebug.IsLogLevelActive(RateLogLevel.Trace)) {
+                RateDebug.Log(RateLogLevel.Trace, $"setting OnDemandRendering.renderFrameInterval to {targetRenderInterval.ToString()}");
             }
             OnDemandRendering.renderFrameInterval = targetRenderInterval;
             return true;

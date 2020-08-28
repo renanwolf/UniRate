@@ -1,6 +1,12 @@
 # UniRate
 
-by Renan Wolf Pace
+Created by Renan Wolf Pace
+
+[![Release](https://img.shields.io/github/v/release/renanwolf/UniRate.svg)](https://github.com/renanwolf/UniRate/releases)
+[![OpenUPM](https://img.shields.io/npm/v/com.pflowr.unirate?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.pflowr.unirate/)
+[![Changelog](https://img.shields.io/github/release-date/renanwolf/UniRate?color=green&label=changelog)](CHANGELOG.md)
+![UnityVersion](https://img.shields.io/badge/dynamic/json?color=green&label=unity&query=%24.unity&suffix=%20or%20later&url=https%3A%2F%2Fraw.githubusercontent.com%2Frenanwolf%2FUniRate%2Frelease%2Fpackage.json)
+[![License](https://img.shields.io/github/license/renanwolf/UniRate)](LICENSE.md)
 
 ## Overview
 
@@ -21,6 +27,13 @@ Add the following dependency to the `Packages/manifest.json` file of your Unity 
 }
 ```
 
+#### via OpenUPM
+
+This package is available on [OpenUPM](https://openupm.com/packages/com.pflowr.unirate/) registry, you can install it via [openupm-cli](https://github.com/openupm/openupm-cli):
+```
+openupm add com.pflowr.unirate
+```
+
 #### via Assets Import Package
 
 Import the [.unitypackage](https://github.com/renanwolf/UniRate/releases/latest) from the latest release to your Unity project.
@@ -35,7 +48,7 @@ Just access the `RateManager.Instance` by code and it will be automatically crea
 
 #### Setting Up
 
-- `UpdateRateMode`: set to `VSyncCount` or `ApplicationTargetFrameRate` to choose how the update rate will be managed.
+- `UpdateRateMode`: set to `VSyncCount` or `ApplicationTargetFrameRate` to choose how the update rate should be managed.
 
 - `MinimumUpdateRate`: is the minimum allowed update rate that can be applied. Any request bellow this value will be ignored.
 
@@ -95,7 +108,7 @@ Is the number of `FixedUpdate` per second that the game executes.
 
 ## Render Interval
 
-Is the number of `Update` that will take before the game executes a render. A value of 1 means the game will render on every update, a value of 2 on every other update, and so on.
+Is the number of `Update` that takes before the game executes a render. A value of 1 means the game will render on every update, a value of 2 on every other update, and so on.
 
 It **only works on Unity 2019.3 or newer**, since its use the new Unity `OnDemandRendering` API. For any previous version the render interval will always be 1, ignoring the requests.
 
@@ -107,18 +120,69 @@ There are a few components already created to manage requests in some circumstan
 
 #### RateRequestWhileEnabledComponent
 
-This component will keep the requests active while it is active and enabled.
+This component keeps the requests active while it is active and enabled.
 
 #### RateRequestTouchComponent
 
-This component will keep the requests active while `Input.touchCount` is greater then zero or `Input.GetMouseButton(0, 1, 2)` is true.
+This component keeps the requests active while `Input.touchCount` is greater then zero or `Input.GetMouseButton(0, 1, 2)` is true.
 
 #### RateRequestScrollRectComponent
 
-This component will keep the requests active while the `ScrollRect.velocity` is not zero or when it changes the normalized position.
+This component keeps the requests active while the `ScrollRect.velocity` is not zero or when it changes the normalized position.
 
 #### RateRequestInputFieldComponent _and_ RateRequestTMPInputFieldComponent
 
-These components will keep the requests active while the input field is focused or when the text changes.
+These components keep the requests active while the input field is focused or when the text changes.
 
 To enable the `RateRequestTMPInputFieldComponent` you need to add the `TMPRO` define symbol in your player settings.
+
+## Debugging
+
+All the debug options can be modified accessing the `RateDebug` static class.
+
+```csharp
+using UniRate.Debug;
+...
+
+private void SetUniRateDebugSettingsForProduction() {
+  RateDebug.LogLevel = RateLogLevel.Warning;
+  RateDebug.DisplayOnScreenData = false;
+}
+
+private void SetUniRateDebugSettingsForTests() {
+  RateDebug.LogLevel = RateLogLevel.Debug;
+  RateDebug.ScreenDataBackgroundColor = new Color(0, 0, 0, 0.5f);
+  RateDebug.ScreenDataFontSize = 10;
+  RateDebug.ScreenDataFontColor = Color.white;
+  RateDebug.ScreenDataVerbose = false;
+  RateDebug.DisplayOnScreenData = true;
+}
+```
+
+#### DisplayOnScreenData
+
+If enabled, display on the top-left corner of the screen informations about current rates and intervals.
+
+To modify how the on screen data is displayed, change the following properties `ScreenDataVerbose`, `ScreenDataBackgroundColor`, `ScreenDataFontSize` and `ScreenDataFontColor`.
+
+#### IsDebugBuild
+
+On editor returns `EditorUserBuildSettings.development`, otherwise returns `Debug.isDebugBuild`.
+
+#### LogLevel
+
+Set to one of the following values to filter which logs should be enabled:
+
+- `Trace`: changes to `QualitySettings.vSyncCount`, `Application.targetFrameRate`, `Time.fixedDeltaTime`, `OnDemandRendering.renderFrameInterval` and `RateRequest` creation/cancellation are logged with this level.
+
+- `Debug`: changes to `TargetUpdateRate`, `TargetFixedUpdateRate` and `TargetRenderInterval` are logged with this level.
+
+- `Info`: changes to `UpdateRateMode`, `MinimumUpdateRate`, `MinimumFixedUpdateRate` and `MaximumRenderInterval` are logged with this level.
+
+- `Warning`
+
+- `Error`
+
+- `Off`
+
+The default value on editor is `Debug` if `IsDebugBuild` is true, otherwise `Info`. In runtime is `Info` if `IsDebugBuild` is true, otherwise `Warning`.
