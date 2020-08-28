@@ -14,9 +14,9 @@ namespace UniRate.Debug {
         
         static RateDebug() {
             #if UNITY_EDITOR
-            LogLevel = (IsDebugBuild ? RateLogLevel.Trace : RateLogLevel.Debug);
+            LogLevel = (IsDebugBuild ? RateLogLevel.Debug : RateLogLevel.Info);
             #else
-            LogLevel = (IsDebugBuild ? LogLevel.Debug : LogLevel.Info);
+            LogLevel = (IsDebugBuild ? RateLogLevel.Info : RateLogLevel.Warning);
             #endif
 
             ScreenDataBackgroundColor = new Color(0, 0, 0, 0.25f);

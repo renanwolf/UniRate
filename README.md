@@ -37,7 +37,7 @@ Just access the `RateManager.Instance` by code and it will be automatically crea
 
 #### Setting Up
 
-- `UpdateRateMode`: set to `VSyncCount` or `ApplicationTargetFrameRate` to choose how the update rate will be managed.
+- `UpdateRateMode`: set to `VSyncCount` or `ApplicationTargetFrameRate` to choose how the update rate should be managed.
 
 - `MinimumUpdateRate`: is the minimum allowed update rate that can be applied. Any request bellow this value will be ignored.
 
@@ -97,7 +97,7 @@ Is the number of `FixedUpdate` per second that the game executes.
 
 ## Render Interval
 
-Is the number of `Update` that will take before the game executes a render. A value of 1 means the game will render on every update, a value of 2 on every other update, and so on.
+Is the number of `Update` that takes before the game executes a render. A value of 1 means the game will render on every update, a value of 2 on every other update, and so on.
 
 It **only works on Unity 2019.3 or newer**, since its use the new Unity `OnDemandRendering` API. For any previous version the render interval will always be 1, ignoring the requests.
 
@@ -109,23 +109,23 @@ There are a few components already created to manage requests in some circumstan
 
 #### RateRequestWhileEnabledComponent
 
-This component will keep the requests active while it is active and enabled.
+This component keeps the requests active while it is active and enabled.
 
 #### RateRequestTouchComponent
 
-This component will keep the requests active while `Input.touchCount` is greater then zero or `Input.GetMouseButton(0, 1, 2)` is true.
+This component keeps the requests active while `Input.touchCount` is greater then zero or `Input.GetMouseButton(0, 1, 2)` is true.
 
 #### RateRequestScrollRectComponent
 
-This component will keep the requests active while the `ScrollRect.velocity` is not zero or when it changes the normalized position.
+This component keeps the requests active while the `ScrollRect.velocity` is not zero or when it changes the normalized position.
 
 #### RateRequestInputFieldComponent _and_ RateRequestTMPInputFieldComponent
 
-These components will keep the requests active while the input field is focused or when the text changes.
+These components keep the requests active while the input field is focused or when the text changes.
 
 To enable the `RateRequestTMPInputFieldComponent` you need to add the `TMPRO` define symbol in your player settings.
 
-## Debug
+## Debugging
 
 All the debug options can be modified accessing the `RateDebug` static class.
 
@@ -148,18 +148,30 @@ private void SetUniRateDebugSettingsForTests() {
 }
 ```
 
+#### DisplayOnScreenData
+
+If enabled, display on the top-left corner of the screen informations about current rates and intervals.
+
+To modify how the on screen data is displayed, change the following properties `ScreenDataVerbose`, `ScreenDataBackgroundColor`, `ScreenDataFontSize` and `ScreenDataFontColor`.
+
 #### IsDebugBuild
 
 On editor returns `EditorUserBuildSettings.development`, otherwise returns `Debug.isDebugBuild`.
 
 #### LogLevel
 
-Set to one of the following values `Trace`, `Debug`, `Info`, `Warning`, `Error` or `Off` to filter which logs should be enabled.
+Set to one of the following values to filter which logs should be enabled:
 
-The default value on editor is `Trace` if `IsDebugBuild` is true, otherwise `Debug`. In runtime is `Debug` if `IsDebugBuild` is true, otherwise `Info`.
+- `Trace`: changes to `QualitySettings.vSyncCount`, `Application.targetFrameRate`, `Time.fixedDeltaTime`, `OnDemandRendering.renderFrameInterval` and `RateRequest` creation/cancellation are logged with this level.
 
-#### DisplayOnScreenData
+- `Debug`: changes to `TargetUpdateRate`, `TargetFixedUpdateRate` and `TargetRenderInterval` are logged with this level.
 
-If enabled will display on the top-left corner of the screen informations about current rates and intervals.
+- `Info`: changes to `UpdateRateMode`, `MinimumUpdateRate`, `MinimumFixedUpdateRate` and `MaximumRenderInterval` are logged with this level.
 
-To modify how the on screen data is displayed, change the following properties `ScreenDataVerbose`, `ScreenDataBackgroundColor`, `ScreenDataFontSize` and `ScreenDataFontColor`.
+- `Warning`
+
+- `Error`
+
+- `Off`
+
+The default value on editor is `Debug` if `IsDebugBuild` is true, otherwise `Info`. In runtime is `Info` if `IsDebugBuild` is true, otherwise `Warning`.

@@ -7,6 +7,7 @@
 ### Changed
 - Renamed `Debugger` to `RateDebug`.
 - Renamed `LogLevel` to `RateLogLevel`.
+- Increased `RateDebug.LogLevel` default value.
 ### Deprecated
 ### Removed
 ### Fixed
