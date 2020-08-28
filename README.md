@@ -2,7 +2,11 @@
 
 Created by Renan Wolf Pace
 
-[![GitHub](https://img.shields.io/github/license/renanwolf/UniRate)](LICENSE.md) [![Releases](https://img.shields.io/github/v/release/renanwolf/UniRate.svg)](https://github.com/renanwolf/UniRate/releases)
+[![Release](https://img.shields.io/github/v/release/renanwolf/UniRate.svg)](https://github.com/renanwolf/UniRate/releases)
+[![OpenUPM](https://img.shields.io/npm/v/com.pflowr.unirate?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.pflowr.unirate/)
+[![Changelog](https://img.shields.io/github/release-date/renanwolf/UniRate?color=green&label=changelog)](CHANGELOG.md)
+![UnityVersion](https://img.shields.io/badge/dynamic/json?color=green&label=unity&query=%24.unity&suffix=%20or%20later&url=https%3A%2F%2Fraw.githubusercontent.com%2Frenanwolf%2FUniRate%2Frelease%2Fpackage.json)
+[![License](https://img.shields.io/github/license/renanwolf/UniRate)](LICENSE.md)
 
 ## Overview
 
@@ -21,6 +25,13 @@ Add the following dependency to the `Packages/manifest.json` file of your Unity 
 "dependencies": {
     "com.pflowr.unirate": "https://github.com/renanwolf/UniRate.git",
 }
+```
+
+#### via OpenUPM
+
+This package is available on [OpenUPM](https://openupm.com/packages/com.pflowr.unirate/) registry, you can install it via [openupm-cli](https://github.com/openupm/openupm-cli):
+```
+openupm add com.pflowr.unirate
 ```
 
 #### via Assets Import Package
