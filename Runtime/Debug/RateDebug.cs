@@ -115,6 +115,7 @@ namespace UniRate.Debug {
         private static void OnScreenDataBackgroundColorChanged(Color color) {
             if (_screenDataBackgroundTexture != null) {
                 UnityObject.Destroy(_screenDataBackgroundTexture);
+                _screenDataBackgroundTexture = null;
             }
             if (_screenDataStyle == null) return;
             _screenDataStyle.normal.background = ScreenDataBackgroundTexture;

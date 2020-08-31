@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- Changes to `RateDebug.ScreenDataBackgroundColor` sometimes had no effect when application was running on device.
+### Security
+
 ## [2.1.1] - 2018-08-28
 ### Fixed
 - `package.json` wrong version.
