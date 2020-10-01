@@ -1,14 +1,9 @@
 # Changelog
 
-## [Unreleased]
-### Added
-### Changed
-### Deprecated
-### Removed
+## [2.1.2] - 2018-10-01
 ### Fixed
 - Changes to `RateDebug.ScreenDataBackgroundColor` sometimes had no effect when application was running on device.
 - Legacy code not being imported correctly by Unity because assembly definition file was missing.
-### Security
 
 ## [2.1.1] - 2018-08-28
 ### Fixed
