@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+### Added
+- `RateRequestAnimationComponent` to activate requests while an `AnimationClip` of the `Animation` component is playing
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
 ## [2.1.2] - 2018-10-01
 ### Fixed
 - Changes to `RateDebug.ScreenDataBackgroundColor` sometimes had no effect when application was running on device.

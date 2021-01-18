@@ -59,7 +59,7 @@ namespace UniRate.Editor {
 
         #region <<---------- Editor ---------->>
         
-        private void OnEnable() {
+        protected virtual void OnEnable() {
             this._propUpdateRatePresetOption = this.serializedObject.FindProperty("_updateRatePresetOption");
             this._propUpdateRateCustomValue = this.serializedObject.FindProperty("_updateRateCustomValue");
             
