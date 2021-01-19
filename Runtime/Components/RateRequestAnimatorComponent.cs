@@ -7,56 +7,11 @@ namespace UniRate {
         
         #region <<---------- Properties and Fields ---------->>
 
-        public bool ActivateRequestsInTransitions {
-            get => this._activateRequestsInTransitions;
-            set {
-                if (this._activateRequestsInTransitions == value) return;
-                this._activateRequestsInTransitions = value;
-                this.OnActivateRequestsInTransitionsChanged(this._activateRequestsInTransitions);
-            }
-        }
         [SerializeField][HideInInspector] private bool _activateRequestsInTransitions = true;
-
-        public string LayerName {
-            get => this._layerName;
-            set {
-                if (this._layerName == value) return;
-                this._layerName = value;
-                this.OnLayerNameChanged(this._layerName);
-            }
-        }
         [SerializeField][HideInInspector] private string _layerName;
-
-        public string StateName {
-            get => this._stateName;
-            set {
-                if (this._stateName == value) return;
-                this._stateName = value;
-                this.OnStateNameChanged(this._stateName);
-            }
-        }
         [SerializeField][HideInInspector] private string _stateName;
 
-        private (int hash, bool hasHash) StateInfo {
-            get => this._stateInfo;
-            set {
-                if (this._stateInfo.hasHash == value.hasHash && this._stateInfo.hash == value.hash) return;
-                this._stateInfo = value;
-                this.OnStateInfoChanged(this._stateInfo.hash, this._stateInfo.hasHash);
-            }
-        }
         private (int hash, bool hasHash) _stateInfo;
-
-        private bool ShouldActivateRequests {
-            get => this._shouldActivateRequests;
-            set {
-                if (this._shouldActivateRequests == value) return;
-                this._shouldActivateRequests = value;
-                this.OnShouldActivateRequestsChanged(this._shouldActivateRequests);
-            }
-        }
-        private bool _shouldActivateRequests;
-        
         private Animator _animator;
         
         #endregion <<---------- Properties and Fields ---------->>
@@ -66,14 +21,14 @@ namespace UniRate {
 
         #region <<---------- MonoBehaviour ---------->>
         
-        private void Awake() {
-            this.CacheManager();
+        protected override void Awake() {
+            base.Awake();
             this._animator = this.GetComponent<Animator>();
-            this.OnStateNameChanged(this._stateName);
+            this._stateInfo = this.GetStateInfo(this._stateName);
         }
 
         private void OnEnable() {
-            this.ShouldActivateRequests = this.GetShouldActivateRequests(
+            this.ShouldActivateRequests = this.GetIsAnimatorPlayingOrInTransition(
                 this._animator,
                 this._layerName,
                 this._stateInfo.hash,
@@ -83,29 +38,32 @@ namespace UniRate {
         }
 
         private void Update() {
-            this.ShouldActivateRequests = this.GetShouldActivateRequests(
+            this.ShouldActivateRequests = this.GetIsAnimatorPlayingOrInTransition(
                 this._animator,
                 this._layerName,
                 this._stateInfo.hash,
                 this._stateInfo.hasHash,
                 this._activateRequestsInTransitions
             );
-            if (this._shouldActivateRequests || !this.IsRequesting || this.ElapsedSecondsSinceRequestsStarted <= this.DelaySecondsToStopRequests) return;
-            this.StopRequests();
-        }
-
-        private void OnDisable() {
-            this._shouldActivateRequests = false;
-            this.StopRequests();
+            this.StopRequestsIfDelayed();
         }
 
         #if UNITY_EDITOR
 
-        private void OnValidate() {
-            if (!Application.isPlaying || this.Manager == null) return;
-            this.OnActivateRequestsInTransitionsChanged(this._activateRequestsInTransitions);
-            this.OnLayerNameChanged(this._layerName);
-            this.OnStateNameChanged(this._stateName);
+        protected override void OnValidate() {
+            if (Application.isPlaying) {
+                this._stateInfo = this.GetStateInfo(this._stateName);
+            }
+            if (Application.isPlaying && !this.isActiveAndEnabled && this.Manager != null) {
+                this.ShouldActivateRequests = this.GetIsAnimatorPlayingOrInTransition(
+                    this._animator,
+                    this._layerName,
+                    this._stateInfo.hash,
+                    this._stateInfo.hasHash,
+                    this._activateRequestsInTransitions
+                );
+            }
+            base.OnValidate();
         }
 
         #endif
@@ -115,65 +73,15 @@ namespace UniRate {
 
 
 
-        #region <<---------- Callbacks ---------->>
+        #region <<---------- General ---------->>
 
-        private void OnActivateRequestsInTransitionsChanged(bool activateRequestsInTransitions) {
-            if (!this.isActiveAndEnabled) return;
-            this.ShouldActivateRequests = this.GetShouldActivateRequests(
-                this._animator,
-                this._layerName,
-                this._stateInfo.hash,
-                this._stateInfo.hasHash,
-                activateRequestsInTransitions
-            );
-        }
-        
-        private void OnLayerNameChanged(string layerName) {
-            if (!this.isActiveAndEnabled) return;
-            this.ShouldActivateRequests = this.GetShouldActivateRequests(
-                this._animator,
-                layerName,
-                this._stateInfo.hash,
-                this._stateInfo.hasHash,
-                this._activateRequestsInTransitions
-            );
-        }
-        
-        private void OnStateNameChanged(string stateName) {
+        private (int hash, bool hasHash) GetStateInfo(string stateName) {
             bool hasStateName = !string.IsNullOrEmpty(stateName);
-            this._stateInfo = (
+            return (
                 (hasStateName ? Animator.StringToHash(stateName) : 0),
                 hasStateName
             );
         }
-
-        private void OnStateInfoChanged(int stateHash, bool hasStateHash) {
-            if (!this.isActiveAndEnabled) return;
-            this.ShouldActivateRequests = this.GetShouldActivateRequests(
-                this._animator,
-                this._layerName,
-                stateHash,
-                hasStateHash,
-                this._activateRequestsInTransitions
-            );
-        }
-
-        private void OnShouldActivateRequestsChanged(bool shouldActivateRequests) {
-            if (shouldActivateRequests) {
-                this.StartRequests(this.Manager, this.GetCurrentPreset());
-                this.Manager.ApplyTargetsIfDirty();
-                return;
-            }
-            if (!this.IsRequesting || this.ElapsedSecondsSinceRequestsStarted <= this.DelaySecondsToStopRequests) return;
-            this.StopRequests();
-        }
-        
-        #endregion <<---------- Callbacks ---------->>
-
-
-
-
-        #region <<---------- General ---------->>
 
         private bool GetIsAnimatorInTransitionAtLayer(Animator animator, int layerIndex) {
             return animator.IsInTransition(layerIndex);
@@ -186,7 +94,7 @@ namespace UniRate {
             return (stateInfo.shortNameHash == stateHash);
         }
 
-        private bool GetShouldActivateRequests(Animator animator, string layerName, int stateHash, bool hasStateHash, bool activateRequestsInTransitions) {
+        private bool GetIsAnimatorPlayingOrInTransition(Animator animator, string layerName, int stateHash, bool hasStateHash, bool activateRequestsInTransitions) {
             if (!animator.isActiveAndEnabled || animator.speed == 0f) return false;
 
             if (!string.IsNullOrEmpty(layerName)) {

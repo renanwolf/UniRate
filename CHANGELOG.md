@@ -8,6 +8,7 @@
 ### Deprecated
 ### Removed
 ### Fixed
+- `DelaySecondsToStopRequests` on requests components was not calculating delay since 'should stop requests' time.
 ### Security
 
 ## [2.1.2] - 2018-10-01
