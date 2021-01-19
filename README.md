@@ -138,7 +138,11 @@ To enable the `RateRequestTMPInputFieldComponent` you need to add the `TMPRO` de
 
 #### RateRequestAnimationComponent
 
-This component keeps the requests active while an `AnimationClip` of the `Animation` component is playing.
+This component keeps the requests active while an `Animation` component is playing.
+
+#### RateRequestAnimatorComponent
+
+This component keeps the requests active while an `Animator` component is playing.
 
 ## Debugging
 

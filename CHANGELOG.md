@@ -2,8 +2,8 @@
 
 ## [Unreleased]
 ### Added
-- `RateRequestAnimationComponent` to activate requests while `Animation` component is playing.
-- `RateRequestAnimatorComponent` to activate requests while `Animator` component is playing.
+- `RateRequestAnimationComponent` to activate requests while an `Animation` component is playing.
+- `RateRequestAnimatorComponent` to activate requests while an `Animator` component is playing.
 ### Changed
 ### Deprecated
 ### Removed
