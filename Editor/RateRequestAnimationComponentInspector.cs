@@ -27,21 +27,20 @@ namespace UniRate.Editor {
 
             EditorGUILayout.Space();
 
-            if (!this._propClipName.hasMultipleDifferentValues) {
-                var clipName = this._propClipName.stringValue;
-                if (string.IsNullOrEmpty(clipName)) {
-                    EditorGUILayout.HelpBox("rate requests will be active if any AnimationClip is playing", MessageType.Info);
-                }
-                else {
-                    EditorGUILayout.HelpBox($"rate requests will be active only if AnimationClip named '{clipName}' is playing", MessageType.Info);
-                }
-            }
-
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(this._propClipName);
             if (EditorGUI.EndChangeCheck()) {
                 this.serializedObject.ApplyModifiedProperties();
             }
+
+            if (this._propClipName.hasMultipleDifferentValues) return;
+
+            var clipName = this._propClipName.stringValue;
+            if (string.IsNullOrEmpty(clipName)) {
+                EditorGUILayout.HelpBox("requests will be active if any AnimationClip is playing", MessageType.Info);
+                return;
+            }
+            EditorGUILayout.HelpBox($"requests will be active only if AnimationClip named '{clipName}' is playing", MessageType.Info);
         }
         
         #endregion <<---------- Editor ---------->>

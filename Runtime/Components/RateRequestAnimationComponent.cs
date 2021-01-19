@@ -7,6 +7,14 @@ namespace UniRate {
 
         #region <<---------- Properties and Fields ---------->>
 
+        public string ClipName {
+            get => this._clipName;
+            set {
+                if (this._clipName == value) return;
+                this._clipName = value;
+                this.OnClipNameChanged(this._clipName);
+            }
+        }
         [SerializeField][HideInInspector] private string _clipName;
 
         private bool IsPlaying {
@@ -47,6 +55,15 @@ namespace UniRate {
             this._isPlaying = false;
             this.StopRequests();
         }
+
+        #if UNITY_EDITOR
+
+        private void OnValidate() {
+            if (!Application.isPlaying || this.Manager == null) return;
+            this.OnClipNameChanged(this._clipName);
+        }
+
+        #endif
         
         #endregion <<---------- MonoBehaviour ---------->>
 
@@ -54,6 +71,11 @@ namespace UniRate {
 
 
         #region <<---------- Callbacks ---------->>
+
+        private void OnClipNameChanged(string clipName) {
+            if (!this.isActiveAndEnabled) return;
+            this.IsPlaying = this.GetIsPlaying(this._animation, clipName);
+        }
         
         private void OnIsPlayingChanged(bool isPlaying) {
             if (isPlaying) {
@@ -64,14 +86,22 @@ namespace UniRate {
             if (!this.IsRequesting || this.ElapsedSecondsSinceRequestsStarted <= this.DelaySecondsToStopRequests) return;
             this.StopRequests();
         }
+        
+        #endregion <<---------- Callbacks ---------->>
 
+
+
+
+        #region <<---------- General ---------->>
+        
         private bool GetIsPlaying(Animation animation, string clipName) {
+            if (!animation.isActiveAndEnabled) return false;
             if (string.IsNullOrEmpty(clipName)) {
                 return animation.isPlaying;
             }
             return animation.IsPlaying(clipName);
         }
         
-        #endregion <<---------- Callbacks ---------->>
+        #endregion <<---------- General ---------->>
     }
 }
