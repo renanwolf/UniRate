@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- `RateRequestAnimatorComponent` was not evaluating correctly if `Animator` states are playing.
+### Security
+
 ## [2.2.0] - 2021-01-20
 ### Added
 - `RateRequestAnimationComponent` to activate requests while an `Animation` component is playing.
