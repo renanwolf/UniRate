@@ -1,16 +1,12 @@
 # Changelog
 
-## [Unreleased]
+## [2.2.0] - 2021-01-20
 ### Added
 - `RateRequestAnimationComponent` to activate requests while an `Animation` component is playing.
 - `RateRequestAnimatorComponent` to activate requests while an `Animator` component is playing.
-### Changed
-### Deprecated
-### Removed
 ### Fixed
 - `DelaySecondsToStopRequests` on requests components was not calculating delay since 'should stop requests' time.
 - Wrong release years on changelog.md file.
-### Security
 
 ## [2.1.2] - 2020-10-01
 ### Fixed
