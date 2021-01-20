@@ -9,16 +9,6 @@ namespace UniRate {
         #region <<---------- Properties and Fields ---------->>
         
         private ScrollRect _scrollRect;
-
-        private bool IsMoving {
-            get => this._isMoving;
-            set {
-                if (this._isMoving == value) return;
-                this._isMoving = value;
-                this.OnIsMovingChanged(this._isMoving);
-            }
-        }
-        private bool _isMoving;
         
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -27,36 +17,25 @@ namespace UniRate {
 
         #region <<---------- MonoBahviour ---------->>
         
-        private void Awake() {
-            this.CacheManager();
+        protected override void Awake() {
+            base.Awake();
             this._scrollRect = this.GetComponent<ScrollRect>();
         }
 
         private void OnEnable() {
             this._scrollRect.onValueChanged.AddListener(this.OnScrollRectValueChanged);
-            this.IsMoving = this.GetIsMoving(this._scrollRect);
+            this.ShouldActivateRequests = this.GetIsScrollRectMoving(this._scrollRect);
         }
 
         private void Update() {
-            this.IsMoving = this.GetIsMoving(this._scrollRect);
-            if (this._isMoving || !this.IsRequesting || this.ElapsedSecondsSinceRequestsStarted <= this.DelaySecondsToStopRequests) return;
-            this.StopRequests();
+            this.ShouldActivateRequests = this.GetIsScrollRectMoving(this._scrollRect);
+            this.StopRequestsIfDelayed();
         }
 
-        private void OnDisable() {
+        protected override void OnDisable() {
             this._scrollRect.onValueChanged.RemoveListener(this.OnScrollRectValueChanged);
-            this._isMoving = false;
-            this.StopRequests();
+            base.OnDisable();
         }
-
-        #if UNITY_EDITOR
-
-        private void OnValidate() {
-            if (!Application.isPlaying || !this.isActiveAndEnabled || this.Manager == null || !this.IsRequesting) return;
-            this.StartRequests(this.Manager, this.GetCurrentPreset());
-        }
-
-        #endif
         
         #endregion <<---------- MonoBahviour ---------->>
 
@@ -64,19 +43,9 @@ namespace UniRate {
 
 
         #region <<---------- Callbacks ---------->>
-
-        private void OnIsMovingChanged(bool isMoving) {
-            if (isMoving) {
-                this.StartRequests(this.Manager, this.GetCurrentPreset());
-                this.Manager.ApplyTargetsIfDirty();
-                return;
-            }
-            if (!this.IsRequesting || this.ElapsedSecondsSinceRequestsStarted <= this.DelaySecondsToStopRequests) return;
-            this.StopRequests();
-        }
         
         private void OnScrollRectValueChanged(Vector2 normalizedPosition) {
-            this.IsMoving = true;
+            this.ShouldActivateRequests = true;
         }
         
         #endregion <<---------- Callbacks ---------->>
@@ -86,7 +55,7 @@ namespace UniRate {
 
         #region <<---------- General ---------->>
         
-        private bool GetIsMoving(ScrollRect scrollRect) {
+        private bool GetIsScrollRectMoving(ScrollRect scrollRect) {
             var velocity = scrollRect.velocity;
             return (!this.IsFloatApproximatelyWithThreshold(velocity.x, 0f, 0.0001f) || !this.IsFloatApproximatelyWithThreshold(velocity.y, 0f, 0.0001f));
         }

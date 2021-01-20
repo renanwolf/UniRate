@@ -136,6 +136,14 @@ These components keep the requests active while the input field is focused or wh
 
 To enable the `RateRequestTMPInputFieldComponent` you need to add the `TMPRO` define symbol in your player settings.
 
+#### RateRequestAnimationComponent
+
+This component keeps the requests active while an `Animation` component is playing.
+
+#### RateRequestAnimatorComponent
+
+This component keeps the requests active while an `Animator` component is playing.
+
 ## Debugging
 
 All the debug options can be modified accessing the `RateDebug` static class.

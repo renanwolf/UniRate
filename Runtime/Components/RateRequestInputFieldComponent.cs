@@ -9,16 +9,6 @@ namespace UniRate {
         #region <<---------- Properties and Fields ---------->>
         
         private InputField _inputField;
-
-        private bool IsFocused {
-            get => this._isFocused;
-            set {
-                if (this._isFocused == value) return;
-                this._isFocused = value;
-                this.OnIsFocusedChanged(this._isFocused);
-            }
-        }
-        private bool _isFocused;
         
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -27,38 +17,27 @@ namespace UniRate {
 
         #region <<---------- MonoBehaviour ---------->>
 
-        private void Awake() {
-            this.CacheManager();
+        protected override void Awake() {
+            base.Awake();
             this._inputField = this.GetComponent<InputField>();
         }
 
         private void OnEnable() {
             this._inputField.onEndEdit.AddListener(this.OnInputFieldEndEdit);
             this._inputField.onValueChanged.AddListener(this.OnInputFieldValueChanged);
-            this.IsFocused = this._inputField.isFocused;
+            this.ShouldActivateRequests = this._inputField.isFocused;
         }
 
         private void Update() {
-            this.IsFocused = this._inputField.isFocused;
-            if (this._isFocused || !this.IsRequesting || this.ElapsedSecondsSinceRequestsStarted <= this.DelaySecondsToStopRequests) return;
-            this.StopRequests();
+            this.ShouldActivateRequests = this._inputField.isFocused;
+            this.StopRequestsIfDelayed();
         }
 
-        private void OnDisable() {
+        protected override void OnDisable() {
             this._inputField.onEndEdit.RemoveListener(this.OnInputFieldEndEdit);
             this._inputField.onValueChanged.RemoveListener(this.OnInputFieldValueChanged);
-            this._isFocused = false;
-            this.StopRequests();
+            base.OnDisable();
         }
-
-        #if UNITY_EDITOR
-
-        private void OnValidate() {
-            if (!Application.isPlaying || !this.isActiveAndEnabled || this.Manager == null || !this.IsRequesting) return;
-            this.StartRequests(this.Manager, this.GetCurrentPreset());
-        }
-
-        #endif
         
         #endregion <<---------- MonoBehaviour ---------->>
 
@@ -66,23 +45,13 @@ namespace UniRate {
 
 
         #region <<---------- Callbacks ---------->>
-
-        private void OnIsFocusedChanged(bool isFocused) {
-            if (isFocused) {
-                this.StartRequests(this.Manager, this.GetCurrentPreset());
-                this.Manager.ApplyTargetsIfDirty();
-                return;
-            }
-            if (!this.IsRequesting || this.ElapsedSecondsSinceRequestsStarted <= this.DelaySecondsToStopRequests) return;
-            this.StopRequests();
-        }
         
         private void OnInputFieldEndEdit(string value) {
-            this.IsFocused = false;
+            this.ShouldActivateRequests = false;
         }
 
         private void OnInputFieldValueChanged(string value) {
-            this.IsFocused = true;
+            this.ShouldActivateRequests = true;
         }
         
         #endregion <<---------- Callbacks ---------->>

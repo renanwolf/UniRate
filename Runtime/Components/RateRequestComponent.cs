@@ -24,6 +24,7 @@ namespace UniRate {
         #region <<---------- Properties and Fields ---------->>
 
         [SerializeField][HideInInspector] private float _delaySecondsToStopRequests = 2f;
+        private float DelaySecondsToStopRequests => this._delaySecondsToStopRequests;
         
         [SerializeField][HideInInspector] private PresetOptions _renderIntervalPresetOption = PresetOptions.High;
         [SerializeField][HideInInspector] private int _renderIntervalCustomValue = RatePreset.High.RenderInterval;
@@ -37,12 +38,20 @@ namespace UniRate {
         protected RateManager Manager => this._manager;
         private RateManager _manager;
 
-        protected float DelaySecondsToStopRequests => this._delaySecondsToStopRequests;
+        protected bool ShouldActivateRequests {
+            get => this._shouldActivateRequests;
+            set {
+                if (this._shouldActivateRequests == value) return;
+                this._shouldActivateRequests = value;
+                this.OnShouldActivateRequestsChanged(this._shouldActivateRequests);
+            }
+        }
+        private bool _shouldActivateRequests;
 
-        protected float ElapsedSecondsSinceRequestsStarted => (Time.realtimeSinceStartup - this._requestsStartedAtRealTime);
-        private float _requestsStartedAtRealTime;
+        private float ElapsedSecondsSinceShouldActivateRequestsIsFalse => (Time.realtimeSinceStartup - this._shouldActivateRequestsIsFalseAtRealTime);
+        private float _shouldActivateRequestsIsFalseAtRealTime = float.PositiveInfinity;
 
-        protected bool IsRequesting => this._isRequesting;
+        private bool IsRequesting => this._isRequesting;
         private bool _isRequesting;
 
         private RenderIntervalRequest _requestRenderInterval;
@@ -50,15 +59,53 @@ namespace UniRate {
         private FixedUpdateRateRequest _requestFixedUpdateRate;
         
         #endregion <<---------- Properties and Fields ---------->>
+
+
+
+
+        #region <<---------- MonoBehaviour ---------->>
+        
+        protected virtual void Awake() {
+            this._manager = RateManager.Instance;
+            this.ShouldActivateRequests = false;
+        }
+
+        protected virtual void OnDisable() {
+            this.ShouldActivateRequests = false;
+            this.StopRequestsNow();
+        }
+
+        #if UNITY_EDITOR
+        protected virtual void OnValidate() {
+            if (!Application.isPlaying || !this._shouldActivateRequests || this.Manager == null) return;
+            this.StartOrRefreshRequests(this.Manager, this.GetCurrentPreset());
+        }
+        #endif
+        
+        #endregion <<---------- MonoBehaviour ---------->>
+
+
+
+
+        #region <<---------- Callbacks ---------->>
+        
+        private void OnShouldActivateRequestsChanged(bool shouldActivateRequests) {
+            if (shouldActivateRequests) {
+                this._shouldActivateRequestsIsFalseAtRealTime = float.PositiveInfinity;
+                this.StartOrRefreshRequests(this._manager, this.GetCurrentPreset());
+                this._manager.ApplyTargetsIfDirty();
+                return;
+            }
+            this._shouldActivateRequestsIsFalseAtRealTime = Time.realtimeSinceStartup;
+            this.StopRequestsIfDelayed();
+        }
+        
+        #endregion <<---------- Callbacks ---------->>
         
         
         
         
         #region <<---------- General ---------->>
-
-        protected void CacheManager() {
-            this._manager = RateManager.Instance;
-        }
 
         protected RatePreset GetCurrentPreset() {
             int renderInterval;
@@ -97,7 +144,7 @@ namespace UniRate {
             return new RatePreset(updateRate, fixedUpdateRate, renderInterval);
         }
         
-        protected void StartRequests(RateManager manager, RatePreset preset) {
+        protected void StartOrRefreshRequests(RateManager manager, RatePreset preset) {
             if (this._requestRenderInterval == null || this._requestRenderInterval.IsDisposed) {
                 this._requestRenderInterval = manager.RequestRenderInterval(preset.RenderInterval);
             }
@@ -122,11 +169,10 @@ namespace UniRate {
                 this._requestFixedUpdateRate = manager.RequestFixedUpdateRate(preset.FixedUpdateRate);
             }
 
-            this._requestsStartedAtRealTime = Time.realtimeSinceStartup;
             this._isRequesting = true;
         }
 
-        protected void StopRequests() {
+        protected void StopRequestsNow() {
             this._requestRenderInterval?.Dispose();
             this._requestRenderInterval = null;
             
@@ -137,7 +183,12 @@ namespace UniRate {
             this._requestFixedUpdateRate = null;
 
             this._isRequesting = false;
-            this._requestsStartedAtRealTime = 0f;
+        }
+
+        protected void StopRequestsIfDelayed() {
+            if (this._isRequesting && !this._shouldActivateRequests && this.ElapsedSecondsSinceShouldActivateRequestsIsFalse > this._delaySecondsToStopRequests) {
+                this.StopRequestsNow();
+            }
         }
         
         #endregion <<---------- General ---------->>
