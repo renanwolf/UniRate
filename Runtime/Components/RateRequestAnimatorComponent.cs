@@ -90,8 +90,8 @@ namespace UniRate {
         private bool GetIsAnimatorPlayingInStateAtLayer(Animator animator, int layerIndex, int stateHash, bool hasStateHash) {
             var stateInfo = animator.GetCurrentAnimatorStateInfo(layerIndex);
             if (stateInfo.speed == 0f || stateInfo.speedMultiplier == 0f) return false;
-            if (!hasStateHash) return true;
-            return (stateInfo.shortNameHash == stateHash);
+            if (hasStateHash && stateInfo.shortNameHash != stateHash) return false;
+            return (stateInfo.loop || stateInfo.normalizedTime < 1f);
         }
 
         private bool GetIsAnimatorPlayingOrInTransition(Animator animator, string layerName, int stateHash, bool hasStateHash, bool activateRequestsInTransitions) {
