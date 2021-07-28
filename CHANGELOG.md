@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- Fixed compilation error on `RateManager` for Unity versions below 2019.3 ([#1](https://github.com/renanwolf/UniRate/pull/1)), by [@Chrisdbhr](https://github.com/Chrisdbhr).
+### Security
+
 ## [2.2.1] - 2021-05-18
 ### Fixed
 - `RateRequestAnimatorComponent` was not evaluating correctly if `Animator` states are playing.
@@ -30,3 +39,10 @@
 - Renamed `Debugger` to `RateDebug`.
 - Renamed `LogLevel` to `RateLogLevel`.
 - Increased `RateDebug.LogLevel` default value.
+
+[Unreleased]: https://github.com/renanwolf/UniRate/compare/v2.2.1...HEAD
+[2.2.1]: https://github.com/renanwolf/UniRate/releases/tag/v2.2.1
+[2.2.0]: https://github.com/renanwolf/UniRate/releases/tag/v2.2.0
+[2.1.2]: https://github.com/renanwolf/UniRate/releases/tag/v2.1.2
+[2.1.1]: https://github.com/renanwolf/UniRate/releases/tag/v2.1.1
+[2.1.0]: https://github.com/renanwolf/UniRate/releases/tag/v2.1.0
