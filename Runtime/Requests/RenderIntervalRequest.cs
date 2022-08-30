@@ -28,10 +28,7 @@ namespace UniRate {
 
         #region <<---------- IDisposable ---------->>
 
-        /// <summary>
-        /// Cancel request.
-        /// </summary>
-        public override void Dispose() {
+        protected override void Dispose(bool disposingManagedResources) {
             if (this.IsDisposed) return;
             this.IsDisposed = true;
             if (this.RateManager == null) return;

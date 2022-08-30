@@ -35,7 +35,12 @@ namespace UniRate {
         /// <summary>
         /// Cancel request.
         /// </summary>
-        public abstract void Dispose();
+        public void Dispose() {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected abstract void Dispose(bool disposingManagedResources);
 
         #endregion <<---------- IDisposable ---------->>
     }
