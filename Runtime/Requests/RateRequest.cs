@@ -1,4 +1,5 @@
 ﻿using System;
+using UniRate.Internals;
 
 namespace UniRate {
 
@@ -6,8 +7,8 @@ namespace UniRate {
 
         #region <<---------- Initializers ---------->>
 
-        protected RateRequest(RateManager rateManager) {
-            this._rateManager = rateManager != null ? rateManager : throw new ArgumentNullException(nameof(rateManager));
+        protected RateRequest(RateManagerValueController controller) {
+            this._controller = controller ?? throw new ArgumentNullException(nameof(controller));
         }
 
         #endregion <<---------- Initializers ---------->>
@@ -17,8 +18,10 @@ namespace UniRate {
 
         #region <<---------- Properties and Fields ---------->>
 
-        protected RateManager RateManager => this._rateManager;
-        private readonly RateManager _rateManager;
+        protected RateManagerValueController Controller => this._controller;
+        private readonly RateManagerValueController _controller;
+
+        protected internal abstract int Value { get; }
 
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -40,7 +43,11 @@ namespace UniRate {
             GC.SuppressFinalize(this);
         }
 
-        protected abstract void Dispose(bool disposingManagedResources);
+        protected void Dispose(bool disposingManagedResources) {
+            if (this.IsDisposed) return;
+            this.IsDisposed = true;
+            this.Controller?.CancelRequest(this);
+        }
 
         #endregion <<---------- IDisposable ---------->>
     }

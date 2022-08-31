@@ -1,5 +1,35 @@
 # Changelog
 
+## [Unreleased]
+### Added
+### Changed
+- **Breaking:** `RateManager.Instance.UpdateRate` now returns the update rate controller instance instead of the current update rate per seconds value, which is now accessible through `RateManager.Instance.UpdateRate.Current`.
+- **Breaking:** `RateManager.Instance.FixedUpdateRate` now returns the fixed update rate controller instance instead of the current fixed update rate per seconds value, which is now accessible through `RateManager.Instance.FixedUpdateRate.Current`.
+- **Breaking:** `RateManager.Instance.RenderInterval` now returns the render interval controller instance instead of the current render interval value, which is now accessible through `RateManager.Instance.RenderInterval.Current`.
+### Deprecated
+- `RateManager.Instance.UpdateRateMode` is now deprecated, use `RateManager.Instance.UpdateRate.Mode` instead.
+- `RateManager.Instance.MinimumUpdateRate` is now deprecated, use `RateManager.Instance.UpdateRate.Minimum` instead.
+- `RateManager.Instance.TargetUpdateRate` is now deprecated, use `RateManager.Instance.UpdateRate.Target` instead.
+- `RateManager.Instance.UpdateRateModeChanged` is now deprecated, use `RateManager.Instance.UpdateRate.ModeChanged` instead.
+- `RateManager.Instance.UpdateRateChanged` is now deprecated, use `RateManager.Instance.UpdateRate.CurrentChanged` instead.
+- `RateManager.Instance.MinimumFixedUpdateRate` is now deprecated, use `RateManager.Instance.FixedUpdateRate.Minimum` instead.
+- `RateManager.Instance.TargetFixedUpdateRate` is now deprecated, use `RateManager.Instance.FixedUpdateRate.Target` instead.
+- `RateManager.Instance.FixedUpdateRateChanged` is now deprecated, use `RateManager.Instance.FixedUpdateRate.CurrentChanged` instead.
+- `RateManager.Instance.TargetFixedUpdateRateChanged` is now deprecated, use `RateManager.Instance.FixedUpdateRate.TargetChanged` instead.
+- `RateManager.Instance.MaximumRenderInterval` is now deprecated, use `RateManager.Instance.RenderInterval.Maximum` instead.
+- `RateManager.Instance.TargetRenderInterval` is now deprecated, use `RateManager.Instance.RenderInterval.Target` instead.
+- `RateManager.Instance.RenderIntervalChanged` is now deprecated, use `RateManager.Instance.RenderInterval.CurrentChanged` instead.
+- `RateManager.Instance.TargetRenderIntervalChanged` is now deprecated, use `RateManager.Instance.RenderInterval.TargetChanged` instead.
+- `RateManager.Instance.RenderRate` is now deprecated, use `RateManager.Instance.RenderInterval.CurrentRenderRate` instead.
+- `RateManager.Instance.WillRender` is now deprecated, use `RateManager.Instance.RenderInterval.WillRender` instead.
+- `RateManager.Instance.IsRenderIntervalSupported` is now deprecated, use `RateManager.Instance.RenderInterval.IsSupported` instead.
+- `RateManager.Instance.RequestUpdateRate(int)` is now deprecated, use `RateManager.Instance.UpdateRate.Request(int)` instead.
+- `RateManager.Instance.RequestFixedUpdateRate(int)` is now deprecated, use `RateManager.Instance.FixedUpdateRate.Request(int)` instead.
+- `RateManager.Instance.RequestRenderInterval(int)` is now deprecated, use `RateManager.Instance.RenderInterval.Request(int)` instead.
+### Removed
+### Fixed
+### Security
+
 ## [2.2.2] - 2021-07-28
 ### Fixed
 - Fixed compilation error on `RateManager` for Unity versions below 2019.3 ([#1](https://github.com/renanwolf/UniRate/pull/1)), by [@Chrisdbhr](https://github.com/Chrisdbhr).

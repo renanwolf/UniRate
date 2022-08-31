@@ -1,10 +1,12 @@
+using UniRate.Internals;
+
 namespace UniRate {
 
     public class RenderIntervalRequest : RateRequest {
 
         #region <<---------- Initializers ---------->>
 
-        internal RenderIntervalRequest(RateManager rateManager, int renderInterval) : base(rateManager) {
+        internal RenderIntervalRequest(RateManagerValueController controller, int renderInterval) : base(controller) {
             this._renderInterval = renderInterval;
         }
 
@@ -21,20 +23,8 @@ namespace UniRate {
         public int RenderInterval => this._renderInterval;
         private readonly int _renderInterval;
 
+        protected internal override int Value => this._renderInterval;
+
         #endregion <<---------- Properties and Fields ---------->>
-
-
-
-
-        #region <<---------- IDisposable ---------->>
-
-        protected override void Dispose(bool disposingManagedResources) {
-            if (this.IsDisposed) return;
-            this.IsDisposed = true;
-            if (this.RateManager == null) return;
-            this.RateManager.CancelRenderIntervalRequest(this);
-        }
-
-        #endregion <<---------- IDisposable ---------->>
     }
 }

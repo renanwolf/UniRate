@@ -25,8 +25,8 @@ namespace PWR.LowPowerMemoryConsumption {
 			set => RateManager.Instance.MaximumRenderInterval = value;
 		}
 
-		[Obsolete("OBSOLETE, use RateManager.Instance.RenderInterval instead.")]
-		public int RenderInterval => RateManager.Instance.RenderInterval;
+		[Obsolete("OBSOLETE, use RateManager.Instance.RenderInterval.Current instead.")]
+		public int RenderInterval => RateManager.Instance.RenderInterval.Current;
 
 		[Obsolete("OBSOLETE, use RateManager.Instance.WillRender instead.")]
 		public bool IsRendering => RateManager.Instance.WillRender;

@@ -36,28 +36,28 @@ namespace UniRate.Examples {
         private void OnEnable() {
             this._rateManager = RateManager.Instance;
 
-            this.ApplyTogglesUpdateRateMode(this._rateManager.UpdateRateMode);
-            this._rateManager.UpdateRateModeChanged += this.OnUpdateRateModeChanged;
+            this.ApplyTogglesUpdateRateMode(this._rateManager.UpdateRate.Mode);
+            this._rateManager.UpdateRate.ModeChanged += this.OnUpdateRateModeChanged;
 
             this._toggleModeTargetFrameRate.onValueChanged.AddListener(this.OnToggleModeTargetFrameRateValueChanged);
             this._toggleModeVSyncCount.onValueChanged.AddListener(this.OnToggleModeVSyncCountValueChanged);
 
-            this.ApplyTextUpdateRate(this._rateManager.UpdateRate, this._rateManager.TargetUpdateRate);
-            this.ApplyTextFixedUpdateRate(this._rateManager.FixedUpdateRate, this._rateManager.TargetFixedUpdateRate);
-            this.ApplyTextRenderInterval(this._rateManager.RenderInterval, this._rateManager.TargetRenderInterval);
+            this.ApplyTextUpdateRate(this._rateManager.UpdateRate.Current, this._rateManager.UpdateRate.Target);
+            this.ApplyTextFixedUpdateRate(this._rateManager.FixedUpdateRate.Current, this._rateManager.FixedUpdateRate.Target);
+            this.ApplyTextRenderInterval(this._rateManager.RenderInterval.Current, this._rateManager.RenderInterval.Target);
 
-            this.ApplySliderUpdateRate(this._rateManager.TargetUpdateRate);
-            this.ApplySliderFixedUpdateRate(this._rateManager.TargetFixedUpdateRate);
-            this.ApplySliderRenderInterval(this._rateManager.TargetRenderInterval);
+            this.ApplySliderUpdateRate(this._rateManager.UpdateRate.Target);
+            this.ApplySliderFixedUpdateRate(this._rateManager.FixedUpdateRate.Target);
+            this.ApplySliderRenderInterval(this._rateManager.RenderInterval.Target);
 
-            this._rateManager.UpdateRateChanged += this.OnUpdateRateChanged;
-            this._rateManager.TargetUpdateRateChanged += this.OnTargetUpdateRateChanged;
+            this._rateManager.UpdateRate.CurrentChanged += this.OnUpdateRateChanged;
+            this._rateManager.UpdateRate.TargetChanged += this.OnTargetUpdateRateChanged;
 
-            this._rateManager.FixedUpdateRateChanged += this.OnFixedUpdateRateChanged;
-            this._rateManager.TargetFixedUpdateRateChanged += this.OnTargetFixedUpdateRateChanged;
+            this._rateManager.FixedUpdateRate.CurrentChanged += this.OnFixedUpdateRateChanged;
+            this._rateManager.FixedUpdateRate.TargetChanged += this.OnTargetFixedUpdateRateChanged;
 
-            this._rateManager.RenderIntervalChanged += this.OnRenderIntervalChanged;
-            this._rateManager.TargetRenderIntervalChanged += this.OnTargetRenderIntervalChanged;
+            this._rateManager.RenderInterval.CurrentChanged += this.OnRenderIntervalChanged;
+            this._rateManager.RenderInterval.TargetChanged += this.OnTargetRenderIntervalChanged;
 
             this._sliderUpdateRate.onValueChanged.AddListener(this.OnSliderUpdateRateChanged);
             this._sliderFixedUpdateRate.onValueChanged.AddListener(this.OnSliderFixedUpdateRateChanged);
@@ -67,19 +67,19 @@ namespace UniRate.Examples {
         private void OnDisable() {
             if (this._rateManager == null) return;
 
-            this._rateManager.UpdateRateModeChanged -= this.OnUpdateRateModeChanged;
+            this._rateManager.UpdateRate.ModeChanged -= this.OnUpdateRateModeChanged;
 
             this._toggleModeTargetFrameRate.onValueChanged.RemoveListener(this.OnToggleModeTargetFrameRateValueChanged);
             this._toggleModeVSyncCount.onValueChanged.RemoveListener(this.OnToggleModeVSyncCountValueChanged);
 
-            this._rateManager.UpdateRateChanged -= this.OnUpdateRateChanged;
-            this._rateManager.TargetUpdateRateChanged -= this.OnTargetUpdateRateChanged;
+            this._rateManager.UpdateRate.CurrentChanged -= this.OnUpdateRateChanged;
+            this._rateManager.UpdateRate.TargetChanged -= this.OnTargetUpdateRateChanged;
 
-            this._rateManager.FixedUpdateRateChanged -= this.OnFixedUpdateRateChanged;
-            this._rateManager.TargetFixedUpdateRateChanged -= this.OnTargetFixedUpdateRateChanged;
+            this._rateManager.FixedUpdateRate.CurrentChanged -= this.OnFixedUpdateRateChanged;
+            this._rateManager.FixedUpdateRate.TargetChanged -= this.OnTargetFixedUpdateRateChanged;
 
-            this._rateManager.RenderIntervalChanged -= this.OnRenderIntervalChanged;
-            this._rateManager.TargetRenderIntervalChanged -= this.OnTargetRenderIntervalChanged;
+            this._rateManager.RenderInterval.CurrentChanged -= this.OnRenderIntervalChanged;
+            this._rateManager.RenderInterval.TargetChanged -= this.OnTargetRenderIntervalChanged;
 
             this._sliderUpdateRate.onValueChanged.RemoveListener(this.OnSliderUpdateRateChanged);
             this._sliderFixedUpdateRate.onValueChanged.RemoveListener(this.OnSliderFixedUpdateRateChanged);
@@ -107,55 +107,55 @@ namespace UniRate.Examples {
         }
 
         private void OnTargetUpdateRateChanged(RateManager manager, int targetUpdateRate) {
-            this.ApplyTextUpdateRate(manager.UpdateRate, targetUpdateRate);
+            this.ApplyTextUpdateRate(manager.UpdateRate.Current, targetUpdateRate);
         }
 
         private void OnUpdateRateChanged(RateManager manager, int updateRate) {
-            this.ApplyTextUpdateRate(updateRate, manager.TargetUpdateRate);
+            this.ApplyTextUpdateRate(updateRate, manager.UpdateRate.Target);
         }
 
         private void OnTargetFixedUpdateRateChanged(RateManager manager, int targetFixedUpdateRate) {
-            this.ApplyTextFixedUpdateRate(manager.FixedUpdateRate, targetFixedUpdateRate);
+            this.ApplyTextFixedUpdateRate(manager.FixedUpdateRate.Current, targetFixedUpdateRate);
         }
 
         private void OnFixedUpdateRateChanged(RateManager manager, int fixedUpdateRate) {
-            this.ApplyTextFixedUpdateRate(fixedUpdateRate, manager.TargetFixedUpdateRate);
+            this.ApplyTextFixedUpdateRate(fixedUpdateRate, manager.FixedUpdateRate.Target);
         }
 
         private void OnRenderIntervalChanged(RateManager manager, int renderInterval) {
-            this.ApplyTextRenderInterval(renderInterval, manager.TargetRenderInterval);
+            this.ApplyTextRenderInterval(renderInterval, manager.RenderInterval.Target);
         }
 
         private void OnTargetRenderIntervalChanged(RateManager manager, int targetRenderInterval) {
-            this.ApplyTextRenderInterval(manager.RenderInterval, targetRenderInterval);
+            this.ApplyTextRenderInterval(manager.RenderInterval.Current, targetRenderInterval);
         }
 
         private void OnToggleModeTargetFrameRateValueChanged(bool isOn) {
             if (!isOn || this._rateManager == null) return;
-            this._rateManager.UpdateRateMode = UpdateRateMode.ApplicationTargetFrameRate;
+            this._rateManager.UpdateRate.Mode = UpdateRateMode.ApplicationTargetFrameRate;
         }
 
         private void OnToggleModeVSyncCountValueChanged(bool isOn) {
             if (!isOn || this._rateManager == null) return;
-            this._rateManager.UpdateRateMode = UpdateRateMode.VSyncCount;
+            this._rateManager.UpdateRate.Mode = UpdateRateMode.VSyncCount;
         }
 
         private void OnSliderUpdateRateChanged(float value) {
             if (this._rateManager == null) return;
             this._updateRateRequest?.Dispose();
-            this._updateRateRequest = this._rateManager.RequestUpdateRate(Mathf.RoundToInt(value));
+            this._updateRateRequest = this._rateManager.UpdateRate.Request(Mathf.RoundToInt(value));
         }
 
         private void OnSliderFixedUpdateRateChanged(float value) {
             if (this._rateManager == null) return;
             this._fixedUpdateRateRequest?.Dispose();
-            this._fixedUpdateRateRequest = this._rateManager.RequestFixedUpdateRate(Mathf.RoundToInt(value));
+            this._fixedUpdateRateRequest = this._rateManager.FixedUpdateRate.Request(Mathf.RoundToInt(value));
         }
 
         private void OnSliderRenderIntervalChanged(float value) {
             if (this._rateManager == null) return;
             this._renderIntervalRequest?.Dispose();
-            this._renderIntervalRequest = this._rateManager.RequestRenderInterval(Mathf.RoundToInt(value));
+            this._renderIntervalRequest = this._rateManager.RenderInterval.Request(Mathf.RoundToInt(value));
         }
         
         #endregion <<---------- Callbacks ---------->>

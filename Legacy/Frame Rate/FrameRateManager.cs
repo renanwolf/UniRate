@@ -102,11 +102,11 @@ namespace PWR.LowPowerMemoryConsumption {
 		}
 		private Action<int> _targetFixedFrameRateChanged;
 
-		[Obsolete("OBSOLETE, use RateManager.Instance.UpdateRate instead.")]
-		public int FrameRate => RateManager.Instance.UpdateRate;
+		[Obsolete("OBSOLETE, use RateManager.Instance.UpdateRate.Current instead.")]
+		public int FrameRate => RateManager.Instance.UpdateRate.Current;
 
-		[Obsolete("OBSOLETE, use RateManager.Instance.FixedUpdateRate instead.")]
-		public int FixedFrameRate => RateManager.Instance.FixedUpdateRate;
+		[Obsolete("OBSOLETE, use RateManager.Instance.FixedUpdateRate.Current instead.")]
+		public int FixedFrameRate => RateManager.Instance.FixedUpdateRate.Current;
 
 		[Obsolete("OBSOLETE, use RateManager.Instance.TargetUpdateRate instead.")]
 		public int TargetFrameRate => RateManager.Instance.TargetUpdateRate;
