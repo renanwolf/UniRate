@@ -4,9 +4,9 @@ using UnityEngine.UI;
 namespace UniRate.Examples {
 
     public class ExampleScript_One : MonoBehaviour {
-        
+
         #region <<---------- Properties and Fields ---------->>
-        
+
         [SerializeField] private Text _textUpdateRate;
         [SerializeField] private Text _textFixedUpdateRate;
         [SerializeField] private Text _textRenderInterval;
@@ -25,7 +25,7 @@ namespace UniRate.Examples {
         private UpdateRateRequest _updateRateRequest;
         private FixedUpdateRateRequest _fixedUpdateRateRequest;
         private RenderIntervalRequest _renderIntervalRequest;
-        
+
         #endregion <<---------- Properties and Fields ---------->>
 
 
@@ -94,14 +94,14 @@ namespace UniRate.Examples {
             this._renderIntervalRequest?.Dispose();
             this._renderIntervalRequest = null;
         }
-        
+
         #endregion <<---------- MonoBehaviour ---------->>
 
 
 
 
         #region <<---------- Callbacks ---------->>
-        
+
         private void OnUpdateRateModeChanged(RateManager manager, UpdateRateMode updateRateMode) {
             this.ApplyTogglesUpdateRateMode(updateRateMode);
         }
@@ -157,14 +157,14 @@ namespace UniRate.Examples {
             this._renderIntervalRequest?.Dispose();
             this._renderIntervalRequest = this._rateManager.RenderInterval.Request(Mathf.RoundToInt(value));
         }
-        
+
         #endregion <<---------- Callbacks ---------->>
 
 
 
 
         #region <<---------- General ---------->>
-        
+
         private void ApplyTextUpdateRate(int rate, int target) {
             this._textUpdateRate.text = $"Update: {rate.ToString("000")} / {target.ToString("000")}";
         }
@@ -193,7 +193,7 @@ namespace UniRate.Examples {
             this._toggleModeTargetFrameRate.isOn = (updateRateMode == UpdateRateMode.ApplicationTargetFrameRate);
             this._toggleModeVSyncCount.isOn = (updateRateMode == UpdateRateMode.VSyncCount);
         }
-        
+
         #endregion <<---------- General ---------->>
     }
 }
