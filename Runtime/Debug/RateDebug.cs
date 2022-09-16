@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -172,6 +173,11 @@ namespace UniRate.Debug {
             style.normal.background = backgroundTexture;
             style.padding = new RectOffset(2, 2, 1, 1);
             return style;
+        }
+
+        internal static string GetCurrentStackTrace(int skipFrames) {
+            var stackTraceObject = new StackTrace(skipFrames + 1, true);
+            return stackTraceObject?.ToString();
         }
 
         #endregion <<---------- General ---------->>
