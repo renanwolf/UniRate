@@ -146,27 +146,27 @@ namespace UniRate {
 
         protected void StartOrRefreshRequests(RateManager manager, RatePreset preset) {
             if (this._requestRenderInterval == null || this._requestRenderInterval.IsDisposed) {
-                this._requestRenderInterval = manager.RequestRenderInterval(preset.RenderInterval);
+                this._requestRenderInterval = manager.RenderInterval.Request(preset.RenderInterval);
             }
             else if (this._requestRenderInterval.RenderInterval != preset.RenderInterval) {
                 this._requestRenderInterval.Dispose();
-                this._requestRenderInterval = manager.RequestRenderInterval(preset.RenderInterval);
+                this._requestRenderInterval = manager.RenderInterval.Request(preset.RenderInterval);
             }
 
             if (this._requestUpdateRate == null || this._requestUpdateRate.IsDisposed) {
-                this._requestUpdateRate = manager.RequestUpdateRate(preset.UpdateRate);
+                this._requestUpdateRate = manager.UpdateRate.Request(preset.UpdateRate);
             }
             else if (this._requestUpdateRate.UpdateRate != preset.UpdateRate) {
                 this._requestUpdateRate.Dispose();
-                this._requestUpdateRate = manager.RequestUpdateRate(preset.UpdateRate);
+                this._requestUpdateRate = manager.UpdateRate.Request(preset.UpdateRate);
             }
 
             if (this._requestFixedUpdateRate == null || this._requestFixedUpdateRate.IsDisposed) {
-                this._requestFixedUpdateRate = manager.RequestFixedUpdateRate(preset.FixedUpdateRate);
+                this._requestFixedUpdateRate = manager.FixedUpdateRate.Request(preset.FixedUpdateRate);
             }
             else if (this._requestFixedUpdateRate.FixedUpdateRate != preset.FixedUpdateRate) {
                 this._requestFixedUpdateRate.Dispose();
-                this._requestFixedUpdateRate = manager.RequestFixedUpdateRate(preset.FixedUpdateRate);
+                this._requestFixedUpdateRate = manager.FixedUpdateRate.Request(preset.FixedUpdateRate);
             }
 
             this._isRequesting = true;
