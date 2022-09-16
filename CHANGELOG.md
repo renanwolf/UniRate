@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Added
+- New editor tracker window to make it easy to debug requests lifecycle. It's accessible through `Window > UniRate Tracker`.
 ### Changed
 - **Breaking:** `RateManager.Instance.UpdateRate` now returns the update rate controller instance instead of the current update rate per seconds value, which is now accessible through `RateManager.Instance.UpdateRate.Current`.
 - **Breaking:** `RateManager.Instance.FixedUpdateRate` now returns the fixed update rate controller instance instead of the current fixed update rate per seconds value, which is now accessible through `RateManager.Instance.FixedUpdateRate.Current`.
