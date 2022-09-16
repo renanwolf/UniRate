@@ -3,7 +3,7 @@
 namespace UniRate {
 
     public class RateRequestTouchComponent : RateRequestComponent {
-        
+
         #region <<---------- MonoBehaviour ---------->>
 
         private void OnEnable() {
@@ -14,14 +14,14 @@ namespace UniRate {
             this.ShouldActivateRequests = this.GetHasTouchesOrClicks();
             this.StopRequestsIfDelayed();
         }
-        
+
         #endregion <<---------- MonoBehaviour ---------->>
 
 
 
 
         #region <<---------- General ---------->>
-        
+
         private bool GetHasTouchesOrClicks() {
             return (
                 Input.touchCount > 0
@@ -30,7 +30,7 @@ namespace UniRate {
                 || Input.GetMouseButton(2) // middle click
             );
         }
-        
+
         #endregion <<---------- General ---------->>
     }
 }
