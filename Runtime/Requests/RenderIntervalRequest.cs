@@ -6,7 +6,7 @@ namespace UniRate {
 
         #region <<---------- Initializers ---------->>
 
-        internal RenderIntervalRequest(RateManagerValueController controller, int renderInterval) : base(controller) {
+        internal RenderIntervalRequest(RateManagerValueController controller, int renderInterval) : base(RateRequestType.RenderInterval, controller) {
             this._renderInterval = renderInterval;
         }
 

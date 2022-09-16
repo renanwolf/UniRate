@@ -6,7 +6,7 @@ namespace UniRate {
 
         #region <<---------- Initializers ---------->>
 
-        internal UpdateRateRequest(RateManagerValueController controller, int updateRate) : base(controller) {
+        internal UpdateRateRequest(RateManagerValueController controller, int updateRate) : base(RateRequestType.UpdateRate, controller) {
             this._updateRate = updateRate;
         }
 

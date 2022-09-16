@@ -7,7 +7,8 @@ namespace UniRate {
 
         #region <<---------- Initializers ---------->>
 
-        protected RateRequest(RateManagerValueController controller) {
+        protected RateRequest(RateRequestType type, RateManagerValueController controller) {
+            this._type = type;
             this._controller = controller ?? throw new ArgumentNullException(nameof(controller));
         }
 
@@ -17,6 +18,9 @@ namespace UniRate {
 
 
         #region <<---------- Properties and Fields ---------->>
+
+        public RateRequestType Type => this._type;
+        private readonly RateRequestType _type;
 
         protected RateManagerValueController Controller => this._controller;
         private readonly RateManagerValueController _controller;

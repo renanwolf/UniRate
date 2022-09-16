@@ -7,7 +7,7 @@ namespace UniRate.TestsEditMode {
 
         private class RequestMock : RateRequest {
 
-            public RequestMock(RateManagerValueController controller, int value) : base(controller) {
+            public RequestMock(RateManagerValueController controller, int value) : base(RateRequestType.UpdateRate, controller) {
                 this._value = value;
             }
 

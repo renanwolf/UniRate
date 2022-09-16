@@ -6,7 +6,7 @@ namespace UniRate {
 
         #region <<---------- Initializers ---------->>
 
-        internal FixedUpdateRateRequest(RateManagerValueController controller, int fixedUpdateRate) : base(controller) {
+        internal FixedUpdateRateRequest(RateManagerValueController controller, int fixedUpdateRate) : base(RateRequestType.FixedUpdateRate, controller) {
             this._fixedUpdateRate = fixedUpdateRate;
         }
 
