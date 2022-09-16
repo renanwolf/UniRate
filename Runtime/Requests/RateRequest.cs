@@ -50,7 +50,7 @@ namespace UniRate {
         protected void Dispose(bool disposingManagedResources) {
             if (this.IsDisposed) return;
             this.IsDisposed = true;
-            this.Controller?.CancelRequest(this);
+            this.Controller?.CancelRequest(this, 2);
         }
 
         #endregion <<---------- IDisposable ---------->>

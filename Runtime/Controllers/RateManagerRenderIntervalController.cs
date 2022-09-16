@@ -90,7 +90,7 @@ namespace UniRate.Internals {
         /// Create a new <see cref="RenderIntervalRequest"/>.
         /// </summary>
         public RenderIntervalRequest Request(int renderInterval) {
-            var request = this.BaseRequest(new RenderIntervalRequest(this, renderInterval));
+            var request = this.BaseRequest(new RenderIntervalRequest(this, renderInterval), 1);
 #if !UNITY_2019_3_OR_NEWER
             this.LogNotSupportedOnce();
 #endif

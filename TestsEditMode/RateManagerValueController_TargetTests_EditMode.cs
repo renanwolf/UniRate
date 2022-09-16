@@ -26,7 +26,7 @@ namespace UniRate.TestsEditMode {
             }
 
             public RequestMock RequestMock(int mockValue) {
-                return this.BaseRequest(new RequestMock(this, mockValue));
+                return this.BaseRequest(new RequestMock(this, mockValue), 1);
             }
         }
 

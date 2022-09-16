@@ -169,21 +169,23 @@ namespace UniRate.Internals {
 
         #region <<---------- General ---------->>
 
-        protected T BaseRequest<T>(T request) where T : RateRequest {
+        protected T BaseRequest<T>(T request, int trackerSkipStackTraceFrames) where T : RateRequest {
             if (!this._requests.Add(request)) return request;
             if (RateDebug.IsLogLevelActive(RateLogLevel.Trace)) {
                 RateDebug.Log(RateLogLevel.Trace, $"creating {this._valueName} request {request.Value.ToString()}");
             }
+            RateRequestTracker.ReportStarted(request, trackerSkipStackTraceFrames + 1);
             this.OnRequestsChanged();
             return request;
         }
 
-        internal void CancelRequest(RateRequest request) {
+        internal void CancelRequest(RateRequest request, int trackerSkipStackTraceFrames) {
             if (request == null) return;
             if (!this._requests.Remove(request)) return;
             if (RateDebug.IsLogLevelActive(RateLogLevel.Trace)) {
                 RateDebug.Log(RateLogLevel.Trace, $"canceled {this._valueName} request {request.Value.ToString()}");
             }
+            RateRequestTracker.ReportFinished(request, trackerSkipStackTraceFrames + 1);
             this.OnRequestsChanged();
         }
 

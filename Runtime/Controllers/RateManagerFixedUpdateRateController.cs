@@ -50,7 +50,7 @@ namespace UniRate.Internals {
         /// Create a new <see cref="FixedUpdateRateRequest"/>.
         /// </summary>
         public FixedUpdateRateRequest Request(int fixedUpdateRate) {
-            return this.BaseRequest(new FixedUpdateRateRequest(this, fixedUpdateRate));
+            return this.BaseRequest(new FixedUpdateRateRequest(this, fixedUpdateRate), 1);
         }
 
         protected override void ApplyTargetValueToUnitySettings() {

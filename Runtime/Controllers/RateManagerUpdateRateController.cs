@@ -97,7 +97,7 @@ namespace UniRate.Internals {
         /// Create a new <see cref="UpdateRateRequest"/>.
         /// </summary>
         public UpdateRateRequest Request(int updateRate) {
-            return this.BaseRequest(new UpdateRateRequest(this, updateRate));
+            return this.BaseRequest(new UpdateRateRequest(this, updateRate), 1);
         }
 
         protected override void ApplyTargetValueToUnitySettings() {
