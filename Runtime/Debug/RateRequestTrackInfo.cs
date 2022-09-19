@@ -57,25 +57,25 @@ namespace UniRate.Debug {
             '\n'
         };
 
-        public readonly int Identifier { get; }
+        public int Identifier { get; }
 
-        public readonly RateRequestType Type { get; }
+        public RateRequestType Type { get; }
 
-        public readonly int Value { get; }
+        public int Value { get; }
 
-        public readonly DateTime StartedTime { get; }
+        public DateTime StartedTime { get; }
 
-        public readonly string StackTraceStart { get; }
+        public string StackTraceStart { get; }
 
-        public readonly string StackTraceStartFirstLine { get; }
+        public string StackTraceStartFirstLine { get; }
 
-        public readonly bool IsActive { get; }
+        public bool IsActive { get; }
 
-        public readonly DateTime FinishedTime { get; }
+        public DateTime FinishedTime { get; }
 
-        public readonly string StackTraceFinish { get; }
+        public string StackTraceFinish { get; }
 
-        public readonly string StackTraceFinishFirstLine { get; }
+        public string StackTraceFinishFirstLine { get; }
 
         #endregion <<---------- Propertie and Fields ---------->>
 
