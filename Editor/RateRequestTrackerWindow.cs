@@ -288,7 +288,7 @@ namespace UniRate.Editor {
                     }
                     else {
                         var id = this._treeView.state.selectedIDs[0];
-                        var trackInfo = this._treeView.Source.FirstOrDefault(i => i.Identifier == id);
+                        var trackInfo = this._trackerInfos.Find(i => i.Identifier == id);
                         builder.Append("Type: ").AppendLine(trackInfo.Type.ToString());
                         builder.Append("Value: ").AppendLine(trackInfo.Value.ToString());
                         builder.Append("Status: ").AppendLine(trackInfo.GetStatusFormatted());
