@@ -8,20 +8,94 @@ using UniRate.Debug;
 
 namespace UniRate.Editor {
 
+    internal static class RateRequestTrackerWindowExtensions {
+
+        internal static RateRequestTrackerWindow.Filters ToggleFlag(this RateRequestTrackerWindow.Filters filter, RateRequestTrackerWindow.Filters flag) {
+            return filter ^ flag;
+        }
+
+        internal static RateRequestTrackerWindow.Filters Flagged(this RateRequestTrackerWindow.Filters filter, RateRequestTrackerWindow.Filters flag) {
+            return filter | flag;
+        }
+
+        internal static RateRequestTrackerWindow.Filters Unflagged(this RateRequestTrackerWindow.Filters filter, RateRequestTrackerWindow.Filters flag) {
+            return filter & (~flag);
+        }
+
+        internal static bool HasAnyFlag(this RateRequestTrackerWindow.Filters filter, RateRequestTrackerWindow.Filters flag) {
+            return (filter & flag) != 0;
+        }
+
+        internal static string GetStatusAndTypeDisplayText(this RateRequestTrackerWindow.Filters filter, bool allowNone = false) {
+            if (!filter.HasAnyFlag(RateRequestTrackerWindow.Filters.Status_All) && !filter.HasAnyFlag(RateRequestTrackerWindow.Filters.Type_All)) {
+                return allowNone ? "Nothing" : null;
+            }
+
+            var builder = new StringBuilder();
+
+            if (filter.HasFlag(RateRequestTrackerWindow.Filters.Status_All)) {
+                builder.Append("All Status");
+            }
+            else if (!filter.HasAnyFlag(RateRequestTrackerWindow.Filters.Status_All)) {
+                if (allowNone) {
+                    builder.Append("No Status");
+                }
+            }
+            else {
+                if (filter.HasFlag(RateRequestTrackerWindow.Filters.Status_Active)) {
+                    builder.Append("Active");
+                }
+                if (filter.HasFlag(RateRequestTrackerWindow.Filters.Status_Finished)) {
+                    if (builder.Length > 0) builder.Append(", ");
+                    builder.Append("Finished");
+                }
+            }
+
+            if (filter.HasFlag(RateRequestTrackerWindow.Filters.Type_All)) {
+                if (builder.Length > 0) builder.Append(", ");
+                builder.Append("All Types");
+            }
+            else if (!filter.HasAnyFlag(RateRequestTrackerWindow.Filters.Type_All)) {
+                if (allowNone) {
+                    if (builder.Length > 0) builder.Append(", ");
+                    builder.Append("No Types");
+                }
+            }
+            else {
+                if (filter.HasFlag(RateRequestTrackerWindow.Filters.Type_UpdateRate)) {
+                    if (builder.Length > 0) builder.Append(", ");
+                    builder.Append("Update Rate");
+                }
+                if (filter.HasFlag(RateRequestTrackerWindow.Filters.Type_FixedUpdateRate)) {
+                    if (builder.Length > 0) builder.Append(", ");
+                    builder.Append("Fixed Update Rate");
+                }
+                if (filter.HasFlag(RateRequestTrackerWindow.Filters.Type_RenderInterval)) {
+                    if (builder.Length > 0) builder.Append(", ");
+                    builder.Append("Render Interval");
+                }
+            }
+
+            return builder.ToString();
+        }
+    }
+
     public class RateRequestTrackerWindow : EditorWindow {
 
         #region <<---------- Enum Filters ---------->>
 
         [Flags]
-        private enum Filters {
+        internal enum Filters {
             None = 0,
 
             Status_Active = 1 << 0,
             Status_Finished = 1 << 1,
+            Status_All = Status_Active | Status_Finished,
 
             Type_UpdateRate = 1 << 2,
             Type_FixedUpdateRate = 1 << 3,
             Type_RenderInterval = 1 << 4,
+            Type_All = Type_UpdateRate | Type_FixedUpdateRate | Type_RenderInterval,
 
             KeepSelection = 1 << 5,
 
@@ -97,6 +171,8 @@ namespace UniRate.Editor {
         private Vector2 _scrollPositionDetails;
         private static GUIStyle _labelDetailsStyle;
 
+        private Rect _filtersDropdownRect;
+
         #endregion <<---------- Properties and Fields ---------->>
 
 
@@ -111,7 +187,7 @@ namespace UniRate.Editor {
             this._mainRect.x = 0;
             this._mainRect.y = 0;
 
-            this._selectedFilter = (Filters)EditorPrefs.GetInt($"{nameof(RateRequestTrackerWindow)}.{nameof(this._selectedFilter)}", (int)this.RemoveBitMask(Filters.All, Filters.Status_Finished));
+            this._selectedFilter = (Filters)EditorPrefs.GetInt($"{nameof(RateRequestTrackerWindow)}.{nameof(this._selectedFilter)}", (int)Filters.All.Unflagged(Filters.Status_Finished));
 
             this._trackerEnabled = EditorPrefs.GetBool($"{nameof(RateRequestTrackerWindow)}.{nameof(this._trackerEnabled)}", true);
             RateRequestTracker.IsEnabled = this._trackerEnabled;
@@ -142,7 +218,7 @@ namespace UniRate.Editor {
 
                 // toolbar
                 using (var toolbarScope = new EditorGUILayout.HorizontalScope(EditorStyles.toolbar)) {
-                    this.SelectedFilter = (Filters)this.MaskFieldAutoSize((int)this._selectedFilter, _filtersDisplayName, EditorStyles.toolbarPopup, 80);
+                    this.MakeFiltersDropdown();
                     GUILayout.FlexibleSpace();
                     this.TrackerEnabled = GUILayout.Toggle(this._trackerEnabled, "Tracking", EditorStyles.toolbarButton);
                     this.StackTraceEnabled = GUILayout.Toggle(this._stackTraceEnabled, "StackTrace", EditorStyles.toolbarButton);
@@ -310,70 +386,102 @@ namespace UniRate.Editor {
             this._treeView.Reload(this._trackerInfos.Where(info =>
                 (
                     (
-                        (info.IsActive && this.HasBitMask(this._selectedFilter, Filters.Status_Active))
-                        || (!info.IsActive && this.HasBitMask(this._selectedFilter, Filters.Status_Finished))
+                        (info.IsActive && this._selectedFilter.HasFlag(Filters.Status_Active))
+                        || (!info.IsActive && this._selectedFilter.HasFlag(Filters.Status_Finished))
                     )
                     && (
-                        (info.Type == RateRequestType.UpdateRate && this.HasBitMask(this._selectedFilter, Filters.Type_UpdateRate))
-                        || (info.Type == RateRequestType.FixedUpdateRate && this.HasBitMask(this._selectedFilter, Filters.Type_FixedUpdateRate))
-                        || (info.Type == RateRequestType.RenderInterval && this.HasBitMask(this._selectedFilter, Filters.Type_RenderInterval))
+                        (info.Type == RateRequestType.UpdateRate && this._selectedFilter.HasFlag(Filters.Type_UpdateRate))
+                        || (info.Type == RateRequestType.FixedUpdateRate && this._selectedFilter.HasFlag(Filters.Type_FixedUpdateRate))
+                        || (info.Type == RateRequestType.RenderInterval && this._selectedFilter.HasFlag(Filters.Type_RenderInterval))
                     )
                 )
                 || (
-                    this.HasBitMask(this._selectedFilter, Filters.KeepSelection)
+                    this._selectedFilter.HasFlag(Filters.KeepSelection)
                     && this._treeView.state.selectedIDs.Contains(info.Identifier)
                 )
             ));
         }
 
-        private int MaskFieldAutoSize(int mask, string[] displayOptions, GUIStyle style, float minWidth) {
-            string text;
-            if (mask == (int)Filters.All) {
-                text = "Everything";
+        private void MakeFiltersDropdown() {
+            var buttonText = $"Filters:  {this._selectedFilter.GetStatusAndTypeDisplayText(true)}";
+            var buttonContent = new GUIContent(buttonText);
+            var buttonStyle = EditorStyles.toolbarDropDown;
+            var buttonWidth = buttonStyle.CalcSize(buttonContent).x + 1;
+
+            var buttonClicked = EditorGUILayout.DropdownButton(buttonContent, FocusType.Passive, buttonStyle, new[] {
+                GUILayout.MinWidth(60),
+                GUILayout.MaxWidth(buttonWidth)
+            });
+
+            if (!buttonClicked) {
+                if (Event.current.type != EventType.Layout) {
+                    this._filtersDropdownRect = GUILayoutUtility.GetLastRect();
+                }
+                return;
             }
-            else if (mask == (int)Filters.None) {
-                text = "Nothing";
+
+            var menu = new GenericMenu();
+
+            if (this._selectedFilter.HasFlag(Filters.Status_All)) {
+                menu.AddItem(
+                    new GUIContent("Status/None"),
+                    false,
+                    () => this.SelectedFilter = this._selectedFilter.Unflagged(Filters.Status_All)
+                );
             }
             else {
-                var builder = new StringBuilder();
-                for (int i = 0; i < displayOptions.Length; i++) {
-                    if (!this.HasBitMask(mask, i)) continue;
-                    if (builder.Length > 0) {
-                        builder.Append(", ");
-                    }
-                    builder.Append(displayOptions[i]);
-                }
-                text = builder.ToString();
+                menu.AddItem(
+                    new GUIContent("Status/All"),
+                    false,
+                    () => this.SelectedFilter = this._selectedFilter.Flagged(Filters.Status_All)
+                );
             }
+            menu.AddSeparator("Status/");
+            menu.AddItem(
+                new GUIContent($"Status/{Filters.Status_Active.GetStatusAndTypeDisplayText()}"),
+                this._selectedFilter.HasFlag(Filters.Status_Active),
+                () => this.SelectedFilter = this._selectedFilter.ToggleFlag(Filters.Status_Active)
+            );
+            menu.AddItem(
+                new GUIContent($"Status/{Filters.Status_Finished.GetStatusAndTypeDisplayText()}"),
+                this._selectedFilter.HasFlag(Filters.Status_Finished),
+                () => this.SelectedFilter = this._selectedFilter.ToggleFlag(Filters.Status_Finished)
+            );
 
-            float maxWidth = style.CalcSize(new GUIContent(text)).x;
+            if (this._selectedFilter.HasFlag(Filters.Type_All)) {
+                menu.AddItem(
+                    new GUIContent("Type/None"),
+                    false,
+                    () => this.SelectedFilter = this._selectedFilter.Unflagged(Filters.Type_All)
+                );
+            }
+            else {
+                menu.AddItem(
+                    new GUIContent("Type/All"),
+                    false,
+                    () => this.SelectedFilter = this._selectedFilter.Flagged(Filters.Type_All)
+                );
+            }
+            menu.AddSeparator("Type/");
+            menu.AddItem(
+                new GUIContent($"Type/{Filters.Type_UpdateRate.GetStatusAndTypeDisplayText()}"),
+                this._selectedFilter.HasFlag(Filters.Type_UpdateRate),
+                () => this.SelectedFilter = this._selectedFilter.ToggleFlag(Filters.Type_UpdateRate)
+            );
+            menu.AddItem(
+                new GUIContent($"Type/{Filters.Type_FixedUpdateRate.GetStatusAndTypeDisplayText()}"),
+                this._selectedFilter.HasFlag(Filters.Type_FixedUpdateRate),
+                () => this.SelectedFilter = this._selectedFilter.ToggleFlag(Filters.Type_FixedUpdateRate)
+            );
+            menu.AddItem(
+                new GUIContent($"Type/{Filters.Type_RenderInterval.GetStatusAndTypeDisplayText()}"),
+                this._selectedFilter.HasFlag(Filters.Type_RenderInterval),
+                () => this.SelectedFilter = this._selectedFilter.ToggleFlag(Filters.Type_RenderInterval)
+            );
 
-            return EditorGUILayout.MaskField(mask, displayOptions, style, new[] {
-                GUILayout.MinWidth(minWidth),
-                GUILayout.MaxWidth(maxWidth)
-            });
+            menu.DropDown(this._filtersDropdownRect);
         }
 
         #endregion <<---------- General ---------->>
-
-
-
-
-        #region <<---------- Enum BitMask ---------->>
-
-        private Filters RemoveBitMask(Filters mask, Filters option) {
-            return mask & (~option);
-        }
-
-        private bool HasBitMask(Filters mask, Filters option) {
-            return (mask & option) == option;
-        }
-
-        private bool HasBitMask(int mask, int option) {
-            int optionShift = 1 << option;
-            return (mask & optionShift) == optionShift;
-        }
-
-        #endregion <<---------- Enum BitMask ---------->>
     }
 }
