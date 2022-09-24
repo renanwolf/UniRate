@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UniRate.Debug;
 
 namespace UniRate.Editor {
@@ -172,6 +173,7 @@ namespace UniRate.Editor {
         private static GUIStyle _labelDetailsStyle;
 
         private Rect _filtersDropdownRect;
+        private Rect _selectionDropdownRect;
 
         #endregion <<---------- Properties and Fields ---------->>
 
@@ -218,6 +220,7 @@ namespace UniRate.Editor {
 
                 // toolbar
                 using (var toolbarScope = new EditorGUILayout.HorizontalScope(EditorStyles.toolbar)) {
+                    this.MakeSelectionDropdown();
                     this.MakeFiltersDropdown();
                     GUILayout.FlexibleSpace();
                     this.TrackerEnabled = GUILayout.Toggle(this._trackerEnabled, "Tracking", EditorStyles.toolbarButton);
@@ -480,6 +483,42 @@ namespace UniRate.Editor {
             );
 
             menu.DropDown(this._filtersDropdownRect);
+        }
+
+        private void MakeSelectionDropdown() {
+            var buttonContent = new GUIContent("Selection");
+            var buttonStyle = EditorStyles.toolbarDropDown;
+            var buttonWidth = buttonStyle.CalcSize(buttonContent).x + 1;
+
+            var buttonClicked = EditorGUILayout.DropdownButton(buttonContent, FocusType.Passive, buttonStyle, new[] {
+                GUILayout.MinWidth(65),
+                GUILayout.MaxWidth(buttonWidth)
+            });
+
+            if (!buttonClicked) {
+                if (Event.current.type != EventType.Layout) {
+                    this._selectionDropdownRect = GUILayoutUtility.GetLastRect();
+                }
+                return;
+            }
+
+            var menu = new GenericMenu();
+            if (this._treeView.state.selectedIDs.Count <= 0) {
+                menu.AddDisabledItem(new GUIContent("Unselect"));
+            }
+            else {
+                menu.AddItem(
+                    new GUIContent("Unselect"),
+                    false,
+                    () => this._treeView.SetSelection(new List<int>(), TreeViewSelectionOptions.FireSelectionChanged)
+                );
+            }
+            menu.AddItem(
+                new GUIContent("Keep selection on list"),
+                this._selectedFilter.HasFlag(Filters.KeepSelection),
+                () => this.SelectedFilter = this._selectedFilter.ToggleFlag(Filters.KeepSelection)
+            );
+            menu.DropDown(this._selectionDropdownRect);
         }
 
         #endregion <<---------- General ---------->>
