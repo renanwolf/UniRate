@@ -5,11 +5,11 @@ namespace UniRate {
 
     [RequireComponent(typeof(InputField))]
     public class RateRequestInputFieldComponent : RateRequestComponent {
-        
+
         #region <<---------- Properties and Fields ---------->>
-        
+
         private InputField _inputField;
-        
+
         #endregion <<---------- Properties and Fields ---------->>
 
 
@@ -38,14 +38,14 @@ namespace UniRate {
             this._inputField.onValueChanged.RemoveListener(this.OnInputFieldValueChanged);
             base.OnDisable();
         }
-        
+
         #endregion <<---------- MonoBehaviour ---------->>
 
 
 
 
         #region <<---------- Callbacks ---------->>
-        
+
         private void OnInputFieldEndEdit(string value) {
             this.ShouldActivateRequests = false;
         }
@@ -53,7 +53,7 @@ namespace UniRate {
         private void OnInputFieldValueChanged(string value) {
             this.ShouldActivateRequests = true;
         }
-        
+
         #endregion <<---------- Callbacks ---------->>
     }
 }

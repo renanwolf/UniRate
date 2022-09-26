@@ -4,23 +4,23 @@ namespace UniRate {
 
     [RequireComponent(typeof(Animator))]
     public class RateRequestAnimatorComponent : RateRequestComponent {
-        
+
         #region <<---------- Properties and Fields ---------->>
 
-        [SerializeField][HideInInspector] private bool _activateRequestsInTransitions = true;
-        [SerializeField][HideInInspector] private string _layerName;
-        [SerializeField][HideInInspector] private string _stateName;
+        [SerializeField] [HideInInspector] private bool _activateRequestsInTransitions = true;
+        [SerializeField] [HideInInspector] private string _layerName;
+        [SerializeField] [HideInInspector] private string _stateName;
 
         private (int hash, bool hasHash) _stateInfo;
         private Animator _animator;
-        
+
         #endregion <<---------- Properties and Fields ---------->>
 
 
 
 
         #region <<---------- MonoBehaviour ---------->>
-        
+
         protected override void Awake() {
             base.Awake();
             this._animator = this.GetComponent<Animator>();
@@ -48,8 +48,7 @@ namespace UniRate {
             this.StopRequestsIfDelayed();
         }
 
-        #if UNITY_EDITOR
-
+#if UNITY_EDITOR
         protected override void OnValidate() {
             if (Application.isPlaying) {
                 this._stateInfo = this.GetStateInfo(this._stateName);
@@ -65,9 +64,8 @@ namespace UniRate {
             }
             base.OnValidate();
         }
+#endif
 
-        #endif
-        
         #endregion <<---------- MonoBehaviour ---------->>
 
 
@@ -113,7 +111,7 @@ namespace UniRate {
 
             return false;
         }
-        
+
         #endregion <<---------- General ---------->>
     }
 }
