@@ -48,23 +48,23 @@ Just access the `RateManager.Instance` by code and it will be automatically crea
 
 #### Setting Up
 
-- `UpdateRateMode`: set to `VSyncCount` or `ApplicationTargetFrameRate` to choose how the update rate should be managed.
+- `UpdateRate.Mode`: set to `VSyncCount` or `ApplicationTargetFrameRate` to choose how the update rate should be managed.
 
-- `MinimumUpdateRate`: is the minimum allowed update rate that can be applied. Any request bellow this value will be ignored.
+- `UpdateRate.Minimum`: is the minimum allowed update rate that can be applied. Any request bellow this value will be ignored.
 
-- `MinimumFixedUpdateRate`: is the minimum allowed fixed update rate that can be applied. Any request bellow this value will be ignored.
+- `FixedUpdateRate.Minimum`: is the minimum allowed fixed update rate that can be applied. Any request bellow this value will be ignored.
 
-- `MaximumRenderInterval`: is the maximum allowed render interval that can be applied. Any request above this value will be ignored.
+- `RenderInterval.Maximum`: is the maximum allowed render interval that can be applied. Any request above this value will be ignored.
 
 ## Rate and Interval Requests
 
 To start a request you need to access the `RateManager.Instance` and use one of the following methods:
 
-- `RequestUpdateRate(int)` to start a new update rate request, it returns the `UpdateRateRequest`.
+- `UpdateRate.Request(int)` to start a new update rate request, it returns an `UpdateRateRequest`.
 
-- `RequestFixedUpdateRate(int)` to start a new fixed update rate request, it returns the `FixedUpdateRateRequest`.
+- `FixedUpdateRate.Request(int)` to start a new fixed update rate request, it returns a `FixedUpdateRateRequest`.
 
-- `RequestRenderInterval(int)` to start a new render interval request, it returns the `RenderIntervalRequest`.
+- `RenderInterval.Request(int)` to start a new render interval request, it returns a `RenderIntervalRequest`.
 
 All the requests returned from these methods inherits from `RateRequest` and implements `IDisposable`. Keep the requests with you to be able to cancel them later.
 
@@ -80,9 +80,9 @@ private IEnumerator ExampleCoroutineThatPerformsAnimation() {
   var rateManager = RateManager.Instance;
   
   // starts the requests you need
-  var updateRateRequest = rateManager.RequestUpdateRate(60);
-  var fixedUpdateRateRequest = rateManager.RequestFixedUpdateRate(50);
-  var renderIntervalRequest = rateManager.RequestRenderInterval(1); // only works on Unity 2019.3 or newer
+  var updateRateRequest = rateManager.UpdateRate.Request(60);
+  var fixedUpdateRateRequest = rateManager.FixedUpdateRate.Request(50);
+  var renderIntervalRequest = rateManager.RenderInterval.Request(1); // only works on Unity 2019.3 or newer
 
   while (isAnimating) {
     ...
@@ -112,7 +112,7 @@ Is the number of `Update` that takes before the game executes a render. A value 
 
 It **only works on Unity 2019.3 or newer**, since its use the new Unity `OnDemandRendering` API. For any previous version the render interval will always be 1, ignoring the requests.
 
-To verify if the current frame will render just access the `WillRender` property inside the `RateManager` instance.
+To verify if the current frame will render just access the `RenderInterval.WillRender` property inside the `RateManager` instance.
 
 ## Ready to use Components
 
@@ -143,6 +143,10 @@ This component keeps the requests active while an `Animation` component is playi
 #### RateRequestAnimatorComponent
 
 This component keeps the requests active while an `Animator` component is playing.
+
+## UniRate Tracker
+
+The tracker is useful to debug requests lifecycle, you can open the tracker window through `Window > UniRate Tracker`.
 
 ## Debugging
 
@@ -183,9 +187,9 @@ Set to one of the following values to filter which logs should be enabled:
 
 - `Trace`: changes to `QualitySettings.vSyncCount`, `Application.targetFrameRate`, `Time.fixedDeltaTime`, `OnDemandRendering.renderFrameInterval` and `RateRequest` creation/cancellation are logged with this level.
 
-- `Debug`: changes to `TargetUpdateRate`, `TargetFixedUpdateRate` and `TargetRenderInterval` are logged with this level.
+- `Debug`: changes to `UpdateRate.Target`, `FixedUpdateRate.Target` and `RenderInterval.Target` are logged with this level.
 
-- `Info`: changes to `UpdateRateMode`, `MinimumUpdateRate`, `MinimumFixedUpdateRate` and `MaximumRenderInterval` are logged with this level.
+- `Info`: changes to `UpdateRate.Mode`, `UpdateRate.Minimum`, `FixedUpdateRate.Minimum` and `RenderInterval.Maximum` are logged with this level.
 
 - `Warning`
 
