@@ -4,6 +4,7 @@
 ### Added
 - New editor tracker window to make it easy to debug requests lifecycle. It's accessible through `Window > UniRate Tracker`.
 ### Changed
+- Refactored rates/interval management to allow easy testability.
 - **Breaking:** `RateManager.Instance.UpdateRate` now returns the update rate controller instance instead of the current update rate per seconds value, which is now accessible through `RateManager.Instance.UpdateRate.Current`.
 - **Breaking:** `RateManager.Instance.FixedUpdateRate` now returns the fixed update rate controller instance instead of the current fixed update rate per seconds value, which is now accessible through `RateManager.Instance.FixedUpdateRate.Current`.
 - **Breaking:** `RateManager.Instance.RenderInterval` now returns the render interval controller instance instead of the current render interval value, which is now accessible through `RateManager.Instance.RenderInterval.Current`.
@@ -29,6 +30,7 @@
 - `RateManager.Instance.RequestRenderInterval(int)` is now deprecated, use `RateManager.Instance.RenderInterval.Request(int)` instead.
 ### Removed
 ### Fixed
+- Fixed `ArgumentNullException` when application is quitting ([#2](https://github.com/renanwolf/UniRate/issues/2)).
 ### Security
 
 ## [2.2.2] - 2021-07-28
