@@ -91,15 +91,6 @@ namespace UniRate {
 
 
 
-        #region <<---------- Properties and Fields Deprecated ---------->>
-
-
-
-        #endregion <<---------- Properties and Fields Deprecated ---------->>
-
-
-
-
         #region <<---------- MonoBehaviour ---------->>
 
         private void Awake() {
