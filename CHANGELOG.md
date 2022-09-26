@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [3.0.0] - 2022-09-26
 ### Added
 - New editor tracker window to make it easy to debug requests lifecycle. It's accessible through `Window > UniRate Tracker`.
 ### Changed
@@ -28,10 +28,8 @@
 - `RateManager.Instance.RequestUpdateRate(int)` is now deprecated, use `RateManager.Instance.UpdateRate.Request(int)` instead.
 - `RateManager.Instance.RequestFixedUpdateRate(int)` is now deprecated, use `RateManager.Instance.FixedUpdateRate.Request(int)` instead.
 - `RateManager.Instance.RequestRenderInterval(int)` is now deprecated, use `RateManager.Instance.RenderInterval.Request(int)` instead.
-### Removed
 ### Fixed
 - Fixed `ArgumentNullException` when application is quitting ([#2](https://github.com/renanwolf/UniRate/issues/2)).
-### Security
 
 ## [2.2.2] - 2021-07-28
 ### Fixed
@@ -68,7 +66,8 @@
 - Renamed `LogLevel` to `RateLogLevel`.
 - Increased `RateDebug.LogLevel` default value.
 
-[Unreleased]: https://github.com/renanwolf/UniRate/compare/v2.2.2...HEAD
+[Unreleased]: https://github.com/renanwolf/UniRate/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/renanwolf/UniRate/releases/tag/v3.0.0
 [2.2.2]: https://github.com/renanwolf/UniRate/releases/tag/v2.2.2
 [2.2.1]: https://github.com/renanwolf/UniRate/releases/tag/v2.2.1
 [2.2.0]: https://github.com/renanwolf/UniRate/releases/tag/v2.2.0
