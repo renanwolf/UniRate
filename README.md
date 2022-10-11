@@ -4,8 +4,8 @@ Created by Renan Wolf Pace
 
 [![Release](https://img.shields.io/github/v/release/renanwolf/UniRate.svg)](https://github.com/renanwolf/UniRate/releases)
 [![OpenUPM](https://img.shields.io/npm/v/com.pflowr.unirate?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.pflowr.unirate/)
+[![Unity](https://img.shields.io/badge/dynamic/json?logo=unity&color=green&label=Asset%20Store&query=%24.unity&prefix=Unity%20&suffix=%2B&url=https%3A%2F%2Fraw.githubusercontent.com%2Frenanwolf%2FUniRate%2Ffeature%2Fpackage.json)](https://assetstore.unity.com/packages/slug/234108)
 [![Changelog](https://img.shields.io/github/release-date/renanwolf/UniRate?color=green&label=changelog)](CHANGELOG.md)
-![UnityVersion](https://img.shields.io/badge/dynamic/json?color=green&label=unity&query=%24.unity&suffix=%20or%20later&url=https%3A%2F%2Fraw.githubusercontent.com%2Frenanwolf%2FUniRate%2Frelease%2Fpackage.json)
 [![License](https://img.shields.io/github/license/renanwolf/UniRate)](LICENSE.md)
 
 ## Overview
@@ -17,6 +17,10 @@ It's not desirable to keep your game always running at the highest frame rate, e
 To help you solve these problems, UniRate provides you a simple solution to control the update rate, fixed update rate and render interval from everywhere in your code without worrying about multiple requests.
 
 ## Installation
+
+#### via Unity Asset Store
+
+https://assetstore.unity.com/packages/slug/234108
 
 #### via Package Manager
 
