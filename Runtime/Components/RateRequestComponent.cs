@@ -29,7 +29,7 @@ namespace UniRate {
 
         #region <<---------- Properties and Fields ---------->>
 
-        [SerializeField] [HideInInspector] private float _delaySecondsToStopRequests = 2f;
+        [SerializeField] [HideInInspector] private float _delaySecondsToStopRequests = 1f;
         private float DelaySecondsToStopRequests => this._delaySecondsToStopRequests;
 
         [SerializeField] [HideInInspector] private PresetOptions _renderIntervalPresetOption = PresetOptions.High;
