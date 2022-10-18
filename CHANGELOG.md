@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Added
 ### Changed
+- Using new `UnityEngine.Device.Application` api.
 - Using new `UnityEngine.Device.Screen` api.
 ### Deprecated
 ### Removed

@@ -1,5 +1,11 @@
 ﻿using UnityEngine;
 
+#if UNITY_2021_1_OR_NEWER
+using UnityApplication = UnityEngine.Device.Application;
+#else
+using UnityApplication = UnityEngine.Application;
+#endif
+
 namespace UniRate {
 
     [RequireComponent(typeof(Animator))]
@@ -50,10 +56,10 @@ namespace UniRate {
 
 #if UNITY_EDITOR
         protected override void OnValidate() {
-            if (Application.isPlaying) {
+            if (UnityApplication.isPlaying) {
                 this._stateInfo = this.GetStateInfo(this._stateName);
             }
-            if (Application.isPlaying && !this.isActiveAndEnabled && this.Manager != null) {
+            if (UnityApplication.isPlaying && !this.isActiveAndEnabled && this.Manager != null) {
                 this.ShouldActivateRequests = this.GetIsAnimatorPlayingOrInTransition(
                     this._animator,
                     this._layerName,

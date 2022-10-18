@@ -1,5 +1,11 @@
 ﻿using UnityEngine;
 
+#if UNITY_2021_1_OR_NEWER
+using UnityApplication = UnityEngine.Device.Application;
+#else
+using UnityApplication = UnityEngine.Application;
+#endif
+
 namespace UniRate {
 
     public abstract class RateRequestComponent : MonoBehaviour {
@@ -77,7 +83,7 @@ namespace UniRate {
 
 #if UNITY_EDITOR
         protected virtual void OnValidate() {
-            if (!Application.isPlaying || !this._shouldActivateRequests || this.Manager == null) return;
+            if (!UnityApplication.isPlaying || !this._shouldActivateRequests || this.Manager == null) return;
             this.StartOrRefreshRequests(this.Manager, this.GetCurrentPreset());
         }
 #endif

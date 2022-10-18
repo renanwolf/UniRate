@@ -3,8 +3,10 @@ using UnityEngine;
 using UniRate.Debug;
 
 #if UNITY_2021_1_OR_NEWER
+using UnityApplication = UnityEngine.Device.Application;
 using UnityScreen = UnityEngine.Device.Screen;
 #else
+using UnityApplication = UnityEngine.Application;
 using UnityScreen = UnityEngine.Screen;
 #endif
 
@@ -138,11 +140,11 @@ namespace UniRate.Internals {
                 QualitySettings.vSyncCount = vSyncCount;
             }
 
-            if (Application.targetFrameRate != targetFrameRate) {
+            if (UnityApplication.targetFrameRate != targetFrameRate) {
                 if (RateDebug.IsLogLevelActive(RateLogLevel.Trace)) {
                     RateDebug.Log(RateLogLevel.Trace, $"setting Application.targetFrameRate to {targetFrameRate.ToString()}");
                 }
-                Application.targetFrameRate = targetFrameRate;
+                UnityApplication.targetFrameRate = targetFrameRate;
             }
         }
 

@@ -4,8 +4,10 @@ using UniRate.Internals;
 using UniRate.Debug;
 
 #if UNITY_2021_1_OR_NEWER
+using UnityApplication = UnityEngine.Device.Application;
 using UnityScreen = UnityEngine.Device.Screen;
 #else
+using UnityApplication = UnityEngine.Application;
 using UnityScreen = UnityEngine.Screen;
 #endif
 
@@ -31,7 +33,7 @@ namespace UniRate {
         public static RateManager Instance {
             get {
 #if UNITY_EDITOR
-                if (!Application.isPlaying) {
+                if (!UnityApplication.isPlaying) {
                     return _instance;
                 }
 #endif
@@ -139,7 +141,7 @@ namespace UniRate {
 #if UNITY_EDITOR
 
         private void OnValidate() {
-            if (!Application.isPlaying) return;
+            if (!UnityApplication.isPlaying) return;
             this.RenderInterval.Maximum = this._maximumRenderInterval;
             this.UpdateRate.Minimum = this._minimumUpdateRate;
             this.UpdateRate.Mode = this._updateRateMode;
