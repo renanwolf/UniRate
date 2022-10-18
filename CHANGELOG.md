@@ -5,6 +5,7 @@
 ### Changed
 - Using new `UnityEngine.Device.Application` api.
 - Using new `UnityEngine.Device.Screen` api.
+- Changed `RateManager` default update rate mode to `ApplicationTargetFrameRate`, default minimum update rate to 20 and default maximum render interval to 10.
 ### Deprecated
 ### Removed
 ### Fixed

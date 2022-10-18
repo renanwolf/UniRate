@@ -61,14 +61,14 @@ namespace UniRate {
 
         #region <<---------- Properties and Fields ---------->>
 
-        [SerializeField] private UpdateRateMode _updateRateMode = UpdateRateMode.VSyncCount;
-        [SerializeField] private int _minimumUpdateRate = 15;
+        [SerializeField] private UpdateRateMode _updateRateMode = UpdateRateMode.ApplicationTargetFrameRate;
+        [SerializeField] private int _minimumUpdateRate = 20;
 
         [Space]
         [SerializeField] private int _minimumFixedUpdateRate = 15;
 
         [Space]
-        [SerializeField] private int _maximumRenderInterval = 3;
+        [SerializeField] private int _maximumRenderInterval = 10;
 
         /// <summary>
         /// Update rate controller.
