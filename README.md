@@ -114,7 +114,7 @@ Is the number of `FixedUpdate` per second that the game executes.
 
 Is the number of `Update` that takes before the game executes a render. A value of 1 means the game will render on every update, a value of 2 on every other update, and so on.
 
-It **only works on Unity 2019.3 or newer**, since its use the new Unity `OnDemandRendering` API. For any previous version the render interval will always be 1, ignoring the requests.
+It **only works on Unity 2019.3 or newer**, since its use the new [Unity OnDemandRendering API](https://docs.unity3d.com/ScriptReference/Rendering.OnDemandRendering.html). For any previous version the render interval will always be 1, ignoring the requests.
 
 To verify if the current frame will render just access the `RenderInterval.WillRender` property inside the `RateManager` instance.
 
@@ -202,3 +202,11 @@ Set to one of the following values to filter which logs should be enabled:
 - `Off`
 
 The default value on editor is `Debug` if `IsDebugBuild` is true, otherwise `Info`. In runtime is `Info` if `IsDebugBuild` is true, otherwise `Warning`.
+
+## FAQ
+
+#### My camera/canvas is flickering
+
+It is probably related to a [Unity OnDemandRendering API](https://docs.unity3d.com/ScriptReference/Rendering.OnDemandRendering.html) bug. The cause may be the combination of some factors like Unity version, canvas render mode, update rate mode, plataform and some others. In most of the cases the bug only occurs in the Unity Editor and not in runtime.
+
+For more information from the community access: https://unity3d.com/search?gq=ondemandrendering%20flicker
