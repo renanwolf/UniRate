@@ -207,6 +207,8 @@ The default value on editor is `Debug` if `IsDebugBuild` is true, otherwise `Inf
 
 #### My camera/canvas is flickering
 
-It is probably related to a [Unity OnDemandRendering API](https://docs.unity3d.com/ScriptReference/Rendering.OnDemandRendering.html) bug. The cause may be the combination of some factors like Unity version, canvas render mode, update rate mode, plataform and some others. In most of the cases the bug only occurs in the Unity Editor and not in runtime.
+It is probably related to a [Unity OnDemandRendering API](https://docs.unity3d.com/ScriptReference/Rendering.OnDemandRendering.html) bug. The cause may be the combination of some factors like Unity version, canvas render mode, camera clear flags, update rate mode, plataform and some others. In most of the cases the bug only occurs in the Unity Editor and not in runtime.
+
+To ignore all the render interval requests set the `RateManager.Instance.RenderInterval.Maximum` to 1.
 
 For more information from the community access: https://unity3d.com/search?gq=ondemandrendering%20flicker
