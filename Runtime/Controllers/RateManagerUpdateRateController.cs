@@ -2,6 +2,12 @@ using System;
 using UnityEngine;
 using UniRate.Debug;
 
+#if UNITY_2021_1_OR_NEWER
+using UnityScreen = UnityEngine.Device.Screen;
+#else
+using UnityScreen = UnityEngine.Screen;
+#endif
+
 namespace UniRate.Internals {
 
     public class RateManagerUpdateRateController : RateManagerValueController {
@@ -116,7 +122,7 @@ namespace UniRate.Internals {
                     // QualitySettings.vSyncCount value must be 0, 1, 2, 3, or 4.
                     // QualitySettings.vSyncCount is ignored on iOS.
                     vSyncCount = Mathf.Clamp(
-                        Screen.currentResolution.refreshRate / targetFrameRate,
+                        UnityScreen.currentResolution.refreshRate / targetFrameRate,
                         1,
                         4
                     );

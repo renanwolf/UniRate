@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+### Added
+### Changed
+- Using new `UnityEngine.Device.Screen` api.
+### Deprecated
+### Removed
+### Fixed
+### Security
+
 ## [3.0.0] - 2022-09-26
 ### Added
 - New editor tracker window to make it easy to debug requests lifecycle. It's accessible through `Window > UniRate Tracker`.
