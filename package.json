@@ -16,6 +16,7 @@
         "rate",
         "render",
         "interval",
-        "renderinterval"
+        "renderinterval",
+        "battery"
     ]
 }
