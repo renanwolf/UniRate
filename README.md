@@ -4,8 +4,8 @@ Created by Renan Wolf Pace
 
 [![Release](https://img.shields.io/github/v/release/renanwolf/UniRate.svg)](https://github.com/renanwolf/UniRate/releases)
 [![OpenUPM](https://img.shields.io/npm/v/com.pflowr.unirate?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.pflowr.unirate/)
+[![Unity](https://img.shields.io/badge/dynamic/json?logo=unity&color=green&label=Asset%20Store&query=%24.unity&prefix=Unity%20&suffix=%2B&url=https%3A%2F%2Fraw.githubusercontent.com%2Frenanwolf%2FUniRate%2Ffeature%2Fpackage.json)](https://assetstore.unity.com/packages/slug/234108)
 [![Changelog](https://img.shields.io/github/release-date/renanwolf/UniRate?color=green&label=changelog)](CHANGELOG.md)
-![UnityVersion](https://img.shields.io/badge/dynamic/json?color=green&label=unity&query=%24.unity&suffix=%20or%20later&url=https%3A%2F%2Fraw.githubusercontent.com%2Frenanwolf%2FUniRate%2Frelease%2Fpackage.json)
 [![License](https://img.shields.io/github/license/renanwolf/UniRate)](LICENSE.md)
 
 ## Overview
@@ -17,6 +17,10 @@ It's not desirable to keep your game always running at the highest frame rate, e
 To help you solve these problems, UniRate provides you a simple solution to control the update rate, fixed update rate and render interval from everywhere in your code without worrying about multiple requests.
 
 ## Installation
+
+#### via Unity Asset Store
+
+https://assetstore.unity.com/packages/slug/234108
 
 #### via Package Manager
 
@@ -110,7 +114,7 @@ Is the number of `FixedUpdate` per second that the game executes.
 
 Is the number of `Update` that takes before the game executes a render. A value of 1 means the game will render on every update, a value of 2 on every other update, and so on.
 
-It **only works on Unity 2019.3 or newer**, since its use the new Unity `OnDemandRendering` API. For any previous version the render interval will always be 1, ignoring the requests.
+It **only works on Unity 2019.3 or newer**, since its use the new [Unity OnDemandRendering API](https://docs.unity3d.com/ScriptReference/Rendering.OnDemandRendering.html). For any previous version the render interval will always be 1, ignoring the requests.
 
 To verify if the current frame will render just access the `RenderInterval.WillRender` property inside the `RateManager` instance.
 
@@ -198,3 +202,13 @@ Set to one of the following values to filter which logs should be enabled:
 - `Off`
 
 The default value on editor is `Debug` if `IsDebugBuild` is true, otherwise `Info`. In runtime is `Info` if `IsDebugBuild` is true, otherwise `Warning`.
+
+## FAQ
+
+#### My camera/canvas is flickering
+
+It is probably related to a [Unity OnDemandRendering API](https://docs.unity3d.com/ScriptReference/Rendering.OnDemandRendering.html) bug. The cause may be the combination of some factors like Unity version, canvas render mode, camera clear flags, update rate mode, plataform and some others. In most of the cases the bug only occurs in the Unity Editor and not in runtime.
+
+To ignore all the render interval requests set the `RateManager.Instance.RenderInterval.Maximum` to 1.
+
+For more information from the community access: https://unity3d.com/search?gq=ondemandrendering%20flicker

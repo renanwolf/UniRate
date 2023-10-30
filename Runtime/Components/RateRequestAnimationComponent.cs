@@ -1,5 +1,11 @@
 ﻿using UnityEngine;
 
+#if UNITY_2021_1_OR_NEWER
+using UnityApplication = UnityEngine.Device.Application;
+#else
+using UnityApplication = UnityEngine.Application;
+#endif
+
 namespace UniRate {
 
     [RequireComponent(typeof(Animation))]
@@ -34,7 +40,7 @@ namespace UniRate {
 
 #if UNITY_EDITOR
         protected override void OnValidate() {
-            if (Application.isPlaying && this.isActiveAndEnabled && this.Manager != null) {
+            if (UnityApplication.isPlaying && this.isActiveAndEnabled && this.Manager != null) {
                 this.ShouldActivateRequests = this.GetIsAnimationPlaying(this._animation, this._clipName);
             }
             base.OnValidate();

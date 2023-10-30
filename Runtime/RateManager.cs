@@ -3,6 +3,14 @@ using UnityEngine;
 using UniRate.Internals;
 using UniRate.Debug;
 
+#if UNITY_2021_1_OR_NEWER
+using UnityApplication = UnityEngine.Device.Application;
+using UnityScreen = UnityEngine.Device.Screen;
+#else
+using UnityApplication = UnityEngine.Application;
+using UnityScreen = UnityEngine.Screen;
+#endif
+
 namespace UniRate {
 
     [DisallowMultipleComponent]
@@ -25,7 +33,7 @@ namespace UniRate {
         public static RateManager Instance {
             get {
 #if UNITY_EDITOR
-                if (!Application.isPlaying) {
+                if (!UnityApplication.isPlaying) {
                     return _instance;
                 }
 #endif
@@ -53,14 +61,14 @@ namespace UniRate {
 
         #region <<---------- Properties and Fields ---------->>
 
-        [SerializeField] private UpdateRateMode _updateRateMode = UpdateRateMode.VSyncCount;
-        [SerializeField] private int _minimumUpdateRate = 15;
+        [SerializeField] private UpdateRateMode _updateRateMode = UpdateRateMode.ApplicationTargetFrameRate;
+        [SerializeField] private int _minimumUpdateRate = 20;
 
         [Space]
         [SerializeField] private int _minimumFixedUpdateRate = 15;
 
         [Space]
-        [SerializeField] private int _maximumRenderInterval = 3;
+        [SerializeField] private int _maximumRenderInterval = 10;
 
         /// <summary>
         /// Update rate controller.
@@ -133,7 +141,7 @@ namespace UniRate {
 #if UNITY_EDITOR
 
         private void OnValidate() {
-            if (!Application.isPlaying) return;
+            if (!UnityApplication.isPlaying) return;
             this.RenderInterval.Maximum = this._maximumRenderInterval;
             this.UpdateRate.Minimum = this._minimumUpdateRate;
             this.UpdateRate.Mode = this._updateRateMode;
@@ -157,11 +165,11 @@ namespace UniRate {
                 this._guiContentText.text = $"Update/s: {this.UpdateRate.Current.ToString("000")} / {this.UpdateRate.Target.ToString("000")}\nFixedUpdate/s: {this.FixedUpdateRate.Current.ToString("000")} / {this.FixedUpdateRate.Target.ToString("000")}\nRenderInterval: {this.RenderInterval.Current.ToString()} / {this.RenderInterval.Target.ToString()}\nRender/s: {this.RenderInterval.CurrentRenderRate.ToString("000")}";
             }
 
-            var safeArea = Screen.safeArea;
+            var safeArea = UnityScreen.safeArea;
             RateDebug.ScreenDataStyle.CalcMinMaxWidth(this._guiContentText, out float minWidth, out float maxWidth);
             var labelWidth = Mathf.Min(safeArea.width - 10, maxWidth);
             float labelSpaceH = Mathf.Min(5f, ((safeArea.width - labelWidth) / 2f));
-            float labelSpaceV = Math.Max(Screen.height - safeArea.height, 5f);
+            float labelSpaceV = Math.Max(UnityScreen.height - safeArea.height, 5f);
             var rectLine = new Rect(safeArea.x + labelSpaceH, labelSpaceV, labelWidth, RateDebug.ScreenDataStyle.CalcHeight(this._guiContentText, labelWidth));
 
             if (GUI.Button(rectLine, this._guiContentText, RateDebug.ScreenDataStyle)) {

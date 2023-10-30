@@ -1,5 +1,11 @@
 ﻿using UnityEngine;
 
+#if UNITY_2021_1_OR_NEWER
+using UnityApplication = UnityEngine.Device.Application;
+#else
+using UnityApplication = UnityEngine.Application;
+#endif
+
 namespace UniRate {
 
     public abstract class RateRequestComponent : MonoBehaviour {
@@ -23,7 +29,7 @@ namespace UniRate {
 
         #region <<---------- Properties and Fields ---------->>
 
-        [SerializeField] [HideInInspector] private float _delaySecondsToStopRequests = 2f;
+        [SerializeField] [HideInInspector] private float _delaySecondsToStopRequests = 1f;
         private float DelaySecondsToStopRequests => this._delaySecondsToStopRequests;
 
         [SerializeField] [HideInInspector] private PresetOptions _renderIntervalPresetOption = PresetOptions.High;
@@ -77,7 +83,7 @@ namespace UniRate {
 
 #if UNITY_EDITOR
         protected virtual void OnValidate() {
-            if (!Application.isPlaying || !this._shouldActivateRequests || this.Manager == null) return;
+            if (!UnityApplication.isPlaying || !this._shouldActivateRequests || this.Manager == null) return;
             this.StartOrRefreshRequests(this.Manager, this.GetCurrentPreset());
         }
 #endif

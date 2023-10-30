@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1] - 2023-10-30
+### Changed
+- Using new `UnityEngine.Device.Application` api.
+- Using new `UnityEngine.Device.Screen` api.
+- Changed `RateManager` default update rate mode to `ApplicationTargetFrameRate`, default minimum update rate to 20 and default maximum render interval to 10.
+- Changed rate request components default delay seconds to stop requests to 1.
+
 ## [3.0.0] - 2022-09-26
 ### Added
 - New editor tracker window to make it easy to debug requests lifecycle. It's accessible through `Window > UniRate Tracker`.
@@ -66,7 +73,8 @@
 - Renamed `LogLevel` to `RateLogLevel`.
 - Increased `RateDebug.LogLevel` default value.
 
-[Unreleased]: https://github.com/renanwolf/UniRate/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/renanwolf/UniRate/compare/v3.0.1...HEAD
+[3.0.1]: https://github.com/renanwolf/UniRate/releases/tag/v3.0.1
 [3.0.0]: https://github.com/renanwolf/UniRate/releases/tag/v3.0.0
 [2.2.2]: https://github.com/renanwolf/UniRate/releases/tag/v2.2.2
 [2.2.1]: https://github.com/renanwolf/UniRate/releases/tag/v2.2.1

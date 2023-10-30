@@ -1,7 +1,7 @@
 {
     "name": "com.pflowr.unirate",
     "displayName": "UniRate",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "unity": "2018.3",
     "description": "A great solution to manage frame rate and rendering interval to save device power, especially on mobile platforms.\nYou can control the update rate, fixed update rate and render interval (Unity 2019.3 or newer) from everywhere in your code without worrying about multiple requests, UniRate will take care of all of them for you.",
     "author": {
@@ -16,6 +16,7 @@
         "rate",
         "render",
         "interval",
-        "renderinterval"
+        "renderinterval",
+        "battery"
     ]
 }
